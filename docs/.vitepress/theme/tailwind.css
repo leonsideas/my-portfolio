@@ -1,0 +1,62 @@
+/* This must be FIRST and only once */
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+/* Your custom CSS after Tailwind */
+:root {
+  --vp-c-brand: #ef7234;
+}
+
+.vp-doc-figure-caption {
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: #6b7280; /* text-gray-500 */
+  line-height: 1.25rem; /* leading-5 */
+}
+
+.vp-button-brand {
+  display: inline-block;
+  border-radius: 9999px;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-weight: 600;
+  background-color: #f97316; /* orange-500 fallback */
+  color: white;
+}
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: #111;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Dotted background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-size: 32px 32px;
+  opacity: 0.6;
+  z-index: -1;
+  filter: blur(2px);
+}
+
+/* Links */
+a {
+  text-decoration-thickness: 1px;
+  text-decoration-color: transparent;
+  text-decoration-style: solid;
+  transition: text-decoration-color 0.3s ease;
+}
+
+a:hover {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #ef4444; /* red-500 */
+  text-decoration-thickness: 1px;
+}

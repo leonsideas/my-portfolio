@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "dependencies": {
+    "@shikijs/vitepress-twoslash": "^3.17.0",
+    "@tailwindcss/typography": "^0.5.13",
+    "gsap": "^3.13.0",
+    "p5": "^2.1.1",
+    "three": "^0.181.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/node": "^24.10.1",
+    "autoprefixer": "^10.4.22",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
+    "vitepress": "^1.6.4"
+  }
+}

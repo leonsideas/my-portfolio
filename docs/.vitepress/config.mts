@@ -5,7 +5,7 @@ import { defineConfig } from 'vitepress'
 const isProd = process.env.NODE_ENV === 'production'
 
 // ⚠️ make sure this matches your repo name exactly
-const repoName = 'my-awsome-portfolio'
+const repoName = 'my-portfolio'
 
 export default defineConfig({
   title: 'Portfolio',

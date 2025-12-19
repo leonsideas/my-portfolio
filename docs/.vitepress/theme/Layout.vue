@@ -23,23 +23,41 @@ const currentPageComponent = computed(() => {
   if (normalizedPath.value.startsWith('/about')) return AboutPage
   return null
 })
+
+const isAboutPage = computed(() => normalizedPath.value.startsWith('/about'))
 </script>
 
 <template>
   <!-- <HeroSection/> -->
-  <div class="min-h-screen font-plexsans bg-stone-200 text-black">
+  <div class="min-h-screen font-plexsans text-black">
     <NavBar />
     
-    <main class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
-      <component
-        v-if="currentPageComponent"
-        :is="currentPageComponent"
-        :key="route.path"
-      />
-      <Content
-        v-else
-        class="prose prose-base md:prose-lg lg:prose-xl max-w-none mt-8"
-      />
-    </main>
+    <!-- globaler Seitenhintergrund -->
+    <div
+      :class="[
+        // Für alle Seiten gleicher, heller Hintergrund (Grau entfernt)
+        !isAboutPage ? 'bg-black' : 'bg-black',
+        'min-h-[calc(100vh-4rem)]' // 4rem = NavBar-Höhe
+      ]"
+    >
+      <main
+        :class="[
+          // Nur noch Breite/Padding steuern, kein Hintergrund
+          !isAboutPage ? 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-8' : 'w-full h-full',
+          // AboutPage: Fullscreen-Content ohne zusätzliches Padding
+          isAboutPage ? '' : ''
+        ]"
+      >
+        <component
+          v-if="currentPageComponent"
+          :is="currentPageComponent"
+          :key="route.path"
+        />
+        <Content
+          v-else
+          class="prose prose-base md:prose-lg lg:prose-xl max-w-none mt-8"
+        />
+      </main>
+    </div>
   </div>
 </template>

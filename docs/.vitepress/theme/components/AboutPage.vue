@@ -1,41 +1,104 @@
 <script setup lang="ts">
-import { useRoute } from 'vitepress'
-import { computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const route = useRoute()
-const currentPath = computed(() => route.path.replace(/\/$/, ''))
+// Hintergrund: erst Video, dann Bild
+const showVideoBg = ref(true)
 
-// Sidebar custom navigation links
-const links = [
-  { title: 'Vitepress', path: 'https://vitepress.dev/guide/what-is-vitepress' },
-  { title: 'Tailwind CSS', path: 'https://tailwindcss.com/' }
-]
+const handleVideoEnded = () => {
+  showVideoBg.value = false
+}
+
+const handleVideoError = () => {
+  showVideoBg.value = false
+}
+
+// Timeout entfernt, damit das Video nicht vorzeitig ausgeblendet wird
+
+const showText = ref(false)
+let textTimer: number | undefined
+
+const startTextFade = () => {
+  if (showText.value) return
+  if (textTimer) return
+  textTimer = window.setTimeout(() => {
+    showText.value = true
+  }, 0) // Fade startet sofort, Dauer steuert die CSS-Transition (5000ms)
+}
+
+onMounted(() => {
+  // Fallback: falls Video nicht spielt (z.B. direkt Bild), starte Fade trotzdem
+  if (!showVideoBg.value) startTextFade()
+})
+
+onBeforeUnmount(() => {
+  if (textTimer) window.clearTimeout(textTimer)
+})
+</script>
+
+<script lang="ts">
+export default {
+  name: 'AboutPage',
+}
 </script>
 
 <template>
-  <div class="flex flex-col lg:flex-row min-h-[80vh] border border-black rounded-2xl overflow-hidden shadow-md">
-    <!-- Sidebar -->
-    <aside class="w-full lg:w-1/4 bg-white border-r border-black p-4 space-y-4">
-      <h2 class="text-xl font-bold mb-4">Useful links</h2>
-      <ul class="space-y-2">
-        <li
-          v-for="link in links"
-          :key="link.path"
-        >
-          <a
-            :href="link.path"
-            class="block px-3 py-2 border border-black rounded text-sm font-medium text-black hover:bg-black hover:text-white transition"
-            :class="{ 'bg-black text-white': currentPath === link.path.replace(/\/$/, '') }"
-          >
-            {{ link.title }}
-          </a>
-        </li>
-      </ul>
-    </aside>
+  <!-- Abstand nach unten von der NavBar: 4rem (passt zu Layout) -->
+  <div class="relative overflow-hidden bg-black">
+    <!-- Hintergrund-Layer -->
+    <div class="fixed inset-0 w-screen h-screen overflow-hidden">
+      <!-- Video-Hintergrund -->
+      <video
+        v-if="showVideoBg"
+        class="absolute inset-0 w-full h-full object-cover"
+        autoplay
+        muted
+        playsinline
+        poster="/images/background-fallback.jpg"
+        @play="startTextFade"
+        @ended="handleVideoEnded"
+        @error="() => { handleVideoError(); startTextFade() }"
+      >
+        <source src="/videos/background.mp4" type="video/mp4" />
+      </video>
 
-    <!-- Markdown Content -->
-    <section class="bg-white w-full lg:w-3/4 p-6 overflow-auto break-words overflow-x-hidden">
-      <Content class="prose prose-base md:prose-lg max-w-none break-words" />
-    </section>
+      <!-- Fallback-Bild im Fullscreen -->
+      <img
+        v-else
+        src="/images/background-fallback.jpg"
+        alt="Hintergrundbild"
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+    </div>
+
+    <!-- Vordergrund-Content -->
+    <div class="relative z-10 h-screen overflow-hidden grid place-items-center px-6 isolate">
+      <p
+        :class="[
+          'text-black mix-blend-difference text-center text-lg sm:text-xl md:text-2xl leading-relaxed max-w-3xl transition-opacity duration-[5000ms] ease-out',
+          showText ? 'opacity-100' : 'opacity-0',
+        ]"
+      >
+        Moin, ich bin Leon, 27 Jahre alt und Gestalter aus Bremen.<br />
+        Aktuell arbeite ich im Bereich Motion Design &amp; Grafik bei der manymany motion GmbH und studiere im fünften Semester Digitale Medien (B.A.) an der Hochschule für Künste Bremen.<br />
+        Bevor’s ins Studium ging, habe ich eine Ausbildung zum Mediengestalter für Konzeption und Visualisierung gemacht.<br />
+        Was mich antreibt? Viel Bewegen. Mit ganz neuen Ideen, Geschichten und immer neuen Wegen.
+      </p>
+    </div>
   </div>
 </template>
+
+<style>
+/* Scrollen global deaktivieren (VitePress Root + Dokument) */
+html,
+body,
+#app,
+.VPApp {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Optional: verhindert „Scroll-Gesten“ auf Touch/Trackpad innerhalb der Seite */
+body {
+  overscroll-behavior: none;
+}
+</style>

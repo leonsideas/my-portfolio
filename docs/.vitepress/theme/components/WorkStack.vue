@@ -1,57 +1,24 @@
 <template>
   <div
     ref="containerRef"
-    class="bg-gray-100 mx-auto w-full max-w-6xl p-6 rounded-2xl border border-gray-300"
+    class="fixed inset-0 w-screen h-screen"
   >
-    <a
-      v-for="card in cards"
-      :key="card.slug"
-      :href="withBase(card.route)"
-      class="group flex flex-col sm:flex-row w-full mb-6 rounded-xl overflow-hidden border border-gray-300 bg-white shadow-sm 
-             transition-all duration-300 hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 
-             focus:ring-gray-400"
-    >
-      <!-- Cover Image -->
-      <div
-        class="w-full sm:w-1/5 min-w-[160px] max-w-[240px] h-48 sm:h-auto flex-shrink-0 object-center"
-      >
-        <img
-          v-if="card.image"
-          :src="card.image"
-          alt="cover image"
-          class="w-full h-full p-4 object-cover"
-        />
-        <div
-          v-else
-          class="w-full h-full bg-gray-300 flex items-center justify-center text-gray-500"
-        >
-          No Image
-        </div>
-      </div>
-
-      <!-- Text Content -->
-      <div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
-        <div>
-          <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-            {{ card.title }}
-          </h2>
-          <h3 class="text-sm font-medium text-gray-600 mb-3">
-            {{ card.name }}
-          </h3>
-          <p
-            class="text-gray-700 text-sm leading-snug line-clamp-3 group-hover:line-clamp-none transition-all duration-300"
-          >
-            {{ card.excerpt }}
-          </p>
-        </div>
-      </div>
-    </a>
+    <!-- Full-width Carousel -->
+    <Carousel
+      v-if="cards.length"
+      :slides="slides"
+      :autoplay="true"
+      :interval="5000"
+      :loop="true"
+      class="w-full h-full"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { withBase } from 'vitepress'
+import Carousel from './Carousel.vue'
 
 type Card = {
   slug: string
@@ -59,7 +26,8 @@ type Card = {
   name: string
   excerpt: string
   route: string      // `/works/?id=slug`
-  image: string | null
+  image: string | null          // Bild im Projekt selbst
+  previewImage: string | null   // separates Vorschaubild fürs Carousel
 }
 
 const markdownFiles = import.meta.glob('../../../works/**/index.md', {
@@ -67,6 +35,11 @@ const markdownFiles = import.meta.glob('../../../works/**/index.md', {
   eager: true,
 })
 const imageFiles = import.meta.glob('../../../works/**/cover.{jpg,jpeg,png,webp}', {
+  eager: true,
+  import: 'default',
+})
+// NEU: eigene Vorschaubilder, z.B. preview.jpg im gleichen Ordner wie index.md
+const previewImageFiles = import.meta.glob('../../../works/**/preview.{jpg,jpeg,png,webp}', {
   eager: true,
   import: 'default',
 })
@@ -81,14 +54,13 @@ for (const path in markdownFiles) {
   const nameLine = lines.find(line => line.startsWith('## '))
   const excerptLine = lines.find(line => line.trim() && !line.startsWith('#'))
 
-  // docs/works/my-work/index.md -> slug = "my-work"
   const match = path.match(/works\/([^/]+)\/index\.md$/)
   const slug = match?.[1] ?? ''
-
   const route = `/works/?id=${slug}`
 
   const folder = path.replace(/\/index\.md$/, '/')
   const imageKey = Object.keys(imageFiles).find(k => k.startsWith(folder))
+  const previewKey = Object.keys(previewImageFiles).find(k => k.startsWith(folder))
 
   cards.value.push({
     slug,
@@ -97,11 +69,36 @@ for (const path in markdownFiles) {
     excerpt: excerptLine || '',
     route,
     image: imageKey ? (imageFiles[imageKey] as string) : null,
+    previewImage: previewKey ? (previewImageFiles[previewKey] as string) : null,
   })
 }
+
+// Slides für das Carousel aus cards ableiten
+const slides = computed(() =>
+  cards.value.map(card => ({
+    id: card.slug,
+    title: card.title,
+    subtitle: card.name,
+    description: card.excerpt,
+    // wichtig: hier das Vorschaubild an Carousel geben
+    previewImage: card.previewImage,
+    // optional: das eigentliche Bild kann zusätzlich mitgegeben werden
+    image: card.image,
+    href: withBase(card.route),
+  }))
+)
+
+// Optional: falls containerRef weiterhin gebraucht wird
+const containerRef = ref<HTMLElement | null>(null)
 </script>
 
 <style scoped>
+/* Optional: sicherstellen, dass der Container selbst auch 100% Höhe hat, falls nötig */
+:host {
+  display: block;
+  height: 100vh;
+}
+
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;

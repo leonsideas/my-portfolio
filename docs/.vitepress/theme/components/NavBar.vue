@@ -2,24 +2,35 @@
 import { useData, withBase } from 'vitepress'
 
 const { theme } = useData()
-const nav = theme.value.nav || []
+
+const items = [
+  { text: 'Leon Albers', link: '/' },
+  { text: 'About', link: '/about' },
+  { text: 'Contact', link: '/contact' },
+]
 </script>
 
 <template>
-  <header class="border-b border-black bg-white">
-    <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-      <div class="text-lg font-bold tracking-tight">
-        Portfolio
-      </div>
-
-      <ul class="flex gap-4 text-sm font-medium">
+  <!-- immer transparente NavBar, Hintergrund kommt von der Seite selbst -->
+  <header
+    class="
+      sticky top-0 z-30 w-full text-black pointer-events-auto
+      /* bg-transparent entfernt, wir regeln es im CSS hart */
+    "
+  >
+    <nav
+      class="flex w-full items-center px-4 py-3 sm:px-6 lg:px-8"
+      style="background: none !important;"
+    >
+      <ul class="flex w-full justify-between text-sm font-medium gap-0">
         <li
-          v-for="item in nav"
+          v-for="item in items"
           :key="item.link"
+          class="flex-1 text-center"
         >
           <a
             :href="withBase(item.link)"
-            class="px-3 py-1 rounded-full border border-black hover:bg-black hover:text-white transition"
+            class="block text-black nav-link-font"
           >
             {{ item.text }}
           </a>
@@ -28,3 +39,31 @@ const nav = theme.value.nav || []
     </nav>
   </header>
 </template>
+
+<style scoped>
+/* ...existing styles... */
+
+/* Sicherstellen, dass kein Hintergrund gesetzt wird */
+header {
+  background: none !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* Optional, falls nav selbst irgendwo überschrieben wird */
+nav {
+  background: none !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* Wiederverwendbare Font-Klasse für NavBar-Links */
+.nav-link-font {
+  /* Tailwind: text-sm font-medium; falls du eine Custom-Font nutzt,
+     hier z.B. font-family setzen */
+  font-size: 0.875rem;
+  font-weight: 500;
+  /* z.B. die gleiche Font wie global, nur explizit: */
+  /* font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); */
+}
+</style>

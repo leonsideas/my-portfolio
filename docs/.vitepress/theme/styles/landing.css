@@ -1,3 +1,4 @@
+npm run docs:dev
 /* /////////////////////// */
 /* Landing Page CSS Styles */
 /* /////////////////////// */
@@ -23,11 +24,16 @@ html:has(.landing) {
   .VPNavBar,
   .VPNavBar:not(.top) {
     background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 0 !important;
 
     @media (min-width: 768px) {
-      backdrop-filter: blur(10px);
-      background: rgba(15, 15, 15, 0.8) !important;
-      border-bottom: 1px solid #262626 !important;
+      /* kein Overlay/Blur auf Desktop */
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border-bottom: 0 !important;
     }
 
     .content-body {

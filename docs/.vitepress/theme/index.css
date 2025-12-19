@@ -1,0 +1,38 @@
+/* Beispiel: lokale Fonts einbinden */
+@font-face {
+  font-family: 'IntroFont';
+  src: url('/fonts/IntroFont.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'YourIntroFont';
+  src: url('/fonts/YourIntroFont.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KlangFont';
+  src: url('/fonts/KlangFont.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ...weitere @font-face-Definitionen... */
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* VitePress-Scrollcontainer hart deaktivieren */
+.VPContent,
+.VPDoc,
+.VPPage,
+.Layout,
+.Layout > div {
+  overflow: hidden !important;
+}

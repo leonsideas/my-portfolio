@@ -134,6 +134,12 @@
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+/* WorkPage: sicherstellen, dass keine anderen globalen Hintergründe durchschlagen */
+:global(html.is-workpage),
+:global(html.is-workpage body) {
+  background: #000000 !important;
+}
+
 /* Entfernen oder einschränken: das hier überschreibt sonst ALLE h2 (auch im Carousel) */
 /*
 :global(h1),

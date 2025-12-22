@@ -23,14 +23,13 @@ html:has(.landing) {
 
   .VPNavBar,
   .VPNavBar:not(.top) {
-    background: transparent !important;
+    background: #000 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border-bottom: 0 !important;
 
     @media (min-width: 768px) {
-      /* kein Overlay/Blur auf Desktop */
-      background: transparent !important;
+      background: #000 !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       border-bottom: 0 !important;

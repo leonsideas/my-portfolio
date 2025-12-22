@@ -25,26 +25,31 @@ const currentPageComponent = computed(() => {
 })
 
 const isAboutPage = computed(() => normalizedPath.value.startsWith('/about'))
+const isWorkPage = computed(() => normalizedPath.value.startsWith('/works/'))
 </script>
 
 <template>
-  <!-- <HeroSection/> -->
   <div class="min-h-screen font-plexsans text-black">
-    <NavBar />
-    
-    <!-- globaler Seitenhintergrund -->
+    <NavBar :class="{ 'is-workpage': isWorkPage }" />
+
+    <!-- Für WorkPage: full-bleed rendern, ohne Wrapper/Padding -->
+    <component
+      v-if="currentPageComponent && isWorkPage"
+      :is="currentPageComponent"
+      :key="route.path"
+    />
+
+    <!-- Für alle anderen Seiten: bisheriges Layout -->
     <div
+      v-else
       :class="[
-        // Für alle Seiten gleicher, heller Hintergrund (Grau entfernt)
         !isAboutPage ? 'bg-black' : 'bg-black',
-        'min-h-[calc(100vh-4rem)]' // 4rem = NavBar-Höhe
+        'min-h-[calc(100vh-4rem)]'
       ]"
     >
       <main
         :class="[
-          // Nur noch Breite/Padding steuern, kein Hintergrund
           !isAboutPage ? 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-8' : 'w-full h-full',
-          // AboutPage: Fullscreen-Content ohne zusätzliches Padding
           isAboutPage ? '' : ''
         ]"
       >

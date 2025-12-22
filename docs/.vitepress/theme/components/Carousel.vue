@@ -82,7 +82,19 @@
                   class="mb-4 text-white font-semibold text-4xl md:text-7xl leading-tight"
                   :class="slide.titleFontClass"
                 >
-                  {{ slide.title }}
+                  <!-- NEU: optional verlinkter Titel -->
+                  <a
+                    v-if="slide.titleLink"
+                    :href="slide.titleLink"
+                    class="pointer-events-auto inline-block hover:underline underline-offset-4"
+                    :aria-label="slide.titleLinkAriaLabel || `Öffne ${slide.title || 'Projekt'}`"
+                    @click.prevent="handleTitleClick(slide)"
+                  >
+                    {{ slide.title }}
+                  </a>
+                  <span v-else>
+                    {{ slide.title }}
+                  </span>
                 </h2>
                 <h3
                   v-if="slide.subtitle"
@@ -197,7 +209,15 @@ type Slide = {
   previewVideo?: string | null// z.B. '/videos/Klanggestalten-cover.mp4'
   href?: string               // optional, aber hier nicht für preview genutzt
   titleFontClass?: string     // Neue optionale Klassen für die Titelschrift (z.B. 'font-display-a', 'font-display-b', ...)
+
+  // NEU: individuell in der .vue einstellbar (pro Projekt)
+  displayTitle?: string              // wenn gesetzt, überschreibt es title (und id-fallback)
+  titleFontKey?: string              // z.B. 'klang' | 'migration' -> mapped auf CSS-Klassen
+  titleLink?: string                 // z.B. '/works/?id=Migration&play=1' oder 'https://...'
+  titleLinkAriaLabel?: string
 }
+
+const router = useRouter()
 
 const props = defineProps<{
   slides: Slide[]
@@ -226,16 +246,28 @@ const firstVideoSlide: Slide = {
   titleFontClass: 'font-intro' // Beispiel: eigene Font-Klasse für den Intro-Titel
 }
 
-// Mapping: jede Projekt-ID bekommt ihre eigene Font-Klasse
+// NEU: Key -> CSS Klasse (die Klasse wiederum sollte eine @font-face Font benutzen)
+const fontClassByKey: Record<string, string> = {
+  klang: 'font-klanggestalten',
+  migration: 'font-migration',
+  moi: 'font-moi',
+  light: 'font-light',
+  font02: 'font-font02',
+  font03: 'font-font03',
+  font04: 'font-font04',
+  font05: 'font-font05',
+}
+
+// Optional: weiterhin Mapping per id möglich, wenn du das behalten willst
 const titleFontById: Record<string, string> = {
   'Klanggestalten': 'font-klanggestalten',
   'Migration': 'font-migration',
+  'Moi': 'font-moi',
+  'LightbyNight': 'font-lightbynight',
+  'Kilma': 'font-kilma',
+  'Astronaut': 'font-save',
+  
 
-  // Beispiel: wenn deine Konsole z.B. "Studio X" ausgibt:
-  // 'Studio X': 'font-studiox',
-
-  // Platzhalter ersetzen oder löschen, sonst passiert dafür nichts:
-  // 'DEINE_3_SLIDE_ID': 'font-third',
 }
 
 // Array, das dein Video + optionalen Start-Slide + Projekt-Slides kombiniert
@@ -288,6 +320,32 @@ const displaySlides = computed<Slide[]>(() => {
       if (key && titleFontById[key]) {
         updated.titleFontClass = titleFontById[key]
       }
+    }
+
+    // NEU 1: Individuellen Titel setzen (displayTitle > title > id)
+    if (updated.displayTitle) updated.title = updated.displayTitle
+    if (!updated.title && updated.id) updated.title = String(updated.id)
+
+    // NEU 2: Font-Key priorisieren (titleFontKey > titleFontClass > Mapping)
+    if (!updated.titleFontClass && updated.titleFontKey) {
+      updated.titleFontClass = fontClassByKey[updated.titleFontKey]
+    }
+
+    // bestehend: Mapping über id/title als fallback
+    if (!updated.titleFontClass) {
+      const key =
+        updated.id ? String(updated.id)
+        : updated.title ? String(updated.title)
+        : ''
+
+      if (key && titleFontById[key]) {
+        updated.titleFontClass = titleFontById[key]
+      }
+    }
+
+    // WICHTIG: titleFontKey soll Priorität haben (damit Works gezielt steuerbar sind)
+    if (updated.titleFontKey) {
+      updated.titleFontClass = fontClassByKey[updated.titleFontKey] || updated.titleFontClass
     }
 
     // Debug: zeigt dir, ob Migration wirklich die Klasse bekommt
@@ -394,6 +452,21 @@ function handleSlideClick(index: number, slide: Slide) {
   if (slide.href) {
     window.location.href = slide.href
   }
+}
+
+function handleTitleClick(slide: Slide) {
+  if (!slide.titleLink) return
+
+  // Interne Links (VitePress) via router (ohne full reload), externe normal öffnen
+  const url = slide.titleLink
+  const isExternal = /^https?:\/\//i.test(url)
+
+  if (isExternal) {
+    window.open(url, '_blank', 'noopener,noreferrer')
+    return
+  }
+
+  router.go(withBase(url))
 }
 </script>
 

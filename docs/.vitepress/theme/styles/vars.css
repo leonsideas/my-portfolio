@@ -12,6 +12,18 @@
   --vp-c-brand-dimm: rgba(100, 108, 255, 0.08);
 }
 
+/* Speziell für WorkPage: Brand-Töne deutlich dunkler/neutraler,
+   damit nichts blaustichig-grau erscheint */
+html.is-workpage {
+  --vp-c-brand: #ffffff;
+  --vp-c-brand-light: #f5f5f5;
+  --vp-c-brand-lighter: #e5e5e5;
+  --vp-c-brand-lightest: #d4d4d4;
+  --vp-c-brand-dark: #ffffff;
+  --vp-c-brand-darker: #ffffff;
+  --vp-c-brand-dimm: rgba(255, 255, 255, 0.06);
+}
+
 /**
  * Component: Button
  * -------------------------------------------------------------------------- */

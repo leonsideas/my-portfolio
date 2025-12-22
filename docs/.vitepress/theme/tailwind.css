@@ -11,7 +11,7 @@
 .vp-doc-figure-caption {
   font-size: 0.875rem; /* text-sm */
   font-weight: 500; /* font-medium */
-  color: #6b7280; /* text-gray-500 */
+  color: #000000; /* text-gray-500 */
   line-height: 1.25rem; /* leading-5 */
 }
 
@@ -29,13 +29,16 @@
 
 body {
   font-family: var(--font-sans, system-ui, sans-serif);
-  color: #111;
+  color: #000000;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  /* Hintergrund für die gesamte Site schwarz wie Carousel */
+  background: #000000;
 }
 
 /* Dotted background */
+/* Nur zeigen, wenn NICHT WorkPage aktiv ist */
 body::before {
   content: '';
   position: fixed;
@@ -44,6 +47,12 @@ body::before {
   opacity: 0.6;
   z-index: -1;
   filter: blur(2px);
+}
+
+/* WorkPage: Dotted-Layer komplett ausblenden */
+html.is-workpage body::before {
+  content: none !important;
+  display: none !important;
 }
 
 /* Links */

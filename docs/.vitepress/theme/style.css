@@ -1,0 +1,153 @@
+/* ...existing code... */
+
+/* Optional: Google-Import entfernen, wenn du lokal hosten willst */
+/* @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap'); */
+
+/* Lokale Fonts (Dateien kommen nach: docs/public/fonts/...) */
+@font-face {
+  font-family: "Klang";
+  src: url("/fonts/Klang.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Migration";
+  src: url("/fonts/Migration.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/fonts/PlayfairDisplay-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/fonts/PlayfairDisplay-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/SpaceGrotesk-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/SpaceGrotesk-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/SpaceGrotesk-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/SpaceGrotesk-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "My Local Font"; /* frei wählbar, aber muss zu :root Mapping passen */
+  src: url("/fonts/MyLocalFont-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Optional: wenn du auch Bold hast */
+/*
+@font-face {
+  font-family: "My Local Font";
+  src: url("/fonts/MyLocalFont-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/* Optional: zentrale Variablen (damit du später nur hier wechselst) */
+:root{
+  --font-klanggestalten: "Klang";
+  --font-migration: "Migration";
+  --font-portfolio: "My Local Font";
+  --font-intro: "Playfair Display";
+
+  /* FIX: wird in :global(.carousel .font-studiox) referenziert */
+  --font-studiox: "Space Grotesk";
+
+  /* GLOBAL: Standard-Schrift für alles (Body-Text) */
+  --font-sans: "Space Grotesk";
+
+  /* Optional: Standard für Überschriften */
+  --font-heading: "Playfair Display";
+
+  /* Neue Schrift für den 3. Slide */
+  --font-third: "My Local Font"; /* oder "Klang" / "Migration" / eine andere font-family */
+}
+
+/* Projekt-Titel-Fonts: nur im Carousel wirksam */
+:global(.carousel .font-klanggestalten) { font-family: var(--font-klanggestalten), system-ui, sans-serif !important; }
+:global(.carousel .font-studiox) { font-family: var(--font-studiox), system-ui, sans-serif !important; }
+:global(.carousel .font-portfolio) { font-family: var(--font-portfolio), system-ui, sans-serif !important; }
+:global(.carousel .font-intro) { font-family: var(--font-intro), system-ui, sans-serif !important; }
+:global(.carousel .font-migration) { 
+  font-family: var(--font-migration), system-ui, sans-serif !important;
+
+  /* DEBUG (temporär): eindeutig sichtbar */
+  outline: 3px solid #ff00ff;
+  color: #ff00ff !important;
+  font-style: italic;
+}
+:global(.carousel .font-third) { font-family: var(--font-third), system-ui, sans-serif !important; }
+
+/* optional: alte globale Regeln entfernen/neutralisieren, falls sie noch irgendwo stehen */
+/*
+.font-klanggestalten,
+.font-studiox,
+.font-portfolio,
+.font-intro,
+.font-migration { font-family: inherit !important; }
+*/
+
+/* Beispiel: Projekt-Titel-Fonts (werden im Carousel via titleFontClass gesetzt) */
+/* Entfernt, da die Regeln jetzt nur im Carousel wirksam sind */
+
+/* Global anwenden */
+:global(html),
+:global(body) {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Entfernen oder einschränken: das hier überschreibt sonst ALLE h2 (auch im Carousel) */
+/*
+:global(h1),
+:global(h2),
+:global(h3) {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+*/
+
+/* Stattdessen: nur im VitePress-Content (Docs) anwenden */
+:global(.vp-doc h1),
+:global(.vp-doc h2),
+:global(.vp-doc h3) {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+/* ...existing code... */

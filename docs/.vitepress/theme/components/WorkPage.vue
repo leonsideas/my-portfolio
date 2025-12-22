@@ -81,6 +81,7 @@ const overlayVisible = ref(false)
 const overlayVideoSrc = ref<string | null>(null)
 const overlayTargetSlug = ref<string | null>(null)
 const overlayFadingOut = ref(false)
+const overlayVideoReady = ref(false) // NEW: erst anzeigen wenn Video wirklich ready ist
 
 // Fade startet nach X ms, läuft dann über overlayFadeMs
 const overlayFadeStartMs = 2000
@@ -110,6 +111,7 @@ function showWorkPageFromOverlay() {
   overlayVisible.value = false
   overlayFadingOut.value = false
   overlayVideoSrc.value = null
+  overlayVideoReady.value = false // NEW
 
   currentSlug.value = target
   router.go(withBase(`/works/?id=${encodeURIComponent(target)}`))
@@ -237,6 +239,7 @@ function playProjectIntro(slug: string, videoSrc?: string | null) {
 
   clearOverlayFadeTimer()
   overlayFadingOut.value = false
+  overlayVideoReady.value = false // NEW: reset bei jedem Start
   overlayVideoSrc.value = src
   overlayTargetSlug.value = slug
   overlayVisible.value = true
@@ -294,9 +297,13 @@ watch(currentSlug, () => {
       >
         <video
           :src="overlayVideoSrc"
-          class="w-full h-full object-contain"
+          class="w-full h-full object-contain transition-opacity duration-150"
+          :class="overlayVideoReady ? 'opacity-100' : 'opacity-0'"
           autoplay
           playsinline
+          preload="auto"
+          @loadeddata="overlayVideoReady = true"
+          @canplay="overlayVideoReady = true"
           @ended="handleOverlayEnded"
         />
         <!-- schwarzes Fade-Layer über dem Video -->

@@ -1,7 +1,7 @@
 <template>
   <!-- eigener schwarzer Hintergrund, NavBar bleibt transparent -->
   <div
-    class="relative w-full overflow-hidden bg-black z-20"
+    class="carousel relative w-full overflow-hidden bg-black z-20"
     :class="carouselHeightClass"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
@@ -183,8 +183,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { withBase } from 'vitepress'
+import { ref, computed, watchEffect, onMounted } from 'vue'
+import { withBase, useRouter } from 'vitepress'
 
 type Slide = {
   id?: string | number        // z.B. 'Klanggestalten'
@@ -228,11 +228,14 @@ const firstVideoSlide: Slide = {
 
 // Mapping: jede Projekt-ID bekommt ihre eigene Font-Klasse
 const titleFontById: Record<string, string> = {
-  // Beispiele – hier deine echten IDs/Fonteinträge einsetzen:
-  Klanggestalten: 'font-klanggestalten',
-  'Studio-X': 'font-studiox',
-  Portfolio: 'font-portfolio'
-  // weitere ids ...
+  'Klanggestalten': 'font-klanggestalten',
+  'Migration': 'font-migration',
+
+  // Beispiel: wenn deine Konsole z.B. "Studio X" ausgibt:
+  // 'Studio X': 'font-studiox',
+
+  // Platzhalter ersetzen oder löschen, sonst passiert dafür nichts:
+  // 'DEINE_3_SLIDE_ID': 'font-third',
 }
 
 // Array, das dein Video + optionalen Start-Slide + Projekt-Slides kombiniert
@@ -270,6 +273,26 @@ const displaySlides = computed<Slide[]>(() => {
       }
     }
 
+    // FIX 1: falls title fehlt, nimm id als Titel (damit du überhaupt Text siehst)
+    if (!updated.title && updated.id) {
+      updated.title = String(updated.id)
+    }
+
+    // FIX 2: Font-Mapping: erst id, sonst title als Key benutzen
+    if (!updated.titleFontClass) {
+      const key =
+        updated.id ? String(updated.id)
+        : updated.title ? String(updated.title)
+        : ''
+
+      if (key && titleFontById[key]) {
+        updated.titleFontClass = titleFontById[key]
+      }
+    }
+
+    // Debug: zeigt dir, ob Migration wirklich die Klasse bekommt
+    console.log('[Carousel] font:', { id: updated.id, title: updated.title, titleFontClass: updated.titleFontClass })
+
     console.debug('[Carousel] slide media:', updated.id, {
       previewVideo: updated.previewVideo,
       video: updated.video,
@@ -281,6 +304,21 @@ const displaySlides = computed<Slide[]>(() => {
   })
 
   return [firstVideoSlide, ...enrichedBaseSlides]
+})
+
+// Debug: alle aktuellen Slide-IDs einmal ausgeben
+watchEffect(() => {
+  const ids = displaySlides.value.map((s) => String(s.id ?? '(no-id)'))
+  console.log('[Carousel] slide ids:', ids) // statt console.debug
+})
+
+// DEBUG: ist die Font wirklich geladen/verfügbar?
+watchEffect(() => {
+  const ok = typeof document !== 'undefined' && 'fonts' in document
+    ? document.fonts.check('16px "Migration"')
+    : null
+
+  console.log('[Fonts] Migration verfügbar?', ok)
 })
 
 const intervalMs = () => (props.interval && props.interval > 0 ? props.interval : 5000)

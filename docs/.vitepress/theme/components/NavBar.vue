@@ -30,7 +30,7 @@ const items = [
         >
           <a
             :href="withBase(item.link)"
-            class="block text-black nav-link-font"
+            class="nav-pill nav-link-font"
           >
             {{ item.text }}
           </a>
@@ -65,5 +65,33 @@ nav {
   font-weight: 500;
   /* z.B. die gleiche Font wie global, nur explizit: */
   /* font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); */
+}
+
+/* Pill-Style: nur Kontur + schwarze Schrift (wie Carousel-Nav, aber ohne Fill) */
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  background: transparent;
+  color: rgba(0, 0, 0, 0.9);
+
+  /* vorher: mix-blend-difference + uppercase/letter-spacing – je nach Geschmack lassen/entfernen */
+  mix-blend-difference: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.nav-pill:hover {
+  /* kein Fill, nur etwas stärkere Kontur */
+  background: transparent;
+  border-color: rgba(0, 0, 0, 1);
+  color: rgba(0, 0, 0, 1);
 }
 </style>

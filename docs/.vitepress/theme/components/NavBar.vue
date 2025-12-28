@@ -2,8 +2,8 @@
   import { withBase } from 'vitepress'
   
   const items = [
-    { text: 'Leon Albers', link: '/' },
-    { text: 'About', link: '/about' },
+    { text: 'Leon Albers', link: '/', isHome: true },
+    { text: 'About', link: '/about', class: 'nav-item--about' },
     { text: 'Contact', link: '/contact' },
   ]
   </script>
@@ -12,8 +12,17 @@
     <header class="my-nav nav-blend">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
-          <li v-for="item in items" :key="item.link" class="my-nav__item">
-            <a :href="withBase(item.link)" class="nav-pill nav-link-font nav-blend">
+          <li
+            v-for="item in items"
+            :key="item.link"
+            class="my-nav__item"
+            :class="item.class"
+          >
+            <a
+              :href="withBase(item.link)"
+              class="nav-pill nav-link-font nav-blend"
+              :data-nav-home="item.isHome ? '1' : null"
+            >
               {{ item.text }}
             </a>
           </li>
@@ -67,7 +76,7 @@
     flex: 1;
     text-align: center;
   }
-  
+
   /* Link font */
   .nav-link-font {
     font-size: 0.875rem;

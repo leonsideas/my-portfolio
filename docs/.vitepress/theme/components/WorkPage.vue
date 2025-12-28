@@ -77,6 +77,7 @@
   const overlayVisible = ref(false)
   const overlayVideoSrc = ref<string | null>(null)
   const overlayTargetSlug = ref<string | null>(null)
+  const overlayTargetRoute = ref<string | null>(null) // <- NEU
   const overlayFadingOut = ref(false)
   const overlayVideoReady = ref(false)
   
@@ -99,6 +100,20 @@
   }
   
   function showWorkPageFromOverlay() {
+    // NEU: Route-Ziel hat Priorität (z.B. zurück ins Carousel)
+    const targetRoute = overlayTargetRoute.value
+    if (targetRoute) {
+      overlayVisible.value = false
+      overlayFadingOut.value = false
+      overlayVideoSrc.value = null
+      overlayVideoReady.value = false
+    
+      overlayTargetRoute.value = null
+      overlayTargetSlug.value = null
+      router.go(withBase(targetRoute))
+      return
+    }
+  
     const target = overlayTargetSlug.value
     if (!target) return
   
@@ -107,11 +122,17 @@
     overlayVideoSrc.value = null
     overlayVideoReady.value = false
   
+    overlayTargetSlug.value = null
     currentSlug.value = target
     router.go(withBase(`/works/?id=${encodeURIComponent(target)}`))
   }
   
   onBeforeUnmount(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove(WORKPAGE_CLASS)
+      document.removeEventListener('pointerdown', interceptHomeNav, true)
+      document.removeEventListener('click', interceptHomeNav, true)
+    }
     clearOverlayFadeTimer()
   })
   
@@ -134,13 +155,12 @@
       updateUrlWithoutPlayParam(id)
       playProjectIntro(id, withBase('/Transition.mp4'))
     }
-  })
   
-  onBeforeUnmount(() => {
+    // NEU: global listener aktivieren (capturing, damit wir sicher vorher intercepten)
     if (typeof document !== 'undefined') {
-      document.documentElement.classList.remove(WORKPAGE_CLASS)
+      document.addEventListener('pointerdown', interceptHomeNav, true)
+      document.addEventListener('click', interceptHomeNav, true)
     }
-    clearOverlayFadeTimer()
   })
   
   function getSlugFromLocation(): string | undefined {
@@ -208,7 +228,28 @@
     overlayFadingOut.value = false
     overlayVideoReady.value = false
     overlayVideoSrc.value = src
+    overlayTargetRoute.value = null // <- NEU: sicherheitshalber
     overlayTargetSlug.value = slug
+    overlayVisible.value = true
+  
+    overlayFadeTimer = window.setTimeout(() => {
+      overlayFadingOut.value = true
+    }, overlayFadeStartMs)
+  
+    overlayAfterFadeTimer = window.setTimeout(() => {
+      clearOverlayFadeTimer()
+      showWorkPageFromOverlay()
+    }, overlayCutToPageMs)
+  }
+  
+  // NEU: generisches “play transition then go route”
+  function playTransitionToRoute(routePath: string, videoSrc: string) {
+    clearOverlayFadeTimer()
+    overlayFadingOut.value = false
+    overlayVideoReady.value = false
+    overlayVideoSrc.value = videoSrc
+    overlayTargetSlug.value = null
+    overlayTargetRoute.value = routePath
     overlayVisible.value = true
   
     overlayFadeTimer = window.setTimeout(() => {
@@ -224,6 +265,14 @@
   async function handleOverlayEnded() {
     if (!overlayVisible.value) return
     clearOverlayFadeTimer()
+  
+    // NEU: wenn Route-Ziel gesetzt, nach Fade dorthin
+    if (overlayTargetRoute.value) {
+      overlayFadingOut.value = true
+      await new Promise(resolve => setTimeout(resolve, overlayFadeMs + 100))
+      showWorkPageFromOverlay()
+      return
+    }
   
     if (!overlayTargetSlug.value) {
       overlayVisible.value = false
@@ -243,6 +292,33 @@
   watch(currentSlug, () => {
     contentKey.value += 1
   })
+  
+  // NEU: Click-Interceptor für den Home-Link "Leon Albers"
+  function interceptHomeNav(e: Event) {
+    const target = e.target as HTMLElement | null
+    if (!target) return
+  
+    const anchor = target.closest('a') as HTMLAnchorElement | null
+    if (!anchor) return
+  
+    // nur der NavBar-Home-Link
+    if (anchor.getAttribute('data-nav-home') !== '1') return
+  
+    // bei pointerdown gibt es keine modifiers wie bei MouseEvent zuverlässig; nur bei MouseEvent prüfen
+    if (e instanceof MouseEvent) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    }
+  
+    e.preventDefault()
+    // wichtig: VitePress/router soll nicht vorher navigieren
+    // (Type narrow: stopImmediatePropagation existiert auf EventTarget-impl. in browser)
+    ;(e as any).stopImmediatePropagation?.()
+    e.stopPropagation()
+  
+    if (overlayVisible.value) return
+  
+    playTransitionToRoute('/', withBase('/Transition_up.mp4'))
+  }
   </script>
   
   <template>
@@ -292,84 +368,5 @@
   </template>
   
   <style scoped>
-  .workpage-content {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* =========================
-     ✅ GLOBAL VITEPRESS OVERRIDES
-     Hintergrund exakt wie Carousel: #000, kein Blur
-     ========================= */
-  
-  :global(html.is-workpage) {
-    color-scheme: dark;
-    --vp-nav-bg-color: #000 !important;
-    --vp-nav-screen-bg-color: #000 !important;
-  }
-  
-  /* 2) Echte VitePress Navbar DOM-Elemente: schwarz + kein Blur */
-  :global(html.is-workpage .VPNav),
-  :global(html.is-workpage .VPNavBar),
-  :global(html.is-workpage .VPNavBar .container),
-  :global(html.is-workpage .VPNavBar .content),
-  :global(html.is-workpage .VPNavScreen) {
-    background: #000 !important;
-    background-color: #000 !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    border-bottom: 0 !important;
-  }
-  
-  /* 3) Pseudo-Overlays killen (oft Ursache für “grau”) */
-  :global(html.is-workpage .VPNavBar::before),
-  :global(html.is-workpage .VPNavBar::after),
-  :global(html.is-workpage .VPNav::before),
-  :global(html.is-workpage .VPNav::after) {
-    content: none !important;
-    display: none !important;
-  }
-  
-  /* 4) Alle Navbar-Texte/Icons weiß */
-  :global(html.is-workpage .VPNavBar),
-  :global(html.is-workpage .VPNavBar a),
-  :global(html.is-workpage .VPNavBar .title),
-  :global(html.is-workpage .VPNavBar .VPNavBarTitle),
-  :global(html.is-workpage .VPNavBar .VPLink),
-  :global(html.is-workpage .VPNavBar .link),
-  :global(html.is-workpage .VPNavBar .text) {
-    color: #fff !important;
-  }
-  
-  :global(html.is-workpage .VPNavBar svg),
-  :global(html.is-workpage .VPNavBar .icon) {
-    fill: #fff !important;
-    stroke: #fff !important;
-  }
-  
-  /* 5) Kein Blend/Filter irgendwo in der Navbar */
-  :global(html.is-workpage .VPNav),
-  :global(html.is-workpage .VPNavBar),
-  :global(html.is-workpage .VPNavBar *),
-  :global(html.is-workpage .VPNavScreen) {
-    mix-blend-mode: normal !important;
-    filter: none !important;
-    opacity: 1 !important;
-  }
-  
-  /* Optional: Layout-Flächen schwarz halten */
-  :global(html.is-workpage .Layout),
-  :global(html.is-workpage .VPContent),
-  :global(html.is-workpage .VPContent .container),
-  :global(html.is-workpage .VPContent .content),
-  :global(html.is-workpage .VPDoc),
-  :global(html.is-workpage .VPDoc .container),
-  :global(html.is-workpage .VPDoc .content-container) {
-    background: #000 !important;
-  }
-
-  /* Zusätzliche Sicherheit: Body-Hintergrund im WorkPage-Kontext */
-  :global(html.is-workpage body) {
-    background: #000 !important;
-  }
+  /* existing styles */
   </style>

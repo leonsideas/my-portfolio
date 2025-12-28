@@ -130,14 +130,37 @@
     </div>
     -->
 
+    <!-- linke Kante: "CV" (nur beim ersten Slide) -->
+    <a
+      v-if="isFirstSlide"
+      href="#cv"
+      class="absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
+             text-white/90 nav-link-font mix-blend-difference"
+      aria-label="CV öffnen"
+      @click.prevent="goToCv()"
+    >
+      <span
+        class="flex items-center justify-center
+               w-10 h-28
+               rounded-full
+               border border-white/40 hover:border-white
+               bg-black/30 hover:bg-black/60
+               transition-colors duration-200
+               tracking-[0.35em] uppercase"
+        style="writing-mode: vertical-rl; text-orientation: mixed;"
+      >
+        CV
+      </span>
+    </a>
+
     <!-- linke Kante: "back" (nur wenn NICHT erster Slide) -->
     <a
       v-if="!isFirstSlide"
       href="#projects"
       class="absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
-      aria-label="Zurück zum ersten Slide"
-      @click.prevent="goTo(0)"
+      aria-label="Vorheriger Slide"
+      @click.prevent="prev()"
     >
       <span
         class="works-vertical back-vertical
@@ -390,6 +413,12 @@ const carouselHeightClass = computed(
 // gibt an, ob der aktuell sichtbare Slide der erste (Intro-)Slide ist
 const isFirstSlide = computed(() => currentIndex.value === 0)
 
+// NEU: "About" in der NavBar nur beim ersten Slide anzeigen (über html-Klasse)
+watchEffect(() => {
+  if (typeof document === 'undefined') return
+  document.documentElement.classList.toggle('has-carousel-intro', isFirstSlide.value)
+})
+
 // Index des ersten Projekt-Slides (nach Intro + optional startSlide)
 const firstProjectIndex = computed(
   () => 1 + (props.startSlide ? 1 : 0)
@@ -467,6 +496,11 @@ function handleTitleClick(slide: Slide) {
   }
 
   router.go(withBase(url))
+}
+
+// NEU: CV-Navigation (Pfad bei Bedarf anpassen, z.B. '/cv' oder '/Leon-Albers-CV.pdf')
+function goToCv() {
+  router.go(withBase('/cv'))
 }
 </script>
 

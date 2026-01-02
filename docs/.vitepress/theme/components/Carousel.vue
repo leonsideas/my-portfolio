@@ -269,7 +269,12 @@ function toBase(url?: string | null) {
 }
 
 function markVideoBroken(slide: Slide, index: number) {
-  brokenVideoIds.value.add(String(slide.id ?? index))
+  const id = String(slide.id ?? index)
+  brokenVideoIds.value.add(id)
+
+  // NEU: klare Fehlerspur mit finaler URL
+  const src = toBase(slide.previewVideo || slide.video)
+  console.warn('[Carousel] video failed:', { id, src })
 }
 
 // Erster Slide mit lokalem Video aus docs/public/videos/intro.mp4

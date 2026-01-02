@@ -1,3 +1,4 @@
-
 # This file is intentionally left blank.
 # It serves as a placeholder to ensure the `docs/public/videos/` directory is tracked by Git.
+# Hinweis: In diesem Ordner müssen die echten *.mp4 Dateien liegen (z.B. intro.mp4, Klanggestalten-cover.mp4, ...),
+# sonst liefert GitHub Pages für /videos/... nur 404.

@@ -45,8 +45,74 @@ jobs:
         uses: actions/configure-pages@v4
       - name: Install dependencies
         run: npm install # or pnpm install / yarn install / bun install
+
+      - name: Debug: list video sources (public)
+        run: |
+          echo "=== public/videos (source) ==="
+          ls -la docs/public/videos || true
+
+      - name: Fail if videos are not in docs/public/videos
+        run: |
+          if [ -d "docs/videos" ]; then
+            echo "ERROR: Found docs/videos. Move videos to docs/public/videos so they get deployed to /videos/."
+            ls -la docs/videos || true
+            exit 1
+          fi
+          if [ ! -d "docs/public/videos" ]; then
+            echo "ERROR: Missing docs/public/videos."
+            exit 1
+          fi
+
+      - name: Fail if required public assets are missing
+        run: |
+          set -e
+          echo "=== required assets ==="
+          for f in docs/public/videos/background.mp4 docs/public/videos/intro.mp4; do
+            if [ ! -f "$f" ]; then
+              echo "ERROR: missing $f"
+              echo "--- current docs/public/videos ---"
+              ls -la docs/public/videos || true
+              exit 1
+            fi
+            echo "OK: $f"
+          done
+
       - name: Build with VitePress
         run: npm run docs:build # or pnpm docs:build / yarn docs:build / bun run docs:build
+
+      - name: Verify dist output exists
+        run: |
+          echo "=== verify build output ==="
+          if [ ! -d "docs/.vitepress/dist" ]; then
+            echo "ERROR: docs/.vitepress/dist not found. Your docs:build script likely doesn't run 'vitepress build docs'."
+            echo "--- listing docs/.vitepress ---"
+            ls -la docs/.vitepress || true
+            echo "--- listing docs ---"
+            ls -la docs || true
+            exit 1
+          fi
+          echo "OK: docs/.vitepress/dist exists"
+          ls -la docs/.vitepress/dist || true
+
+      - name: Debug: list deployed videos (dist)
+        run: |
+          echo "=== dist/videos (deployed) ==="
+          ls -la docs/.vitepress/dist/videos || true
+          echo "=== mp4 in dist ==="
+          find docs/.vitepress/dist -maxdepth 3 -type f -name "*.mp4" -print || true
+
+      - name: Debug: list deployed assets (dist/videos + dist/images)
+        run: |
+          echo "=== dist/videos ==="
+          ls -la docs/.vitepress/dist/videos || true
+          echo "=== dist/images ==="
+          ls -la docs/.vitepress/dist/images || true
+
+          echo "=== sanity checks ==="
+          test -f docs/.vitepress/dist/videos/background.mp4 && echo "OK: background.mp4" || echo "MISSING: background.mp4"
+          test -f docs/.vitepress/dist/videos/intro.mp4 && echo "OK: intro.mp4" || echo "MISSING: intro.mp4"
+          test -f docs/.vitepress/dist/images/background-fallback.jpg && echo "OK: background-fallback.jpg" || echo "MISSING: background-fallback.jpg"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

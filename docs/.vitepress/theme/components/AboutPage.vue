@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { withBase } from 'vitepress'
 
 // Hintergrund: erst Video, dann Bild
 const showVideoBg = ref(true)
@@ -24,6 +25,9 @@ const startTextFade = () => {
     showText.value = true
   }, 0) // Fade startet sofort, Dauer steuert die CSS-Transition (5000ms)
 }
+
+const bgPoster = withBase('/images/background-fallback.jpg')
+const bgVideo = withBase('/videos/background.mp4')
 
 onMounted(() => {
   // Fallback: falls Video nicht spielt (z.B. direkt Bild), starte Fade trotzdem
@@ -53,18 +57,18 @@ export default {
         autoplay
         muted
         playsinline
-        poster="/images/background-fallback.jpg"
+        :poster="bgPoster"
         @play="startTextFade"
         @ended="handleVideoEnded"
         @error="() => { handleVideoError(); startTextFade() }"
       >
-        <source src="/videos/background.mp4" type="video/mp4" />
+        <source :src="bgVideo" type="video/mp4" />
       </video>
 
       <!-- Fallback-Bild im Fullscreen -->
       <img
         v-else
-        src="/images/background-fallback.jpg"
+        :src="bgPoster"
         alt="Hintergrundbild"
         class="absolute inset-0 w-full h-full object-cover"
       />

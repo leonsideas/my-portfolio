@@ -40,16 +40,17 @@
             </button>
 
             <!-- 1) Video, wenn vorhanden -->
-            <div v-if="slide.previewVideo || slide.video" class="w-full h-full">
+            <div v-if="(slide.previewVideo || slide.video) && !brokenVideoIds.has(String(slide.id ?? index))" class="w-full h-full">
               <video
-                :src="slide.previewVideo || slide.video"
                 class="w-full h-full object-cover"
                 autoplay
                 muted
                 loop
                 playsinline
+                preload="metadata"
+                @error="() => markVideoBroken(slide, index)"
               >
-                <!-- weitere <source>-Tags möglich -->
+                <source :src="toBase(slide.previewVideo || slide.video)" type="video/mp4" />
               </video>
             </div>
 
@@ -59,7 +60,7 @@
               class="w-full h-full"
             >
               <img
-                :src="slide.previewImage || slide.image"
+                :src="toBase(slide.previewImage || slide.image)"
                 class="w-full h-full object-cover"
                 alt=""
               />
@@ -258,12 +259,22 @@ const currentIndex = ref(0)
 const timer = ref<number | null>(null)
 const isHovered = ref(false)
 
+const brokenVideoIds = ref(new Set<string>())
+
+function toBase(url?: string | null) {
+  if (!url) return ''
+  // externe URLs unverändert lassen
+  if (/^https?:\/\//i.test(url)) return url
+  return withBase(url)
+}
+
+function markVideoBroken(slide: Slide, index: number) {
+  brokenVideoIds.value.add(String(slide.id ?? index))
+}
+
 // Erster Slide mit lokalem Video aus docs/public/videos/intro.mp4
 const firstVideoSlide: Slide = {
   id: 'intro-video',
-  //title: 'Mein Video',
-  //subtitle: 'Intro',
-  //description: 'Dieses Video wird als erstes im Loop abgespielt.',
   video: '/videos/intro.mp4',
   href: undefined,
   titleFontClass: 'font-intro' // Beispiel: eigene Font-Klasse für den Intro-Titel

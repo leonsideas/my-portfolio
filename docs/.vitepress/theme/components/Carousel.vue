@@ -382,20 +382,29 @@ const displaySlides = computed<Slide[]>(() => {
       updated.titleFontClass = fontClassByKey[updated.titleFontKey] || updated.titleFontClass
     }
 
-    // Debug: zeigt dir, ob Migration wirklich die Klasse bekommt
-    console.log('[Carousel] font:', { id: updated.id, title: updated.title, titleFontClass: updated.titleFontClass })
-
-    console.debug('[Carousel] slide media:', updated.id, {
-      previewVideo: updated.previewVideo,
-      video: updated.video,
-      previewImage: updated.previewImage,
-      image: updated.image
-    })
-
     return updated
   })
 
   return [firstVideoSlide, ...enrichedBaseSlides]
+})
+
+// Einmalig: zeige, welche Dateien der Carousel wirklich erwartet
+let didLogExpectedAssets = false
+watchEffect(() => {
+  if (didLogExpectedAssets) return
+  if (!displaySlides.value.length) return
+  didLogExpectedAssets = true
+
+  const expected = displaySlides.value.map((s, i) => {
+    const id = String(s.id ?? i)
+    return {
+      id,
+      video: s.previewVideo || s.video || null,
+      image: s.previewImage || s.image || null,
+    }
+  })
+
+  console.log('[Carousel] expected assets (relative):', expected)
 })
 
 // Debug: alle aktuellen Slide-IDs einmal ausgeben

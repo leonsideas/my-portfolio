@@ -11,7 +11,14 @@
     image: string | null
     video: string | null
     component: any
+    images: string[]        // NEU: zusätzliche Bilder pro Projekt
   }
+  
+  type OverlayFadeMode = 'fade-out' | 'fade-in' | 'none'
+  const overlayFadeMode = ref<OverlayFadeMode>('fade-out')
+
+  // NEU: falls true -> kein schwarzer Fade-Layer rendern
+  const overlayFadeDisabled = ref(false)
   
   // 1) Markdown as Vue components
   const markdownModules = import.meta.glob('../../../works/**/index.md', {
@@ -35,6 +42,12 @@
     eager: true,
     import: 'default'
   })
+
+  // NEU: beliebige Projektbilder, z.B. works/<slug>/images/foo.jpg
+  const projectImageFiles = import.meta.glob('../../../works/**/*.{jpg,jpeg,png,webp,gif}', {
+    eager: true,
+    import: 'default'
+  })
   
   const cards = ref<Card[]>([])
   
@@ -54,7 +67,18 @@
     const folder = path.replace(/\/index\.md$/, '/')
     const imageKey = Object.keys(imageFiles).find(k => k.startsWith(folder))
     const videoKey = Object.keys(videoFiles).find(k => k.startsWith(folder))
-  
+
+    const coverImage = imageKey ? (imageFiles[imageKey] as string) : null
+
+    const projectImages: string[] = Object.keys(projectImageFiles)
+      .filter(k => k.startsWith(folder))
+      .filter(k => !/\/cover\.(jpg|jpeg|png|webp|gif)$/i.test(k))
+      .map(k => projectImageFiles[k] as string)
+      .sort()
+
+    // NEU: fallback -> wenn keine images/ vorhanden, nimm cover.*
+    const images = projectImages.length ? projectImages : (coverImage ? [coverImage] : [])
+
     const mod = markdownModules[path] as any
   
     cards.value.push({
@@ -63,9 +87,10 @@
       name: nameLine?.replace(/^## /, '') || 'Anonymous',
       excerpt: excerptLine || '',
       route,
-      image: imageKey ? (imageFiles[imageKey] as string) : null,
+      image: coverImage,
       video: videoKey ? (videoFiles[videoKey] as string) : null,
-      component: mod?.default || null
+      component: mod?.default || null,
+      images
     })
   }
   
@@ -77,7 +102,7 @@
   const overlayVisible = ref(false)
   const overlayVideoSrc = ref<string | null>(null)
   const overlayTargetSlug = ref<string | null>(null)
-  const overlayTargetRoute = ref<string | null>(null) // <- NEU
+  const overlayTargetRoute = ref<string | null>(null)
   const overlayFadingOut = ref(false)
   const overlayVideoReady = ref(false)
   
@@ -87,6 +112,12 @@
   
   let overlayFadeTimer: number | null = null
   let overlayAfterFadeTimer: number | null = null
+  
+  // NEU: Content ist initial unsichtbar – wird erst nach Video eingeblendet
+  const contentVisible = ref(false)
+
+  // NEU: Safety-Fallback nur falls @ended nie kommt (z.B. Video startet nicht)
+  const overlaySafetyFallbackMs = 30000
   
   function clearOverlayFadeTimer() {
     if (overlayFadeTimer !== null) {
@@ -110,6 +141,8 @@
     
       overlayTargetRoute.value = null
       overlayTargetSlug.value = null
+      // WICHTIG: contentVisible NICHT hier auf true setzen,
+      // das macht handleOverlayEnded NACH dem Videoende.
       router.go(withBase(targetRoute))
       return
     }
@@ -125,6 +158,8 @@
     overlayTargetSlug.value = null
     currentSlug.value = target
     router.go(withBase(`/works/?id=${encodeURIComponent(target)}`))
+  
+    // contentVisible NICHT hier setzen -> passiert nach Videoende
   }
   
   onBeforeUnmount(() => {
@@ -152,14 +187,26 @@
     if (id) currentSlug.value = id
   
     if (id && play) {
+      // WICHTIG: Bei Intro-Video contentVisible NICHT hier setzen.
+      // Das passiert erst nach Videoende in handleOverlayEnded().
       updateUrlWithoutPlayParam(id)
       playProjectIntro(id, withBase('/Transition.mp4'))
+    } else {
+      // Kein Intro-Video -> Content direkt einblenden
+      contentVisible.value = true
     }
   
     // NEU: global listener aktivieren (capturing, damit wir sicher vorher intercepten)
     if (typeof document !== 'undefined') {
       document.addEventListener('pointerdown', interceptHomeNav, true)
       document.addEventListener('click', interceptHomeNav, true)
+    }
+
+    // NEU: Debug – zeigt dir, ob Vite die Dateien überhaupt findet
+    if (typeof window !== 'undefined') {
+      const slug = getSlugFromLocation()
+      const c = cards.value.find(x => x.slug === slug)
+      console.log('[WorkPage] slug:', slug, 'images:', c?.images)
     }
   })
   
@@ -220,17 +267,24 @@
   
     const src = videoSrc ?? card.video
     if (!src) {
+      // Kein Video für dieses Projekt:
+      // direkt auf Workpage wechseln UND Content direkt zeigen.
       selectCard(slug, `/works/?id=${slug}`)
+      contentVisible.value = true
       return
     }
   
     clearOverlayFadeTimer()
+    overlayFadeMode.value = 'fade-out'
     overlayFadingOut.value = false
     overlayVideoReady.value = false
     overlayVideoSrc.value = src
-    overlayTargetRoute.value = null // <- NEU: sicherheitshalber
+    overlayTargetRoute.value = null
     overlayTargetSlug.value = slug
     overlayVisible.value = true
+
+    // Content verstecken bevor Overlay startet
+    contentVisible.value = false
   
     overlayFadeTimer = window.setTimeout(() => {
       overlayFadingOut.value = true
@@ -239,19 +293,41 @@
     overlayAfterFadeTimer = window.setTimeout(() => {
       clearOverlayFadeTimer()
       showWorkPageFromOverlay()
+      // Fallback: falls @ended nicht kam, nach Cut trotzdem Content einblenden
+      contentVisible.value = true
     }, overlayCutToPageMs)
   }
   
   // NEU: generisches “play transition then go route”
-  function playTransitionToRoute(routePath: string, videoSrc: string) {
+  function playTransitionToRoute(routePath: string, videoSrc: string, fadeMode: OverlayFadeMode = 'fade-out') {
     clearOverlayFadeTimer()
+
+    overlayFadeMode.value = fadeMode
+    overlayFadeDisabled.value = fadeMode === 'none'
+
+    // wichtig: bei "none" den Fade-State neutral halten
     overlayFadingOut.value = false
+
     overlayVideoReady.value = false
     overlayVideoSrc.value = videoSrc
     overlayTargetSlug.value = null
     overlayTargetRoute.value = routePath
     overlayVisible.value = true
-  
+
+    contentVisible.value = false
+
+    // NONE: KEIN kurzer Cut. Nur Safety-Fallback.
+    if (fadeMode === 'none') {
+      overlayAfterFadeTimer = window.setTimeout(() => {
+        clearOverlayFadeTimer()
+        showWorkPageFromOverlay()
+        contentVisible.value = true
+        overlayFadeDisabled.value = false
+      }, overlaySafetyFallbackMs)
+      return
+    }
+
+    // Default: Fade-out am Ende (bisheriges Verhalten)
     overlayFadeTimer = window.setTimeout(() => {
       overlayFadingOut.value = true
     }, overlayFadeStartMs)
@@ -259,6 +335,8 @@
     overlayAfterFadeTimer = window.setTimeout(() => {
       clearOverlayFadeTimer()
       showWorkPageFromOverlay()
+      // Fallback: falls @ended nicht kam, Content trotzdem anzeigen
+      contentVisible.value = true
     }, overlayCutToPageMs)
   }
   
@@ -268,15 +346,29 @@
   
     // NEU: wenn Route-Ziel gesetzt, nach Fade dorthin
     if (overlayTargetRoute.value) {
+      // NEU: wenn fade disabled -> ohne warten sofort navigieren
+      if (overlayFadeDisabled.value) {
+        showWorkPageFromOverlay()
+        contentVisible.value = true
+        overlayFadeDisabled.value = false
+        return
+      }
+
       overlayFadingOut.value = true
       await new Promise(resolve => setTimeout(resolve, overlayFadeMs + 100))
       showWorkPageFromOverlay()
+
+      // Transition-Video ist vorbei -> Text einblenden
+      contentVisible.value = true
+      overlayFadeDisabled.value = false
       return
     }
   
     if (!overlayTargetSlug.value) {
       overlayVisible.value = false
       overlayFadingOut.value = false
+      // Kein Ziel: Overlay einfach weg, aber Content wieder zeigen
+      contentVisible.value = true
       return
     }
   
@@ -284,6 +376,20 @@
     await new Promise(resolve => setTimeout(resolve, overlayFadeMs + 100))
   
     showWorkPageFromOverlay()
+
+    // JETZT – nach Wechsel auf Workpage -> Text einblenden (mit 2s-Fade)
+    contentVisible.value = true
+  }
+
+  function handleOverlayError() {
+    // Im no-fade Modus NICHT sofort navigieren, sonst bricht das Video quasi direkt ab
+    if (overlayFadeDisabled.value) {
+      console.warn('[WorkPage] overlay video error (no-fade). keeping overlay; will use safety fallback timer.')
+      return
+    }
+
+    showWorkPageFromOverlay()
+    contentVisible.value = true
   }
   
   const currentCard = computed(() => cards.value.find(card => card.slug === currentSlug.value))
@@ -293,80 +399,144 @@
     contentKey.value += 1
   })
   
-  // NEU: Click-Interceptor für den Home-Link "Leon Albers"
+  // NEU: Click-Interceptor für den Home-/About-Link (Navbar)
   function interceptHomeNav(e: Event) {
     const target = e.target as HTMLElement | null
     if (!target) return
-  
+
     const anchor = target.closest('a') as HTMLAnchorElement | null
     if (!anchor) return
-  
-    // nur der NavBar-Home-Link
-    if (anchor.getAttribute('data-nav-home') !== '1') return
-  
-    // bei pointerdown gibt es keine modifiers wie bei MouseEvent zuverlässig; nur bei MouseEvent prüfen
+
+    const rawHref = anchor.getAttribute('href') || ''
+
+    // explizite Marker aus der Navbar
+    const isHomeMarked = anchor.getAttribute('data-nav-home') === '1'
+    const isAboutMarked = anchor.getAttribute('data-nav-about') === '1'
+
+    let isHome = isHomeMarked
+    let isAbout = isAboutMarked
+
+    if (!isHome && !isAbout) {
+      const hrefUrl = rawHref.startsWith('http')
+        ? new URL(rawHref)
+        : new URL(withBase(rawHref), window.location.origin)
+
+      const pathname = hrefUrl.pathname.replace(withBase('/'), '/')
+
+      isHome = pathname === '/'
+      isAbout = pathname === '/cv' || pathname === '/about' || rawHref === '#cv'
+    }
+
+    if (!isHome && !isAbout) return
+
     if (e instanceof MouseEvent) {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
     }
-  
+
     e.preventDefault()
-    // wichtig: VitePress/router soll nicht vorher navigieren
-    // (Type narrow: stopImmediatePropagation existiert auf EventTarget-impl. in browser)
     ;(e as any).stopImmediatePropagation?.()
     e.stopPropagation()
-  
+
     if (overlayVisible.value) return
-  
-    playTransitionToRoute('/', withBase('/Transition_up.mp4'))
+
+    // Home bleibt '/', About soll auf about.html
+    const targetRoute = isHome ? '/' : '/about.html'
+    playTransitionToRoute(targetRoute, withBase('/Transition_up.mp4'), 'none')
   }
-  </script>
-  
-  <template>
-    <div class="h-screen w-full bg-black workpage-root overflow-hidden">
-      <div class="flex flex-col h-full min-h-0">
+</script>
+
+<template>
+  <div class="h-screen w-full bg-black workpage-root overflow-hidden">
+    <div class="flex flex-col h-full min-h-0">
+      <!-- Overlay mit Transition-Video -->
+      <div
+        v-if="overlayVisible && overlayVideoSrc"
+        class="workpage-overlay fixed inset-0 bg-black flex items-center justify-center z-[9999]"
+      >
+        <video
+          :src="overlayVideoSrc"
+          class="w-full h-full object-cover"
+          :class="overlayVideoReady ? 'opacity-100' : 'opacity-0'"
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+          @loadeddata="overlayVideoReady = true"
+          @canplay="overlayVideoReady = true"
+          @error="handleOverlayError"
+          @ended="handleOverlayEnded"
+        />
+
         <div
-          v-if="overlayVisible && overlayVideoSrc"
-          class="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
-        >
-          <video
-            :src="overlayVideoSrc"
-            class="w-full h-full object-contain transition-opacity duration-150"
-            :class="overlayVideoReady ? 'opacity-100' : 'opacity-0'"
-            autoplay
-            playsinline
-            preload="auto"
-            @loadeddata="overlayVideoReady = true"
-            @canplay="overlayVideoReady = true"
-            @ended="handleOverlayEnded"
-          />
-          <div
-            class="absolute inset-0 bg-black pointer-events-none transition-opacity ease-in-out"
-            style="transition-duration: 2000ms;"
-            :class="overlayFadingOut ? 'opacity-100' : 'opacity-0'"
-          />
-        </div>
-  
-        <section class="flex-1 min-h-0 w-full bg-black overflow-y-auto text-gray-100 workpage-content pt-16">
-          <div class="px-6 pb-6">
-            <Transition name="fade" mode="out-in">
-              <div v-if="currentCard" :key="contentKey" class="text-left">
-                <component
-                  v-if="currentCard.component"
-                  :is="currentCard.component"
-                  class="prose prose-invert prose-base md:prose-lg max-w-none text-left"
-                />
-              </div>
-  
-              <div v-else :key="'not-found'" class="text-gray-400 text-left">
-                Work not found.
-              </div>
-            </Transition>
-          </div>
-        </section>
+          v-if="!overlayFadeDisabled"
+          class="absolute inset-0 bg-black pointer-events-none transition-opacity ease-in-out"
+          style="transition-duration: 2000ms;"
+          :class="[
+            overlayFadeMode === 'fade-out'
+              ? (overlayFadingOut ? 'opacity-100' : 'opacity-0')
+              : (overlayFadingOut ? 'opacity-0' : 'opacity-100')
+          ]"
+        />
       </div>
+
+      <!-- Hauptinhalt -->
+      <section
+        v-if="contentVisible"
+        class="flex-1 min-h-0 w-full bg-black text-gray-100 workpage-content pt-16"
+      >
+        <div class="px-6 pb-6 h-full min-h-0">
+          <Transition name="content-fade" mode="out-in" appear>
+            <div v-if="currentCard" :key="contentKey" class="h-full min-h-0">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start h-full min-h-0">
+                <!-- Text: eigener Scroll -->
+                <div class="min-h-0 h-full overflow-y-auto pr-2">
+                  <div class="text-left">
+                    <component
+                      v-if="currentCard.component"
+                      :is="currentCard.component"
+                      class="prose prose-invert prose-base md:prose-lg max-w-none text-left"
+                    />
+                  </div>
+                </div>
+
+                <!-- Bilder: eigener Scroll -->
+                <div class="min-h-0 h-full overflow-y-auto pl-2">
+                  <div class="space-y-4">
+                    <div
+                      v-if="currentCard.images && currentCard.images.length"
+                      class="grid grid-cols-1 gap-4"
+                    >
+                      <figure
+                        v-for="(img, idx) in currentCard.images"
+                        :key="img + '-' + idx"
+                        class="w-full overflow-hidden rounded-lg bg-neutral-900"
+                      >
+                        <img
+                          :src="img"
+                          :alt="currentCard.title + ' – Bild ' + (idx + 1)"
+                          class="w-full h-auto object-contain"
+                          loading="lazy"
+                        />
+                      </figure>
+                    </div>
+                    <div v-else class="text-sm text-gray-500">
+                      Für dieses Projekt sind noch keine Bilder hinterlegt.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else :key="'not-found'" class="text-gray-300">
+              Projekt nicht gefunden.
+            </div>
+          </Transition>
+        </div>
+      </section>
     </div>
-  </template>
-  
-  <style scoped>
-  /* existing styles */
-  </style>
+  </div>
+</template>
+
+<style scoped>
+/* ...existing code... (deine content-fade styles) ...existing code... */
+</style>

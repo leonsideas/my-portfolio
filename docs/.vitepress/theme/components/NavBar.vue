@@ -3,13 +3,13 @@
   
   const items = [
     { text: 'Leon Albers', link: '/', isHome: true },
-    { text: 'About', link: '/about', class: 'nav-item--about' },
+    { text: 'About', link: '/about', class: 'nav-item--about', isAbout: true },
     { text: 'Contact', link: '/contact' },
   ]
-  </script>
-  
-  <template>
-    <header class="my-nav nav-blend">
+</script>
+
+<template>
+  <header class="my-nav nav-blend">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
           <li
@@ -22,6 +22,7 @@
               :href="withBase(item.link)"
               class="nav-pill nav-link-font nav-blend"
               :data-nav-home="item.isHome ? '1' : null"
+              :data-nav-about="item.isAbout ? '1' : null"
             >
               {{ item.text }}
             </a>
@@ -29,9 +30,9 @@
         </ul>
       </nav>
     </header>
-  </template>
-  
-  <style scoped>
+</template>
+
+<style scoped>
   /* Sticky + transparent by default */
   .my-nav {
     position: sticky;
@@ -122,4 +123,4 @@
   .nav-blend {
     mix-blend-mode: difference;
   }
-  </style>
+</style>

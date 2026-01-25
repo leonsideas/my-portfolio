@@ -40,7 +40,10 @@
             </button>
 
             <!-- 1) Video, wenn vorhanden -->
-            <div v-if="(slide.previewVideo || slide.video) && !brokenVideoIds.has(String(slide.id ?? index))" class="w-full h-full">
+            <div
+              v-if="(slide.previewVideo || slide.video) && !brokenVideoIds.has(String(slide.id ?? index))"
+              class="absolute inset-0 w-full h-full"
+            >
               <video
                 class="w-full h-full object-cover"
                 autoplay
@@ -76,38 +79,27 @@
 
             <!-- Text-Overlay: über der Klickfläche, Pointer-Events deaktiviert -->
             <div
-              class="absolute inset-0 flex items-center justify-center p-6 md:p-10 pointer-events-none z-20"
+              class="absolute inset-0 flex items-start justify-center pt-32 md:pt-40 px-6 md:px-10 pointer-events-none z-20"
             >
-              <div class="max-w-2xl text-center mix-blend-difference center-text-shadow">
+              <div class="max-w-5xl text-center">
                 <h2
-                  class="mb-4 text-white font-semibold text-4xl md:text-7xl leading-tight"
+                  class="mb-4 font-semibold text-6xl md:text-9xl leading-tight whitespace-normal md:whitespace-nowrap title-center"
                   :class="slide.titleFontClass"
                 >
                   <!-- NEU: optional verlinkter Titel -->
                   <a
                     v-if="slide.titleLink"
                     :href="slide.titleLink"
-                    class="pointer-events-auto inline-block hover:underline underline-offset-4"
+                    class="pointer-events-auto inline-block hover:underline underline-offset-4 title-link-dark"
                     :aria-label="slide.titleLinkAriaLabel || `Öffne ${slide.title || 'Projekt'}`"
                     @click.prevent="handleTitleClick(slide)"
                   >
                     {{ slide.title }}
                   </a>
-                  <span v-else>
+                  <span v-else class="title-dark">
                     {{ slide.title }}
                   </span>
                 </h2>
-                <h3
-                  v-if="slide.subtitle"
-                  class="text-sm md:text-lg font-medium text-white mb-3"
-                >
-                  {{ slide.subtitle }}
-                </h3>
-                <p
-                  class="text-white text-sm md:text-base leading-snug line-clamp-4 group-hover:line-clamp-none transition-all duration-300"
-                >
-                  {{ slide.description }}
-                </p>
               </div>
             </div>
           </div>
@@ -222,24 +214,29 @@
 import { ref, computed, watchEffect, onMounted } from 'vue'
 import { withBase, useRouter } from 'vitepress'
 
+// ...existing code...
+
 type Slide = {
-  id?: string | number        // z.B. 'Klanggestalten'
+  id?: string | number
   title?: string
   subtitle?: string
   description?: string
-  image?: string | null       // optional bestehendes Bild
-  previewImage?: string | null// automatisch abgeleitetes Bild, z.B. '/images/<id>-cover.jpg'
-  video?: string | null       // z.B. '/videos/intro.mp4'
-  previewVideo?: string | null// z.B. '/videos/Klanggestalten-cover.mp4'
-  href?: string               // optional, aber hier nicht für preview genutzt
-  titleFontClass?: string     // Neue optionale Klassen für die Titelschrift (z.B. 'font-display-a', 'font-display-b', ...)
-
-  // NEU: individuell in der .vue einstellbar (pro Projekt)
-  displayTitle?: string              // wenn gesetzt, überschreibt es title (und id-fallback)
-  titleFontKey?: string              // z.B. 'klang' | 'migration' -> mapped auf CSS-Klassen
-  titleLink?: string                 // z.B. '/works/?id=Migration&play=1' oder 'https://...'
+  image?: string | null
+  previewImage?: string | null
+  video?: string | null
+  previewVideo?: string | null
+  nightPreviewVideo?: string | null
+  href?: string
+  titleFontClass?: string
+  displayTitle?: string
+  titleFontKey?: string
+  titleLink?: string
   titleLinkAriaLabel?: string
 }
+
+// ENTFERNT: PreviewFrontmatter, PreviewMdModule, getPreviewMdContent, h1FromMarkdown,
+// firstParagraphFromMarkdown, previewModules, getFrontmatter, folderNameFromPath,
+// previewPathById, previewById
 
 const router = useRouter()
 
@@ -250,6 +247,25 @@ const props = defineProps<{
   interval?: number
   loop?: boolean
 }>()
+
+// NEU: Uhrzeitabhängiger Zustand (Nacht = true, Tag = false)
+const isNightTime = ref(false)
+
+// NEU: Helper, ob aktuell 20:00–05:59 ist
+function calcIsNight(): boolean {
+  if (typeof window === 'undefined') return false
+  const now = new Date()
+  const h = now.getHours()
+  return h >= 20 || h < 6
+}
+
+// NEU: beim Mounten initial setzen und alle 60s neu prüfen
+onMounted(() => {
+  isNightTime.value = calcIsNight()
+  setInterval(() => {
+    isNightTime.value = calcIsNight()
+  }, 60_000)
+})
 
 const emit = defineEmits<{
   (e: 'open-project', slide: Slide): void
@@ -281,6 +297,8 @@ function markVideoBroken(slide: Slide, index: number) {
 const firstVideoSlide: Slide = {
   id: 'intro-video',
   video: '/videos/intro.mp4',
+  // Nacht-Variante
+  nightPreviewVideo: '/videos/background-night.mp4',
   href: undefined,
   titleFontClass: 'font-intro' // Beispiel: eigene Font-Klasse für den Intro-Titel
 }
@@ -316,15 +334,19 @@ const displaySlides = computed<Slide[]>(() => {
     : props.slides
 
   const enrichedBaseSlides = baseSlides.map((slide) => {
-    let updated = { ...slide }
+    let updated: Slide = { ...slide }
 
     // 1) Preview-Video aus id ableiten, falls noch keins gesetzt
     if (!updated.previewVideo && updated.id) {
       updated.previewVideo = `/videos/${String(updated.id)}-cover.mp4`
     }
 
-    // 2) Wenn es *trotzdem* kein Video gibt, ein Preview-Bild aus id ableiten
-    //    (nur wenn noch kein Bild/previewImage gesetzt ist)
+    // 2) Nacht-Preview automatisch ableiten, falls du nichts explizit setzt
+    if (!updated.nightPreviewVideo && updated.id) {
+      updated.nightPreviewVideo = `/videos/${String(updated.id)}-cover-night.mp4`
+    }
+
+    // 3) Wenn es *trotzdem* kein Video gibt, ein Preview-Bild aus id ableiten
     if (
       !updated.previewVideo &&
       !updated.video &&
@@ -332,11 +354,10 @@ const displaySlides = computed<Slide[]>(() => {
       !updated.image &&
       updated.id
     ) {
-      // Passe das Pattern bei Bedarf an (.png, anderer Pfad, ...)
       updated.previewImage = `/images/${String(updated.id)}-cover.jpg`
     }
 
-    // 3) Pro-Projekt-Font-Klasse aus Mapping setzen, falls noch nicht vorhanden
+    // 4) Pro-Projekt-Font-Klasse aus Mapping setzen, falls noch nicht vorhanden
     if (!updated.titleFontClass && updated.id) {
       const key = String(updated.id)
       if (titleFontById[key]) {
@@ -344,53 +365,56 @@ const displaySlides = computed<Slide[]>(() => {
       }
     }
 
-    // FIX 1: falls title fehlt, nimm id als Titel (damit du überhaupt Text siehst)
+    // 5) falls title fehlt, nimm id als Titel
     if (!updated.title && updated.id) {
       updated.title = String(updated.id)
     }
 
-    // FIX 2: Font-Mapping: erst id, sonst title als Key benutzen
-    if (!updated.titleFontClass) {
-      const key =
-        updated.id ? String(updated.id)
-        : updated.title ? String(updated.title)
-        : ''
-
-      if (key && titleFontById[key]) {
-        updated.titleFontClass = titleFontById[key]
-      }
-    }
-
-    // NEU 1: Individuellen Titel setzen (displayTitle > title > id)
+    // 6) Individuellen Titel setzen (displayTitle > title > id)
     if (updated.displayTitle) updated.title = updated.displayTitle
     if (!updated.title && updated.id) updated.title = String(updated.id)
 
-    // NEU 2: Font-Key priorisieren (titleFontKey > titleFontClass > Mapping)
+    // 7) Font-Key priorisieren (titleFontKey > titleFontClass > Mapping)
     if (!updated.titleFontClass && updated.titleFontKey) {
       updated.titleFontClass = fontClassByKey[updated.titleFontKey]
     }
 
-    // bestehend: Mapping über id/title als fallback
     if (!updated.titleFontClass) {
       const key =
         updated.id ? String(updated.id)
         : updated.title ? String(updated.title)
         : ''
-
       if (key && titleFontById[key]) {
         updated.titleFontClass = titleFontById[key]
       }
     }
 
-    // WICHTIG: titleFontKey soll Priorität haben (damit Works gezielt steuerbar sind)
     if (updated.titleFontKey) {
       updated.titleFontClass = fontClassByKey[updated.titleFontKey] || updated.titleFontClass
+    }
+
+    // 8) zum Schluss – je nach Zeit Tag- oder Nacht-Preview verwenden
+    if (isNightTime.value && updated.nightPreviewVideo) {
+      updated.previewVideo = updated.nightPreviewVideo
     }
 
     return updated
   })
 
-  return [firstVideoSlide, ...enrichedBaseSlides]
+  // Intro-Slide Tag/Nacht-abhängig behandeln
+  const introSlide: Slide = (() => {
+    const s: Slide = { ...firstVideoSlide }
+    if (isNightTime.value && s.nightPreviewVideo) {
+      s.previewVideo = s.nightPreviewVideo
+      s.video = s.nightPreviewVideo
+    } else {
+      s.previewVideo = s.previewVideo ?? s.video ?? null
+      s.video = '/videos/intro.mp4'
+    }
+    return s
+  })()
+
+  return [introSlide, ...enrichedBaseSlides]
 })
 
 // Einmalig: zeige, welche Dateien der Carousel wirklich erwartet
@@ -536,7 +560,33 @@ function goToCv() {
   text-orientation: mixed; /* alternativ: upright, falls du Buchstaben einzeln aufrecht willst */
 }
 
-.center-text-shadow {
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+/* Titel immer mittig ausrichten, auch wenn andere Klassen etwas anderes setzen */
+.title-center {
+  text-align: center !important;
+}
+
+/* schwarze Titel, auch wenn gemischte Fonts benutzt werden */
+.title-dark {
+  color: #000;
+}
+
+.title-link-dark {
+  color: #000;
+}
+
+.title-link-dark:hover {
+  color: #000;
+}
+
+@media (min-width: 768px) {
+  /* Desktop: Titel etwas kleiner und weiter unten */
+  h2.title-center {
+    font-size: 4.5rem; /* etwas unterhalb von Tailwind text-9xl (~8rem) */
+  }
+
+  /* optional: zusätzlicher top-offset, falls noch mehr Abstand gewünscht ist */
+  .absolute.inset-0.flex.items-start.justify-center.pt-32.md\:pt-40 {
+    padding-top: 11rem; /* feintuning für Desktop */
+  }
 }
 </style>

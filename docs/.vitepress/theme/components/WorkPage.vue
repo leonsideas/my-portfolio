@@ -11,7 +11,8 @@
     image: string | null
     video: string | null
     component: any
-    images: string[]        // NEU: zusätzliche Bilder pro Projekt
+    images: string[]
+    videos: string[]      // NEU: zusätzliche Videos pro Projekt
   }
   
   type OverlayFadeMode = 'fade-out' | 'fade-in' | 'none'
@@ -19,6 +20,10 @@
 
   // NEU: falls true -> kein schwarzer Fade-Layer rendern
   const overlayFadeDisabled = ref(false)
+  // NEU: sagt, ob nach Ende der Transition ein Hard-Reload auf targetRoute gemacht werden soll
+  const overlayUseHardReload = ref(false)
+  // NEU: Spezialfall – Transition_up zurück zum Home-Carousel
+  const overlayHomeToRoot = ref(false)
   
   // 1) Markdown as Vue components
   const markdownModules = import.meta.glob('../../../works/**/index.md', {
@@ -37,7 +42,7 @@
     import: 'default'
   })
   
-  // Videos
+  // Videos (Cover)
   const videoFiles = import.meta.glob('../../../works/**/cover.{mp4,webm,ogg}', {
     eager: true,
     import: 'default'
@@ -45,6 +50,12 @@
 
   // NEU: beliebige Projektbilder, z.B. works/<slug>/images/foo.jpg
   const projectImageFiles = import.meta.glob('../../../works/**/*.{jpg,jpeg,png,webp,gif}', {
+    eager: true,
+    import: 'default'
+  })
+
+  // NEU: beliebige Projekt-Videos, z.B. works/<slug>/videos/*.mp4
+  const projectVideoFiles = import.meta.glob('../../../works/**/*.{mp4,webm,ogg}', {
     eager: true,
     import: 'default'
   })
@@ -76,6 +87,13 @@
       .map(k => projectImageFiles[k] as string)
       .sort()
 
+    // NEU: alle Videos im Ordner außer cover.*
+    const projectVideos: string[] = Object.keys(projectVideoFiles)
+      .filter(k => k.startsWith(folder))
+      .filter(k => !/\/cover\.(mp4|webm|ogg)$/i.test(k))
+      .map(k => projectVideoFiles[k] as string)
+      .sort()
+
     // NEU: fallback -> wenn keine images/ vorhanden, nimm cover.*
     const images = projectImages.length ? projectImages : (coverImage ? [coverImage] : [])
 
@@ -90,7 +108,8 @@
       image: coverImage,
       video: videoKey ? (videoFiles[videoKey] as string) : null,
       component: mod?.default || null,
-      images
+      images,
+      videos: projectVideos   // NEU
     })
   }
   
@@ -138,12 +157,21 @@
       overlayFadingOut.value = false
       overlayVideoSrc.value = null
       overlayVideoReady.value = false
-    
+
+      const hardReload = overlayUseHardReload.value
+
       overlayTargetRoute.value = null
       overlayTargetSlug.value = null
-      // WICHTIG: contentVisible NICHT hier auf true setzen,
-      // das macht handleOverlayEnded NACH dem Videoende.
-      router.go(withBase(targetRoute))
+      overlayUseHardReload.value = false
+
+      if (hardReload) {
+        // Hard-Reload: verhindert, dass WorkPage noch einmal kurz gerendert wird
+        if (typeof window !== 'undefined') {
+          window.location.href = withBase(targetRoute)
+        }
+      } else {
+        router.go(withBase(targetRoute))
+      }
       return
     }
   
@@ -304,6 +332,8 @@
 
     overlayFadeMode.value = fadeMode
     overlayFadeDisabled.value = fadeMode === 'none'
+    // Standard: kein Hard-Reload, kann bei Bedarf aktiviert werden
+    overlayUseHardReload.value = false
 
     // wichtig: bei "none" den Fade-State neutral halten
     overlayFadingOut.value = false
@@ -311,15 +341,31 @@
     overlayVideoReady.value = false
     overlayVideoSrc.value = videoSrc
     overlayTargetSlug.value = null
-    overlayTargetRoute.value = routePath
-    overlayVisible.value = true
 
+    // WICHTIG:
+    // Wenn wir explizit "zur Startseite" (Leon-Albers) wollen, nutzen wir
+    // NICHT overlayTargetRoute, damit handleOverlayEnded in den Spezialfall gehen kann.
+    overlayTargetRoute.value = overlayHomeToRoot.value ? null : routePath
+
+    overlayVisible.value = true
     contentVisible.value = false
 
     // NONE: KEIN kurzer Cut. Nur Safety-Fallback.
     if (fadeMode === 'none') {
       overlayAfterFadeTimer = window.setTimeout(() => {
         clearOverlayFadeTimer()
+
+        // Safety-Fallback:
+        // Falls das Video nie endet, trotzdem das gewünschte Ziel erreichen.
+        if (overlayHomeToRoot.value && typeof window !== 'undefined') {
+          const target = routePath || '/'
+          overlayHomeToRoot.value = false
+          window.location.href = withBase(target)
+          return
+        }
+
+        // Safety für alle anderen Routen
+        overlayUseHardReload.value = true
         showWorkPageFromOverlay()
         contentVisible.value = true
         overlayFadeDisabled.value = false
@@ -343,11 +389,35 @@
   async function handleOverlayEnded() {
     if (!overlayVisible.value) return
     clearOverlayFadeTimer()
+
+    // NEU: absoluter Spezialfall – zurück zum Root-Carousel (Leon-Albers-Klick)
+    if (overlayHomeToRoot.value && typeof window !== 'undefined') {
+      overlayHomeToRoot.value = false
+
+      // NICHTS mehr an WorkPage-State ändern, direkt Hard-Reload:
+      window.location.href = withBase('/')
+      return
+    }
   
     // NEU: wenn Route-Ziel gesetzt, nach Fade dorthin
     if (overlayTargetRoute.value) {
       // NEU: wenn fade disabled -> ohne warten sofort navigieren
       if (overlayFadeDisabled.value) {
+        // wenn Hard-Reload gewünscht, hier direkt voll neu laden
+        if (overlayUseHardReload.value && typeof window !== 'undefined') {
+          const targetRoute = overlayTargetRoute.value
+          overlayVisible.value = false
+          overlayFadingOut.value = false
+          overlayVideoSrc.value = null
+          overlayVideoReady.value = false
+          overlayTargetRoute.value = null
+          overlayTargetSlug.value = null
+          overlayUseHardReload.value = false
+
+          window.location.href = withBase(targetRoute || '/')
+          return
+        }
+
         showWorkPageFromOverlay()
         contentVisible.value = true
         overlayFadeDisabled.value = false
@@ -439,14 +509,72 @@
 
     if (overlayVisible.value) return
 
-    // Home bleibt '/', About soll auf about.html
-    const targetRoute = isHome ? '/' : '/about.html'
+    // Beim Klick auf Brand/Home/Leon-Albers:
+    // wir wollen nach Ende von Transition_up direkt mit Hard-Reload nach "/"
+    const targetRoute = '/'
+    overlayUseHardReload.value = true
+    overlayHomeToRoot.value = true
     playTransitionToRoute(targetRoute, withBase('/Transition_up.mp4'), 'none')
+  }
+
+  // NEU: Index/Helfer für Navigation
+  const currentIndex = computed(() =>
+    cards.value.findIndex(card => card.slug === currentSlug.value)
+  )
+  const hasPrev = computed(() => currentIndex.value > 0)
+  const hasNext = computed(() => currentIndex.value >= 0 && currentIndex.value < cards.value.length - 1)
+  const prevSlug = computed(() => (hasPrev.value ? cards.value[currentIndex.value - 1].slug : undefined))
+  const nextSlug = computed(() => (hasNext.value ? cards.value[currentIndex.value + 1].slug : undefined))
+
+  // NEU: einfache Prev/Nächste-Helfer
+  function goToPrev() {
+    if (!hasPrev.value || !prevSlug.value) return
+    selectCard(prevSlug.value, `/works/?id=${encodeURIComponent(prevSlug.value)}`)
+  }
+
+  function goToNext() {
+    if (!hasNext.value || !nextSlug.value) return
+    selectCard(nextSlug.value, `/works/?id=${encodeURIComponent(nextSlug.value)}`)
+  }
+
+  // NEU: Touch-Swipe-Handling auf Bildbereich
+  const swipeStartX = ref<number | null>(null)
+  const swipeStartY = ref<number | null>(null)
+
+  function onImagesTouchStart(e: TouchEvent) {
+    const t = e.touches[0]
+    swipeStartX.value = t.clientX
+    swipeStartY.value = t.clientY
+  }
+
+  function onImagesTouchEnd(e: TouchEvent) {
+    if (swipeStartX.value == null || swipeStartY.value == null) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - swipeStartX.value
+    const dy = t.clientY - swipeStartY.value
+
+    swipeStartX.value = null
+    swipeStartY.value = null
+
+    // Vertikal stärker als horizontal -> als Scroll interpretieren
+    if (Math.abs(dy) > Math.abs(dx)) return
+
+    const threshold = 50 // px
+    if (dx < -threshold && hasNext.value) {
+      // nach links gewischt -> nächstes Projekt
+      goToNext()
+    } else if (dx > threshold && hasPrev.value) {
+      // nach rechts gewischt -> vorheriges Projekt
+      goToPrev()
+    }
   }
 </script>
 
 <template>
-  <div class="h-screen w-full bg-black workpage-root overflow-hidden">
+  <!-- Voller Screen -->
+  <!-- ÄNDERUNG: mobil scroll erlauben (overflow-y-auto), desktop weiterhin kein globales scroll (lg:overflow-hidden) -->
+  <div class="h-screen w-full bg-black workpage-root overflow-y-auto lg:overflow-hidden">
+    <!-- WICHTIG: flex + h-full + min-h-0, damit Kinder schrumpfen dürfen -->
     <div class="flex flex-col h-full min-h-0">
       <!-- Overlay mit Transition-Video -->
       <div
@@ -479,58 +607,127 @@
         />
       </div>
 
-      <!-- Hauptinhalt -->
+      <!-- Hauptinhalt unterhalb der Navbar -->
       <section
         v-if="contentVisible"
-        class="flex-1 min-h-0 w-full bg-black text-gray-100 workpage-content pt-16"
+        class="flex-1 min-h-0 w-full bg-black text-gray-100 workpage-content"
       >
-        <div class="px-6 pb-6 h-full min-h-0">
+        <!-- Navbar-Abstand per Padding oben, aber trotzdem volle Höhe -->
+        <!-- ÄNDERUNG: auf mobilen Geräten darf die Seite normal scrollen -->
+        <div class="pt-16 px-6 pb-2 h-full flex flex-col lg:min-h-0">
           <Transition name="content-fade" mode="out-in" appear>
-            <div v-if="currentCard" :key="contentKey" class="h-full min-h-0">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start h-full min-h-0">
-                <!-- Text: eigener Scroll -->
-                <div class="min-h-0 h-full overflow-y-auto pr-2">
-                  <div class="text-left">
+            <!-- Ganze Karte: nutzt restliche Höhe -->
+            <!-- ÄNDERUNG: auf mobil kein min-h-0 + flex-1, sonst vollflächiger Container -->
+            <div v-if="currentCard" :key="contentKey" class="flex flex-col lg:flex-1 lg:min-h-0">
+              <!-- Buttons oben, feste Höhe -->
+              <div
+                class="flex items-center justify-between gap-4 mb-4 text-xs md:text-sm text-gray-400 shrink-0"
+              >
+                <button
+                  v-if="hasPrev"
+                  type="button"
+                  class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10"
+                  @click="goToPrev"
+                >
+                  <span>‹</span>
+                  <span>Vorheriges Projekt</span>
+                </button>
+
+                <button
+                  v-if="hasNext"
+                  type="button"
+                  class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10"
+                  @click="goToNext"
+                >
+                  <span>Nächstes Projekt</span>
+                  <span>›</span>
+                </button>
+              </div>
+
+              <!-- Grid-Bereich: 
+                   - mobil: normales Flow-Layout, eine Spalte, ein Scrollbereich
+                   - desktop (lg): 2 Spalten, eigener Scroll je Spalte -->
+              <div class="lg:flex-1 lg:min-h-0">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start lg:h-full lg:min-h-0">
+                  <!-- Textspalte -->
+                  <div class="text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-2">
                     <component
                       v-if="currentCard.component"
                       :is="currentCard.component"
                       class="prose prose-invert prose-base md:prose-lg max-w-none text-left"
                     />
                   </div>
-                </div>
 
-                <!-- Bilder: eigener Scroll -->
-                <div class="min-h-0 h-full overflow-y-auto pl-2">
-                  <div class="space-y-4">
-                    <div
-                      v-if="currentCard.images && currentCard.images.length"
-                      class="grid grid-cols-1 gap-4"
-                    >
-                      <figure
-                        v-for="(img, idx) in currentCard.images"
-                        :key="img + '-' + idx"
-                        class="w-full overflow-hidden rounded-lg bg-neutral-900"
+                  <!-- Medien-Spalte -->
+                  <div
+                    class="mt-8 lg:mt-0 lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pl-2 relative"
+                    @touchstart.passive="onImagesTouchStart"
+                    @touchend.passive="onImagesTouchEnd"
+                  >
+                    <div class="space-y-6">
+                      <!-- Bilder -->
+                      <div
+                        v-if="currentCard.images && currentCard.images.length"
+                        class="grid grid-cols-1 gap-4"
                       >
-                        <img
-                          :src="img"
-                          :alt="currentCard.title + ' – Bild ' + (idx + 1)"
-                          class="w-full h-auto object-contain"
-                          loading="lazy"
-                        />
-                      </figure>
-                    </div>
-                    <div v-else class="text-sm text-gray-500">
-                      Für dieses Projekt sind noch keine Bilder hinterlegt.
+                        <figure
+                          v-for="(img, idx) in currentCard.images"
+                          :key="img + '-' + idx"
+                          class="w-full overflow-hidden rounded-lg bg-neutral-900"
+                        >
+                          <img
+                            :src="img"
+                            :alt="currentCard.title + ' – Bild ' + (idx + 1)"
+                            class="w-full h-auto object-contain"
+                            loading="lazy"
+                          />
+                        </figure>
+                      </div>
+
+                      <!-- Videos (zusätzliche Projektvideos) -->
+                      <div
+                        v-if="currentCard.videos && currentCard.videos.length"
+                        class="grid grid-cols-1 gap-4"
+                      >
+                        <figure
+                          v-for="(vid, vIdx) in currentCard.videos"
+                          :key="vid + '-' + vIdx"
+                          class="w-full overflow-hidden rounded-lg bg-neutral-900"
+                        >
+                          <video
+                            :src="vid"
+                            class="w-full h-auto"
+                            controls
+                            playsinline
+                            preload="metadata"
+                          />
+                        </figure>
+                      </div>
+
+                      <!-- Fallback, wenn weder Bilder noch Videos vorhanden -->
+                      <div
+                        v-if="(!currentCard.images || !currentCard.images.length) &&
+                             (!currentCard.videos || !currentCard.videos.length)"
+                        class="text-sm text-gray-500"
+                      >
+                        Für dieses Projekt sind noch keine Medien hinterlegt.
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- Fallback, falls kein Projekt für currentSlug gefunden wurde -->
             <div v-else :key="'not-found'" class="text-gray-300">
               Projekt nicht gefunden.
             </div>
           </Transition>
+
+          <!-- Kleiner Footer unten -->
+          <footer class="mt-2 pt-2 border-t border-white/10 text-xs text-gray-500 shrink-0">
+            © {{ new Date().getFullYear() }} Leon Albers
+          </footer>
         </div>
       </section>
     </div>
@@ -538,5 +735,10 @@
 </template>
 
 <style scoped>
-/* ...existing code... (deine content-fade styles) ...existing code... */
+/* ...existing code... */
+
+/* optional, aber hilfreich für iOS „momentum scrolling“ */
+.workpage-root {
+  -webkit-overflow-scrolling: touch;
+}
 </style>

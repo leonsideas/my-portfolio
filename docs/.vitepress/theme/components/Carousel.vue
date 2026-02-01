@@ -650,25 +650,22 @@ h2 {
 /* 🔹 Mobile: spezifisch den "Projekt öffnen"-Button anpassen */
 @media (max-width: 639px) {
   .carousel button.absolute {
-    bottom: 12vh;                 /* etwas höher über der Kante */
+    bottom: 12vh;
     left: 50%;
     transform: translateX(-50%);
-    width: 70vw;                  /* 70% der Bildschirmbreite */
+    width: 70vw;
     max-width: 320px;
     font-size: 0.85rem;
     padding-inline: 1.5rem;
   }
-}
 
-/* 🔹 Mobile: Overlay & Titel größer und mittiger */
-@media (max-width: 639px) {
   .carousel .absolute.inset-0.flex.items-start.justify-center {
-    padding-top: 20vh;            /* Titel eher mittig platzieren */
+    padding-top: 20vh;
     padding-inline: 1.5rem;
   }
 
   .carousel h2 {
-    font-size: 2.4rem;            /* größer als vorher */
+    font-size: 2.4rem;
     line-height: 1.1;
     padding: 0;
     word-wrap: break-word;

@@ -78,29 +78,26 @@
     text-align: center;
   }
 
-  /* 🔹 Neu: nur Desktop – Abstand zwischen Buttons */
   @media (min-width: 1024px) {
     .my-nav__list {
       justify-content: center;
-      gap: 1.5rem; /* Abstand zwischen den Pills */
+      gap: 1.5rem;
     }
 
     .my-nav__item {
-      flex: 0; /* Items werden so breit wie ihre Pills */
+      flex: 0;
     }
 
     .nav-pill {
-      width: auto; /* Desktop: Breite nur nach Inhalt */
+      width: auto;
     }
   }
 
-  /* Link font */
   .nav-link-font {
     font-size: 0.875rem;
     font-weight: 500;
   }
   
-  /* Default Pills: schwarz */
   .nav-pill {
     display: inline-flex;
     align-items: center;
@@ -118,7 +115,6 @@
   
     transition: border-color 200ms ease, color 200ms ease;
 
-    /* 🔹 Neu: überall gleiche Höhe/Breite + kein Zeilenumbruch */
     white-space: nowrap;
     width: 100%;
     max-width: 100%;
@@ -135,8 +131,30 @@
       width: 100%;
       justify-content: center;
       gap: 0.5rem;
-      flex-wrap: nowrap;       /* alles in einer Zeile */
+      flex-wrap: nowrap;
     }
 
     .my-nav__item {
-      flex: 1 1 0;             /* alle bekommen gleich viel
+      flex: 1 1 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-pill {
+      max-width: 100%;
+      white-space: normal;
+      padding: 0.4rem 0.5rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+    }
+  }
+
+  .nav-pill:hover {
+    border-color: rgba(255, 255, 255, 1);
+    color: rgba(255, 255, 255, 1);
+  }
+
+  .nav-blend {
+    mix-blend-mode: difference;
+  }
+</style>

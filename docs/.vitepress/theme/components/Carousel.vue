@@ -25,7 +25,7 @@
             <button
               v-if="index !== 0"
               type="button"
-              class="absolute bottom-10 left-1/2 -translate-x-1/2
+              class="absolute bottom-10 left-1/2
                      px-6 py-2 z-10 cursor-pointer
                      flex items-center justify-center
                      bg-black/30 hover:bg-black/60
@@ -680,5 +680,12 @@ h2 {
     max-width: 90vw;
     margin: 0 auto;
   }
+}
+
+/* Grundverhalten: Button als Block in der Mitte falls absolute nicht greift */
+.project-open-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

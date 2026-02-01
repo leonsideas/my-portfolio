@@ -666,4 +666,32 @@ h2 {
     word-wrap: break-word; /* Zeilenumbruch bei langen Wörtern */
   }
 }
+
+/* 🔹 Mobile: "Projekt öffnen"-Button mittig und sichtbar */
+@media (max-width: 639px) {
+  button {
+    bottom: 10%; /* Abstand vom unteren Rand */
+    left: 50%;
+    transform: translateX(-50%); /* Zentrieren */
+    width: 80%; /* Breite auf 80% des Bildschirms begrenzen */
+    font-size: 0.875rem; /* Etwas größere Schriftgröße */
+  }
+}
+
+/* 🔹 Mobile: Vorschauüberschriften größer und mittig */
+@media (max-width: 639px) {
+  h2 {
+    font-size: 2rem; /* Größere Schriftgröße */
+    padding: 0 1.5rem; /* Mehr Innenabstand für bessere Lesbarkeit */
+    text-align: center; /* Überschriften zentrieren */
+    word-wrap: break-word; /* Zeilenumbruch bei langen Wörtern */
+  }
+}
+
+/* 🔹 Viewport-Anpassung */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* Kein horizontales Scrollen */
+}
 </style>

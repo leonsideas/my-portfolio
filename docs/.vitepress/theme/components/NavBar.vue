@@ -141,7 +141,8 @@
   /* 🔹 Mobile: Navigation fixieren und zentrieren */
   @media (max-width: 639px) {
     .my-nav__list {
-      flex-wrap: wrap; /* Navigationselemente umbrechen */
+      flex-wrap: nowrap; /* Kein Umbruch der Navigationselemente */
+      overflow-x: auto; /* Horizontal scrollen, falls nötig */
       gap: 0.5rem; /* Abstand zwischen den Elementen */
       justify-content: center; /* Zentrieren der Elemente */
     }

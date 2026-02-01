@@ -137,6 +137,24 @@
       min-height: 2.5rem; /* gleiche Höhe */
     }
   }
+
+  /* 🔹 Mobile: Navigation fixieren und zentrieren */
+  @media (max-width: 639px) {
+    .my-nav__list {
+      flex-wrap: wrap; /* Navigationselemente umbrechen */
+      gap: 0.5rem; /* Abstand zwischen den Elementen */
+      justify-content: center; /* Zentrieren der Elemente */
+    }
+
+    .my-nav__item {
+      flex: 0; /* Elemente werden nur so breit wie nötig */
+    }
+
+    .nav-pill {
+      padding: 0.3rem 0.7rem; /* Kleinere Abstände für Pills */
+      font-size: 0.75rem; /* Kleinere Schriftgröße */
+    }
+  }
   
   .nav-pill:hover {
     border-color: rgba(255, 255, 255, 1);

@@ -646,4 +646,24 @@ h2 {
     padding-top: 11rem; /* feintuning für Desktop */
   }
 }
+
+/* 🔹 Mobile: "Projekt öffnen"-Button anpassen */
+@media (max-width: 639px) {
+  button {
+    bottom: 5%; /* Abstand vom unteren Rand */
+    left: 50%;
+    transform: translateX(-50%); /* Zentrieren */
+    width: 90%; /* Breite auf 90% des Bildschirms begrenzen */
+    font-size: 0.75rem; /* Kleinere Schriftgröße */
+  }
+}
+
+/* 🔹 Mobile: Vorschauüberschriften anpassen */
+@media (max-width: 639px) {
+  h2 {
+    font-size: 1.5rem; /* Kleinere Schriftgröße */
+    padding: 0 1rem; /* Innenabstand für bessere Lesbarkeit */
+    word-wrap: break-word; /* Zeilenumbruch bei langen Wörtern */
+  }
+}
 </style>

@@ -88,6 +88,15 @@
   font-family: "Font05", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
 }
 
+/* @font-face für die Übergangsobjekte-Font */
+@font-face {
+  font-family: "Uebergangsobjekte";
+  src: url("/fonts/Uebergangsobjekte.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Utility-Klassen, die du im Carousel nutzt */
 .font-migration {
   font-family: "Migration", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
@@ -130,4 +139,9 @@
 
 .font-font05 {
   font-family: "Font05", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+/* NEU: Übergangsobjekte – Utility-Klasse (Font-Face ist in style.css) */
+.font-uebergangsobjekte {
+  font-family: "Uebergangsobjekte", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
 }

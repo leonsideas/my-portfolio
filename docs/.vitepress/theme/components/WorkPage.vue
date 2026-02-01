@@ -1,7 +1,14 @@
 <script setup lang="ts">
   import { withBase, useRouter } from 'vitepress'
   import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
-  
+
+  type CardVideo = {
+    // komplette Embed-URL, z.B. "https://www.youtube.com/embed/XXXXXXXXXXX"
+    url: string
+    // optionaler Titel
+    title?: string
+  }
+
   type Card = {
     slug: string
     title: string
@@ -12,9 +19,9 @@
     video: string | null
     component: any
     images: string[]
-    videos: string[]      // NEU: zusätzliche Videos pro Projekt
+    videos: CardVideo[]    // jetzt YouTube-Infos statt lokaler Dateien
   }
-  
+
   type OverlayFadeMode = 'fade-out' | 'fade-in' | 'none'
   const overlayFadeMode = ref<OverlayFadeMode>('fade-out')
 
@@ -24,6 +31,10 @@
   const overlayUseHardReload = ref(false)
   // NEU: Spezialfall – Transition_up zurück zum Home-Carousel
   const overlayHomeToRoot = ref(false)
+  
+  // NEU: Standard‑Seitentitel merken, damit wir ihn wiederherstellen können
+  const defaultDocumentTitle =
+    typeof document !== 'undefined' ? document.title : 'Leon Albers | Portfolio'
   
   // 1) Markdown as Vue components
   const markdownModules = import.meta.glob('../../../works/**/index.md', {
@@ -55,10 +66,11 @@
   })
 
   // NEU: beliebige Projekt-Videos, z.B. works/<slug>/videos/*.mp4
-  const projectVideoFiles = import.meta.glob('../../../works/**/*.{mp4,webm,ogg}', {
-    eager: true,
-    import: 'default'
-  })
+  // -> nicht mehr benötigt, wenn alles über YouTube läuft
+  // const projectVideoFiles = import.meta.glob('../../../works/**/*.{mp4,webm,ogg}', {
+  //   eager: true,
+  //   import: 'default'
+  // })
   
   const cards = ref<Card[]>([])
   
@@ -87,17 +99,29 @@
       .map(k => projectImageFiles[k] as string)
       .sort()
 
-    // NEU: alle Videos im Ordner außer cover.*
-    const projectVideos: string[] = Object.keys(projectVideoFiles)
-      .filter(k => k.startsWith(folder))
-      .filter(k => !/\/cover\.(mp4|webm|ogg)$/i.test(k))
-      .map(k => projectVideoFiles[k] as string)
-      .sort()
+    // NEU: alle Videos im Ordner außer cover.* -> entfällt bei YouTube-Umstellung
+    // const projectVideos: string[] = Object.keys(projectVideoFiles)
+    //   .filter(k => k.startsWith(folder))
+    //   .filter(k => !/\/cover\.(mp4|webm|ogg)$/i.test(k))
+    //   .map(k => projectVideoFiles[k] as string)
+    //   .sort()
 
-    // NEU: fallback -> wenn keine images/ vorhanden, nimm cover.*
     const images = projectImages.length ? projectImages : (coverImage ? [coverImage] : [])
 
     const mod = markdownModules[path] as any
+
+    // NEU: YouTube-Links aus dem Frontmatter lesen (Array von Strings oder Objekten)
+    const fm = mod?.frontmatter || {}
+    const fmVideos = Array.isArray(fm.videos) ? fm.videos : []
+    const youtubeVideos: CardVideo[] = fmVideos.map((v: any) => {
+      if (typeof v === 'string') {
+        return { url: v }
+      }
+      if (v && typeof v.url === 'string') {
+        return { url: v.url, title: v.title }
+      }
+      return null
+    }).filter(Boolean) as CardVideo[]
   
     cards.value.push({
       slug,
@@ -109,7 +133,7 @@
       video: videoKey ? (videoFiles[videoKey] as string) : null,
       component: mod?.default || null,
       images,
-      videos: projectVideos   // NEU
+      videos: youtubeVideos  // jetzt YouTube-Infos statt lokaler Dateien
     })
   }
   
@@ -195,6 +219,8 @@
       document.documentElement.classList.remove(WORKPAGE_CLASS)
       document.removeEventListener('pointerdown', interceptHomeNav, true)
       document.removeEventListener('click', interceptHomeNav, true)
+      // NEU: ursprünglichen Titel wiederherstellen
+      document.title = defaultDocumentTitle
     }
     clearOverlayFadeTimer()
   })
@@ -205,6 +231,8 @@
   onMounted(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.classList.add(WORKPAGE_CLASS)
+      // NEU: Tab‑Titel für WorkPage setzen
+      document.title = 'Projects | Leon Albers'
     }
   
     // initialer Slug aus URL
@@ -467,6 +495,11 @@
   const contentKey = ref(0)
   watch(currentSlug, () => {
     contentKey.value += 1
+
+    // NEU: bei jedem Projektwechsel Tab‑Titel sicher auf „Projects | Leon Albers“ setzen
+    if (typeof document !== 'undefined') {
+      document.title = 'Projects | Leon Albers'
+    }
   })
   
   // NEU: Click-Interceptor für den Home-/About-Link (Navbar)
@@ -522,9 +555,15 @@
     cards.value.findIndex(card => card.slug === currentSlug.value)
   )
   const hasPrev = computed(() => currentIndex.value > 0)
-  const hasNext = computed(() => currentIndex.value >= 0 && currentIndex.value < cards.value.length - 1)
-  const prevSlug = computed(() => (hasPrev.value ? cards.value[currentIndex.value - 1].slug : undefined))
-  const nextSlug = computed(() => (hasNext.value ? cards.value[currentIndex.value + 1].slug : undefined))
+  const hasNext = computed(() =>
+    currentIndex.value >= 0 && currentIndex.value < cards.value.length - 1
+  )
+  const prevSlug = computed(() =>
+    hasPrev.value ? cards.value[currentIndex.value - 1].slug : undefined
+  )
+  const nextSlug = computed(() =>
+    hasNext.value ? cards.value[currentIndex.value + 1].slug : undefined
+  )
 
   // NEU: einfache Prev/Nächste-Helfer
   function goToPrev() {
@@ -568,12 +607,23 @@
       goToPrev()
     }
   }
+
+  // NEU: Hilfs-URL für Hintergrundbild – Bild liegt in /public/erde.jpg
+  const backgroundImage = withBase('/erde.jpg')
 </script>
 
 <template>
   <!-- Voller Screen -->
-  <!-- ÄNDERUNG: mobil scroll erlauben (overflow-y-auto), desktop weiterhin kein globales scroll (lg:overflow-hidden) -->
-  <div class="h-screen w-full bg-black workpage-root overflow-y-auto lg:overflow-hidden">
+  <!-- ÄNDERUNG: Hintergrundbild + dunkles Overlay -->
+  <div
+    class="h-screen w-full bg-black/80 workpage-root overflow-y-auto lg:overflow-hidden"
+    :style="{
+      backgroundImage: `url(${backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }"
+  >
     <!-- WICHTIG: flex + h-full + min-h-0, damit Kinder schrumpfen dürfen -->
     <div class="flex flex-col h-full min-h-0">
       <!-- Overlay mit Transition-Video -->
@@ -610,7 +660,7 @@
       <!-- Hauptinhalt unterhalb der Navbar -->
       <section
         v-if="contentVisible"
-        class="flex-1 min-h-0 w-full bg-black text-gray-100 workpage-content"
+        class="flex-1 min-h-0 w-full text-gray-100 workpage-content"
       >
         <!-- Navbar-Abstand per Padding oben, aber trotzdem volle Höhe -->
         <!-- ÄNDERUNG: auf mobilen Geräten darf die Seite normal scrollen -->
@@ -623,6 +673,7 @@
               <div
                 class="flex items-center justify-between gap-4 mb-4 text-xs md:text-sm text-gray-400 shrink-0"
               >
+                <!-- Links: nur „Vorheriges Projekt“, aber nicht beim ersten Projekt -->
                 <button
                   v-if="hasPrev"
                   type="button"
@@ -633,10 +684,11 @@
                   <span>Vorheriges Projekt</span>
                 </button>
 
+                <!-- Rechts: nur „Nächstes Projekt“, falls vorhanden -->
                 <button
                   v-if="hasNext"
                   type="button"
-                  class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10"
+                  class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 ml-auto"
                   @click="goToNext"
                 >
                   <span>Nächstes Projekt</span>
@@ -665,7 +717,7 @@
                     @touchend.passive="onImagesTouchEnd"
                   >
                     <div class="space-y-6">
-                      <!-- Bilder -->
+                      <!-- Bilder (oben) -->
                       <div
                         v-if="currentCard.images && currentCard.images.length"
                         class="grid grid-cols-1 gap-4"
@@ -684,23 +736,24 @@
                         </figure>
                       </div>
 
-                      <!-- Videos (zusätzliche Projektvideos) -->
+                      <!-- Videos (darunter) -->
                       <div
                         v-if="currentCard.videos && currentCard.videos.length"
                         class="grid grid-cols-1 gap-4"
                       >
                         <figure
                           v-for="(vid, vIdx) in currentCard.videos"
-                          :key="vid + '-' + vIdx"
-                          class="w-full overflow-hidden rounded-lg bg-neutral-900"
+                          :key="vid.url + '-' + vIdx"
+                          class="w-full overflow-hidden rounded-lg bg-neutral-900 aspect-video"
                         >
-                          <video
-                            :src="vid"
-                            class="w-full h-auto"
-                            controls
-                            playsinline
-                            preload="metadata"
-                          />
+                          <iframe
+                            class="w-full h-full"
+                            :src="vid.url"
+                            title="YouTube video player"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                          ></iframe>
                         </figure>
                       </div>
 
@@ -740,5 +793,11 @@
 /* optional, aber hilfreich für iOS „momentum scrolling“ */
 .workpage-root {
   -webkit-overflow-scrolling: touch;
+
+  /* NEU: Fullscreen-Background fixiert über der gesamten Seite */
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 </style>

@@ -1,19 +1,13 @@
 # Kilma
-## Leon Albers
 
+Mit Kilma habe ich eine Android-App in Unity entwickelt, die sich auf spielerische Weise mit dem Klimawandel auseinandersetzt und vier einzigartige Minispiele umfasst. Anstatt sich auf trockene Fakten oder beängstigende Erzählungen zu stützen, verfolgt Kilma einen anderen Ansatz – mit einem Hauch von schwarzem Humor. Das Ziel? Die Spieler mit einer unbeschwerten Einführung in ein ernstes Thema zu fesseln und gleichzeitig auf unterhaltsame Weise das Bewusstsein zu schärfen.
 
-## Abstract
- Klanggestalten invites users to perceive and share moments of nature in new ways. With the app, they can record their own sounds — such as birdsong, rustling leaves, or rainfall. These personal sound moments can be saved, adjusted, and played back.
+Vier Minispiele, ein dringendes Problem.
 
-The app, developed in Flutter, connects automatically via Bluetooth to the Klanggestalten Lamp, which is powered by an ESP32 microcontroller. Inside the lamp, three LED rings visualize the audio from the app. The sounds are separated into treble, mid, and bass frequencies and displayed as a dynamic light animation.
+Jedes Minispiel repräsentiert einen anderen Aspekt des Klimawandels, verpackt mit Humor, aber verwurzelt in der Realität. Eine Möwe frisst fröhlich Plastik, Delfine tanzen durch Ölteppiche und Schafe versuchen (vergeblich), dem steigenden Wasserstand zu entkommen. Absurd? Auf jeden Fall. Aber hinter jedem lächerlichen Szenario verbirgt sich ein sehr reales Problem. Ein Timer, der die Dinge ins rechte Licht rückt
 
-By touching the body of the lamp, users can physically feel the recordings in the form of vibrations. Both this haptic feedback and the live audio visualization can be individually switched on or off.
-
-The sculptural body of the lamp was 3D-printed and houses all hardware components. Thanks to a simple plug-in system, all parts can be easily assembled and disassembled. The logo and all graphics for the project were also designed by the artist.
-
-Inspired by nature, Klanggestalten acts as a bridge between the outside world and indoor spaces. It aims to foster inclusion by making acoustic experiences accessible across different senses
-
+Während der Nutzer aktiv spielt, läuft im Hintergrund ein Timer, der die in der App verbrachte Zeit aufzeichnet. Aber hier kommt der Clou: Kilma misst nicht nur die Spielzeit, sondern bietet auch eine Alternative. In einem speziellen Bereich können Nutzer sehen, was sie statt zu spielen für die Umwelt hätten tun können. Auch diese Funktion ist humorvoll – denn manchmal kann ein wenig Selbstironie der beste Weckruf sein.
 
 ## Keywords
-Installation, digital art, light art, bird sounds, natural sounds.
+Unity Engine, interactive media, digital storytelling, climate change
 

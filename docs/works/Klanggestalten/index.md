@@ -1,18 +1,21 @@
+---
+title: Klanggestalten
+name: Leon Albers
+excerpt: App, Lampe und Installation, die Naturklänge in Licht- und Vibrationsfeedback übersetzt.
+videos:
+  - https://youtu.be/xenrVK3cvyA   # hier deine echte Embed-URL eintragen
+---
 # Klanggestalten
-## Leon Albers
 
+Klanggestalten lädt Nutzer dazu ein, Momente der Natur auf neue Weise wahrzunehmen und zu teilen. Mit der App können sie ihre eigenen Geräusche aufnehmen – beispielsweise Vogelgezwitscher, raschelnde Blätter oder Regentropfen. Diese persönlichen Klangmomente lassen sich speichern, bearbeiten und wiedergeben.
 
-## Abstract
- Klanggestalten invites users to perceive and share moments of nature in new ways. With the app, they can record their own sounds — such as birdsong, rustling leaves, or rainfall. These personal sound moments can be saved, adjusted, and played back.
+Die in Flutter entwickelte App verbindet sich automatisch über Bluetooth mit der Klanggestalten-Lampe, die von einem ESP32-Mikrocontroller gesteuert wird. Im Inneren der Lampe visualisieren drei LED-Ringe die Audiodaten aus der App. Die Klänge werden in hohe, mittlere und tiefe Frequenzen unterteilt und als dynamische Lichtanimation dargestellt.
 
-The app, developed in Flutter, connects automatically via Bluetooth to the Klanggestalten Lamp, which is powered by an ESP32 microcontroller. Inside the lamp, three LED rings visualize the audio from the app. The sounds are separated into treble, mid, and bass frequencies and displayed as a dynamic light animation.
+Durch Berühren des Lampenkörpers können Nutzer die Aufnahmen in Form von Vibrationen physisch spüren. Sowohl dieses haptische Feedback als auch die Live-Audiovisualisierung können individuell ein- und ausgeschaltet werden.
 
-By touching the body of the lamp, users can physically feel the recordings in the form of vibrations. Both this haptic feedback and the live audio visualization can be individually switched on or off.
+Der skulpturale Körper der Lampe wurde im 3D-Druckverfahren hergestellt und beherbergt alle Hardwarekomponenten. Dank eines einfachen Stecksystems lassen sich alle Teile leicht montieren und demontieren. Das Logo und alle Grafiken für das Projekt wurden ebenfalls vom Künstler entworfen.
 
-The sculptural body of the lamp was 3D-printed and houses all hardware components. Thanks to a simple plug-in system, all parts can be easily assembled and disassembled. The logo and all graphics for the project were also designed by the artist.
-
-Inspired by nature, Klanggestalten acts as a bridge between the outside world and indoor spaces. It aims to foster inclusion by making acoustic experiences accessible across different senses
-
+Inspiriert von der Natur fungiert Klanggestalten als Brücke zwischen der Außenwelt und Innenräumen. Es zielt darauf ab, Inklusion zu fördern, indem es akustische Erfahrungen über verschiedene Sinne zugänglich macht.
 
 ## Keywords
 Installation, digital art, light art, bird sounds, natural sounds.

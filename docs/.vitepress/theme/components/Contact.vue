@@ -13,7 +13,17 @@
     <div class="overlay" aria-hidden="true"></div>
 
     <div class="content">
-      <a class="email" href="mailto:leon-albers@web.de">leon-albers@web.de</a>
+      <div class="links">
+        <a class="email" href="mailto:leon-albers@web.de">leon-albers@web.de</a>
+        <a
+          class="instagram"
+          href="https://www.instagram.com/leonsideas"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          @leonsideas
+        </a>
+      </div>
     </div>
   </section>
 </template>
@@ -85,6 +95,13 @@ const videoSrc = withBase('/videos/contact-bg.mp4')
   text-align: center;
 }
 
+/* Container für Links */
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* Mail-Link */
 .email {
   font-weight: 800;
@@ -97,6 +114,20 @@ const videoSrc = withBase('/videos/contact-bg.mp4')
 }
 
 .email:hover {
+  text-decoration: underline;
+}
+
+/* Instagram-Link */
+.instagram {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: #000;
+  font-size: clamp(28px, 6vw, 72px);
+  line-height: 1.05;
+}
+
+.instagram:hover {
   text-decoration: underline;
 }
 

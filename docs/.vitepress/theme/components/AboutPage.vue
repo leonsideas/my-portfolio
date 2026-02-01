@@ -75,18 +75,23 @@ export default {
     </div>
 
     <!-- Vordergrund-Content -->
-    <div class="relative z-10 h-screen overflow-hidden grid place-items-center px-6 isolate">
-      <p
-        :class="[
-          'text-black mix-blend-difference text-center text-lg sm:text-xl md:text-2xl leading-relaxed max-w-3xl transition-opacity duration-[5000ms] ease-out',
-          showText ? 'opacity-100' : 'opacity-0',
-        ]"
-      >
-        Moin, ich bin Leon, 27 Jahre alt und Gestalter aus Bremen.<br />
-        Aktuell arbeite ich im Bereich Motion Design &amp; Grafik bei der manymany motion GmbH und studiere im fünften Semester Digitale Medien (B.A.) an der Hochschule für Künste Bremen.<br />
-        Bevor’s ins Studium ging, habe ich eine Ausbildung zum Mediengestalter für Konzeption und Visualisierung gemacht.<br />
-        Was mich antreibt? Viel Bewegen. Mit ganz neuen Ideen, Geschichten und immer neuen Wegen.
-      </p>
+    <div
+      class="relative z-10 h-screen overflow-hidden px-6 isolate
+           flex items-start justify-center pt-32 sm:pt-40 md:pt-48"
+    >
+      <div class="w-full max-w-6xl">
+        <p
+          :class="[
+            'text-black mix-blend-difference text-left text-lg sm:text-xl md:text-2xl leading-relaxed transition-opacity duration-[5000ms] ease-out',
+            showText ? 'opacity-100' : 'opacity-0',
+          ]"
+        >
+          Moin, ich bin Leon, 27 Jahre alt und Gestalter aus Bremen.<br />
+          Aktuell arbeite ich im Bereich Motion Design &amp; Grafik bei der manymany motion GmbH und studiere im fünften Semester Digitale Medien (B.A.) an der Hochschule für Künste Bremen.
+          Bevor’s ins Studium ging, habe ich eine Ausbildung zum Mediengestalter für Konzeption und Visualisierung gemacht.
+          Was mich antreibt? Viel Bewegen. Mit ganz neuen Ideen, Geschichten und immer neuen Wegen.
+        </p>
+      </div>
     </div>
   </div>
 </template>

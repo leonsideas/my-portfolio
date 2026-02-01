@@ -3,8 +3,8 @@
   
   const items = [
     { text: 'Leon Albers', link: '/', isHome: true },
-    { text: 'About', link: '/about', class: 'nav-item--about', isAbout: true },
-    { text: 'Contact', link: '/contact' },
+    { text: 'Über mich', link: '/about', class: 'nav-item--about', isAbout: true },
+    { text: 'Kontakt', link: '/contact' },
   ]
 </script>
 
@@ -78,6 +78,22 @@
     text-align: center;
   }
 
+  /* 🔹 Neu: nur Desktop – Abstand zwischen Buttons */
+  @media (min-width: 1024px) {
+    .my-nav__list {
+      justify-content: center;
+      gap: 1.5rem; /* Abstand zwischen den Pills */
+    }
+
+    .my-nav__item {
+      flex: 0; /* Items werden so breit wie ihre Pills */
+    }
+
+    .nav-pill {
+      width: auto; /* Desktop: Breite nur nach Inhalt */
+    }
+  }
+
   /* Link font */
   .nav-link-font {
     font-size: 0.875rem;
@@ -101,6 +117,25 @@
     letter-spacing: 0.25em;
   
     transition: border-color 200ms ease, color 200ms ease;
+
+    /* 🔹 Neu: überall gleiche Höhe/Breite + kein Zeilenumbruch */
+    white-space: nowrap;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 🔹 Neu: Mobile – alle Kästen gleiche minimale Breite/Höhe */
+  @media (max-width: 639px) {
+    .my-nav__item {
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-pill {
+      min-width: 0;
+      min-height: 2.5rem; /* gleiche Höhe */
+    }
   }
   
   .nav-pill:hover {

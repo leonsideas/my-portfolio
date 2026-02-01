@@ -1,19 +1,21 @@
 # Mit KI läufts bei uns!
-## Leon Albers
 
+Wissen zum Leben erwecken mit KI
 
-## Abstract
- Klanggestalten invites users to perceive and share moments of nature in new ways. With the app, they can record their own sounds — such as birdsong, rustling leaves, or rainfall. These personal sound moments can be saved, adjusted, and played back.
+In diesem Projekt habe ich die Möglichkeiten der künstlichen Intelligenz untersucht, um Museen in einem völlig neuen Licht zu präsentieren: als lebendige, moderne und zugängliche Wissenszentren. Das Ergebnis? Musik, Stimmen, Bilder und Videos, die das Lernen im Museum zum Leben erwecken.
 
-The app, developed in Flutter, connects automatically via Bluetooth to the Klanggestalten Lamp, which is powered by an ESP32 microcontroller. Inside the lamp, three LED rings visualize the audio from the app. The sounds are separated into treble, mid, and bass frequencies and displayed as a dynamic light animation.
+Das Herzstück des Projekts ist ein Konzepttrailer, der für das Übersee-Museum entwickelt wurde. Dieser Trailer zeigt eindrucksvoll, wie dynamisch und spannend Wissensvermittlung sein kann – und beweist, dass Museen weit mehr sind als nur alte, verstaubte Hallen.
 
-By touching the body of the lamp, users can physically feel the recordings in the form of vibrations. Both this haptic feedback and the live audio visualization can be individually switched on or off.
+KI trifft auf Social Media – „Mit KI – Läuft bei uns“ 
 
-The sculptural body of the lamp was 3D-printed and houses all hardware components. Thanks to a simple plug-in system, all parts can be easily assembled and disassembled. The logo and all graphics for the project were also designed by the artist.
+Begleitend zum Trailer habe ich eine Social-Media-Kampagne unter dem Motto „Mit KI – Läuft bei uns“ entworfen. In dieser Kampagne werden in kurzen, spannenden Reels (je 30-35 Sekunden) Tiere aus dem Übersee-Museum vorgestellt.
 
-Inspired by nature, Klanggestalten acts as a bridge between the outside world and indoor spaces. It aims to foster inclusion by making acoustic experiences accessible across different senses
+Jedes Reel liefert 3-4 faszinierende Fakten über ein Tier – präsentiert mit Humor, einem lockeren Voiceover und rasanten Schnitten, perfekt optimiert für das Social-Media-Publikum.
+Wissensvermittlung revolutionieren
+
+Diese Filme zeigen, wie moderne Technologie die Art und Weise, wie wir lernen, umgestaltet. Wir brauchen keine Käfige – KI ermöglicht es uns, die natürliche Welt auf fesselnde, interaktive und völlig neue Weise zu erleben.
 
 
 ## Keywords
-Installation, digital art, light art, bird sounds, natural sounds.
+Artificial intelligence, digital education, social media campaign
 

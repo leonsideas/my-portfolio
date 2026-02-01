@@ -1,19 +1,26 @@
 # Migration
-## Leon Albers
 
+In meinem Projekt habe ich analoge und digitale Elemente miteinander verbunden, um ein interaktives Erlebnis zu schaffen. Der zentrale Bestandteil ist ein Tisch mit Motorikschleifen – inspiriert von klassischen Kinderspieltischen. Um diese Assoziation weiter zu verstärken, stehen auf beiden Seiten kleine Kinderstühle, darunter liegt ein bunter Spielteppich. Doch dieser Tisch ist nicht für Kinder gedacht: Er dient als Lernplattform, die sich auf berührende Weise mit dem Thema Migration und den Herausforderungen von Vertriebenen auseinandersetzt.
 
-## Abstract
- Klanggestalten invites users to perceive and share moments of nature in new ways. With the app, they can record their own sounds — such as birdsong, rustling leaves, or rainfall. These personal sound moments can be saved, adjusted, and played back.
+Die Motorikschleifen symbolisieren durch ihre taktile Interaktion Fluchtwege. Bewegliche Holzelemente stehen dabei stellvertretend für Menschen auf der Flucht. In der Mitte des Tisches ist der Projektname „Migration“ eingraviert – per CNC-Fräse gefertigt und anschließend von Hand geschliffen und verfeinert.
 
-The app, developed in Flutter, connects automatically via Bluetooth to the Klanggestalten Lamp, which is powered by an ESP32 microcontroller. Inside the lamp, three LED rings visualize the audio from the app. The sounds are separated into treble, mid, and bass frequencies and displayed as a dynamic light animation.
+Drei Wege – drei Zonen – drei Perspektiven
+Das Projekt fokussiert sich auf drei zentrale Regionen weltweiter 
 
-By touching the body of the lamp, users can physically feel the recordings in the form of vibrations. Both this haptic feedback and the live audio visualization can be individually switched on or off.
+Vertreibung:
 
-The sculptural body of the lamp was 3D-printed and houses all hardware components. Thanks to a simple plug-in system, all parts can be easily assembled and disassembled. The logo and all graphics for the project were also designed by the artist.
+– die Sahelzone
+– die Darién-Gap
+– das Mittelmeer
 
-Inspired by nature, Klanggestalten acts as a bridge between the outside world and indoor spaces. It aims to foster inclusion by making acoustic experiences accessible across different senses
+Um die jeweiligen Fluchtrouten greifbarer zu machen, habe ich ergänzend 3D-gedruckte Figuren gestaltet. Sie eröffnen eine zusätzliche visuelle Ebene und ermöglichen den Besucher*innen, sich noch intensiver mit dem Thema auseinanderzusetzen.
+Technologie für ein immersives Erlebnis
+
+Im Inneren des Tisches steckt ein interaktives System: Mithilfe von Arduino und lichtempfindlichen Sensoren (LDRs) können die Nutzer*innen Figuren auf bestimmte Zonen platzieren. Sobald ein Bereich aktiviert wird, reagiert ein Processing-Sketch und projiziert entsprechende Informationen per Beamer direkt auf die Tischplatte. Die Sensoren sind dabei mit verlängerten Kabeln versehen, um eine flexible Platzierung zu ermöglichen.
+
+So entsteht eine Erfahrung, die zum Nachdenken anregt – spielerisch in der Form, aber tiefgründig im Inhalt.
 
 
 ## Keywords
-Installation, digital art, light art, bird sounds, natural sounds.
+Installation, digital art, mixed media, 3D printing, projection mapping, exhibition design, CNC milling, migration
 

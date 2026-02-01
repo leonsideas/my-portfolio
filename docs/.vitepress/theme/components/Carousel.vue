@@ -35,7 +35,7 @@
               @click.prevent="handleSlideClick(index, slide)"
             >
               <span>
-                open project
+                Projekt öffnen
               </span>
             </button>
 
@@ -123,26 +123,26 @@
     </div>
     -->
 
-    <!-- linke Kante: "CV" (nur beim ersten Slide) -->
+    <!-- linke Kante: "Projekte" (nur beim ersten Slide) -->
     <a
       v-if="isFirstSlide"
-      href="#cv"
+      href="#projects"
       class="absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
-      aria-label="CV öffnen"
-      @click.prevent="goToCv()"
+      aria-label="Projekte von hinten durchblättern"
+      @click.prevent="goToProjectsFromEnd()"
     >
       <span
         class="flex items-center justify-center
-               w-10 h-28
+               w-10
+               h-40 py-2
                rounded-full
                border border-white/40 hover:border-white
                bg-black/30 hover:bg-black/60
                transition-colors duration-200
-               tracking-[0.35em] uppercase"
-        style="writing-mode: vertical-rl; text-orientation: mixed;"
+               tracking-[0.35em] uppercase works-vertical"
       >
-        CV
+        Projekte
       </span>
     </a>
 
@@ -165,7 +165,7 @@
                transition-colors duration-200
                tracking-[0.35em] uppercase"
       >
-        back
+        zurück
       </span>
     </a>
 
@@ -174,7 +174,7 @@
       :href="isFirstSlide ? '#projects' : '#more'"
       class="absolute right-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
-      :aria-label="isFirstSlide ? 'Zu Projects' : 'Nächster Slide'"
+      :aria-label="isFirstSlide ? 'Zu Projekten' : 'Nächster Slide'"
       @click.prevent="isFirstSlide ? goTo(firstProjectIndex) : next()"
     >
       <span
@@ -188,7 +188,7 @@
                tracking-[0.35em] uppercase"
         :class="isFirstSlide ? 'h-40 py-2' : 'h-28 py-1'"
       >
-        {{ isFirstSlide ? 'projects' : 'more' }}
+        {{ isFirstSlide ? 'Projekte' : 'mehr' }}
       </span>
     </a>
 
@@ -211,7 +211,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watchEffect, onMounted } from 'vue'
+import { ref, computed, watchEffect, onMounted, nextTick } from 'vue'
 import { withBase, useRouter } from 'vitepress'
 
 // ...existing code...
@@ -313,6 +313,8 @@ const fontClassByKey: Record<string, string> = {
   font03: 'font-font03',
   font04: 'font-font04',
   font05: 'font-font05',
+  // z.B. eigener Key für Übergangsobjekte
+  uebergangsobjekte: 'font-uebergangsobjekte', // nutzt direkt deine Font aus fonts.css
 }
 
 // Optional: weiterhin Mapping per id möglich, wenn du das behalten willst
@@ -323,8 +325,7 @@ const titleFontById: Record<string, string> = {
   'LightbyNight': 'font-lightbynight',
   'Kilma': 'font-kilma',
   'Astronaut': 'font-save',
-  
-
+  'Uebergangsobjekte': 'font-uebergangsobjekte', // neu: eigene Klasse
 }
 
 // Array, das dein Video + optionalen Start-Slide + Projekt-Slides kombiniert
@@ -417,6 +418,18 @@ const displaySlides = computed<Slide[]>(() => {
   return [introSlide, ...enrichedBaseSlides]
 })
 
+// DEBUG: logge nur noch den Übergangsobjekte-Slide
+watchEffect(() => {
+  const slide = displaySlides.value.find(s => /uebergangsobjekte|Übergangsobjekte/i.test(String(s.id ?? s.title ?? '')))
+  if (slide) {
+    console.log('[Carousel] Übergangsobjekte slide:', {
+      id: slide.id,
+      title: slide.title,
+      titleFontClass: slide.titleFontClass,
+    })
+  }
+})
+
 // Einmalig: zeige, welche Dateien der Carousel wirklich erwartet
 let didLogExpectedAssets = false
 watchEffect(() => {
@@ -444,11 +457,25 @@ watchEffect(() => {
 
 // DEBUG: ist die Font wirklich geladen/verfügbar?
 watchEffect(() => {
-  const ok = typeof document !== 'undefined' && 'fonts' in document
+  const okMigration = typeof document !== 'undefined' && 'fonts' in document
     ? document.fonts.check('16px "Migration"')
     : null
 
-  console.log('[Fonts] Migration verfügbar?', ok)
+  const okUebergang = typeof document !== 'undefined' && 'fonts' in document
+    ? document.fonts.check('16px "Uebergangsobjekte"')
+    : null
+
+  console.log('[Fonts] Migration verfügbar?', okMigration)
+  console.log('[Fonts] Uebergangsobjekte verfügbar?', okUebergang)
+})
+
+// NEU: sobald Slides gerendert sind, schaue dir die tatsächliche h2-Klasse an
+watchEffect(async () => {
+  await nextTick()
+  if (typeof document === 'undefined') return
+  const el = document.querySelector('html .carousel h2')
+  if (!el) return
+  console.log('[Carousel] first h2 classes:', (el as HTMLElement).className)
 })
 
 const intervalMs = () => (props.interval && props.interval > 0 ? props.interval : 5000)
@@ -473,6 +500,11 @@ const firstProjectIndex = computed(
   () => 1 + (props.startSlide ? 1 : 0)
 )
 
+// NEU: Index des letzten Projekt-Slides
+const lastProjectIndex = computed(() =>
+  Math.max(firstProjectIndex.value, displaySlides.value.length - 1)
+)
+
 // Navigation
 function next() {
   if (!displaySlides.value.length) return
@@ -495,6 +527,26 @@ function prev() {
 function goTo(index: number) {
   if (index < 0 || index >= displaySlides.value.length) return
   currentIndex.value = index
+}
+
+// NEU: Von Intro aus ans Ende der Projekte springen und dann rückwärts sliden
+function goToProjectsFromEnd() {
+  if (!displaySlides.value.length) return
+
+  // Wenn wir noch im Intro sind, direkt an das Ende der Projekte springen
+  if (isFirstSlide.value) {
+    currentIndex.value = lastProjectIndex.value
+    return
+  }
+
+  // Wenn wir schon in den Projekten sind:
+  // solange wir noch nicht beim ersten Projekt sind, einen Schritt zurück
+  if (currentIndex.value > firstProjectIndex.value) {
+    currentIndex.value--
+  } else {
+    // optional: wenn wir am Anfang der Projekte sind, wieder ans Ende springen
+    currentIndex.value = lastProjectIndex.value
+  }
 }
 
 function clearTimer() {
@@ -548,9 +600,9 @@ function handleTitleClick(slide: Slide) {
 }
 
 // NEU: CV-Navigation (Pfad bei Bedarf anpassen, z.B. '/cv' oder '/Leon-Albers-CV.pdf')
-function goToCv() {
-  router.go(withBase('/cv'))
-}
+// function goToCv() {
+//   router.go(withBase('/cv'))
+// }
 </script>
 
 <style scoped>
@@ -562,6 +614,11 @@ function goToCv() {
 
 /* Titel immer mittig ausrichten, auch wenn andere Klassen etwas anderes setzen */
 .title-center {
+  text-align: center !important;
+}
+
+/* zusätzliche Sicherheit: alle h2 im Carousel mittig */
+h2 {
   text-align: center !important;
 }
 
@@ -579,9 +636,9 @@ function goToCv() {
 }
 
 @media (min-width: 768px) {
-  /* Desktop: Titel etwas kleiner und weiter unten */
+  /* Desktop: Titel deutlich größer und etwas weiter unten */
   h2.title-center {
-    font-size: 4.5rem; /* etwas unterhalb von Tailwind text-9xl (~8rem) */
+    font-size: 8rem; /* von 5rem auf 8rem erhöht (entspricht grob text-9xl) */
   }
 
   /* optional: zusätzlicher top-offset, falls noch mehr Abstand gewünscht ist */

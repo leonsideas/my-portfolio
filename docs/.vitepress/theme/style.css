@@ -81,6 +81,14 @@
 }
 */
 
+@font-face {
+  font-family: "Uebergangsobjekte";
+  src: url("/fonts/Uebergangsobjekte.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Optional: zentrale Variablen (damit du später nur hier wechselst) */
 :root{
   --font-klanggestalten: "Klang";
@@ -99,6 +107,9 @@
 
   /* Neue Schrift für den 3. Slide */
   --font-third: "My Local Font"; /* oder "Klang" / "Migration" / eine andere font-family */
+
+  /* NEU: Schrift für Projekt "Übergangsobjekte" */
+  --font-uebergangsobjekte: "Uebergangsobjekte";
 }
 
 /* Projekt-Titel-Fonts: nur im Carousel wirksam */
@@ -114,7 +125,8 @@
   color: #ff00ff !important;
   font-style: italic;
 }
-:global(.carousel .font-third) { font-family: var(--font-third), system-ui, sans-serif !important; }
+:global(.carousel .font-uebergangsobjekte) { font-family: var(--font-uebergangsobjekte), system-ui, sans-serif !important; }
+
 
 /* optional: alte globale Regeln entfernen/neutralisieren, falls sie noch irgendwo stehen */
 /*

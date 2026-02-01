@@ -36,6 +36,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: "Debug: list video sources (repo docs/videos)"
+        run: |
+          echo "=== docs/videos (source in repo) ==="
+          ls -la docs/videos || true
+
+      # ✅ HIER: Videos im Repo lassen (docs/videos), aber für VitePress Build nach docs/public/videos kopieren
+      - name: Copy videos from docs/videos to docs/public/videos
+        run: |
+          set -e
+          mkdir -p docs/public/videos
+          if [ -d "docs/videos" ]; then
+            echo "Copying docs/videos -> docs/public/videos"
+            cp -R docs/videos/* docs/public/videos/
+          fi
+          echo "=== docs/public/videos (after copy) ==="
+          ls -la docs/public/videos || true
+
       - name: "Debug: list video sources (public)"
         run: |
           echo "=== public/videos (source) ==="
@@ -43,11 +60,6 @@ jobs:
 
       - name: Fail if videos are not in docs/public/videos
         run: |
-          if [ -d "docs/videos" ]; then
-            echo "ERROR: Found docs/videos. Move videos to docs/public/videos so they get deployed to /videos/."
-            ls -la docs/videos || true
-            exit 1
-          fi
           if [ ! -d "docs/public/videos" ]; then
             echo "ERROR: Missing docs/public/videos."
             exit 1
@@ -62,6 +74,8 @@ jobs:
               echo "ERROR: missing $f"
               echo "--- current docs/public/videos ---"
               ls -la docs/public/videos || true
+              echo "--- current docs/videos ---"
+              ls -la docs/videos || true
               exit 1
             fi
             echo "OK: $f"

@@ -125,56 +125,18 @@
     box-sizing: border-box;
   }
 
-  /* 🔹 Neu: Mobile – alle Kästen gleiche minimale Breite/Höhe */
+  /* 🔹 Mobile – Layout sauber begrenzen */
   @media (max-width: 639px) {
-    .my-nav__item {
-      display: flex;
-      justify-content: center;
+    .my-nav__inner {
+      padding-inline: 0.75rem;
     }
 
-    .nav-pill {
-      min-width: 0;
-      min-height: 2.5rem; /* gleiche Höhe */
-    }
-  }
-
-  /* 🔹 Mobile: Navigation fixieren und zentrieren */
-  @media (max-width: 639px) {
     .my-nav__list {
-      flex-wrap: nowrap; /* Kein Umbruch der Navigationselemente */
-      overflow-x: auto; /* Horizontal scrollen, falls nötig */
-      gap: 0.5rem; /* Abstand zwischen den Elementen */
-      justify-content: center; /* Zentrieren der Elemente */
+      width: 100%;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: nowrap;       /* alles in einer Zeile */
     }
 
     .my-nav__item {
-      flex: 0; /* Elemente werden nur so breit wie nötig */
-    }
-
-    .nav-pill {
-      padding: 0.3rem 0.7rem; /* Kleinere Abstände für Pills */
-      font-size: 0.75rem; /* Kleinere Schriftgröße */
-    }
-  }
-  
-  .nav-pill:hover {
-    border-color: rgba(255, 255, 255, 1);
-    color: rgba(255, 255, 255, 1);
-  }
-  
-  /* ✅ NUR WorkPage: Pills weiß (Navbar-Hintergrund kommt von VitePress-CSS global) */
-  /* :global(html.is-workpage) .nav-pill {
-    border-color: rgba(255, 255, 255, 0.6) !important;
-    color: rgba(255, 255, 255, 0.95) !important;
-  }
-  
-  :global(html.is-workpage) .nav-pill:hover {
-    border-color: rgba(255, 255, 255, 1) !important;
-    color: rgba(255, 255, 255, 1) !important;
-  } */
-
-  /* NavBar soll wie Carousel-Navigation blenden */
-  .nav-blend {
-    mix-blend-mode: difference;
-  }
-</style>
+      flex: 1 1 0;             /* alle bekommen gleich viel

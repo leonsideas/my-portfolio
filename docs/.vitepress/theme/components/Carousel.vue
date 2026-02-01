@@ -647,51 +647,31 @@ h2 {
   }
 }
 
-/* 🔹 Mobile: "Projekt öffnen"-Button anpassen */
+/* 🔹 Mobile: spezifisch den "Projekt öffnen"-Button anpassen */
 @media (max-width: 639px) {
-  button {
-    bottom: 5%; /* Abstand vom unteren Rand */
+  .carousel button.absolute {
+    bottom: 12vh;                 /* etwas höher über der Kante */
     left: 50%;
-    transform: translateX(-50%); /* Zentrieren */
-    width: 90%; /* Breite auf 90% des Bildschirms begrenzen */
-    font-size: 0.75rem; /* Kleinere Schriftgröße */
+    transform: translateX(-50%);
+    width: 70vw;                  /* 70% der Bildschirmbreite */
+    max-width: 320px;
+    font-size: 0.85rem;
+    padding-inline: 1.5rem;
   }
 }
 
-/* 🔹 Mobile: Vorschauüberschriften anpassen */
+/* 🔹 Mobile: Overlay & Titel größer und mittiger */
 @media (max-width: 639px) {
-  h2 {
-    font-size: 1.5rem; /* Kleinere Schriftgröße */
-    padding: 0 1rem; /* Innenabstand für bessere Lesbarkeit */
-    word-wrap: break-word; /* Zeilenumbruch bei langen Wörtern */
+  .carousel .absolute.inset-0.flex.items-start.justify-center {
+    padding-top: 20vh;            /* Titel eher mittig platzieren */
+    padding-inline: 1.5rem;
   }
-}
 
-/* 🔹 Mobile: "Projekt öffnen"-Button mittig und sichtbar */
-@media (max-width: 639px) {
-  button {
-    bottom: 10%; /* Abstand vom unteren Rand */
-    left: 50%;
-    transform: translateX(-50%); /* Zentrieren */
-    width: 80%; /* Breite auf 80% des Bildschirms begrenzen */
-    font-size: 0.875rem; /* Etwas größere Schriftgröße */
+  .carousel h2 {
+    font-size: 2.4rem;            /* größer als vorher */
+    line-height: 1.1;
+    padding: 0;
+    word-wrap: break-word;
   }
-}
-
-/* 🔹 Mobile: Vorschauüberschriften größer und mittig */
-@media (max-width: 639px) {
-  h2 {
-    font-size: 2rem; /* Größere Schriftgröße */
-    padding: 0 1.5rem; /* Mehr Innenabstand für bessere Lesbarkeit */
-    text-align: center; /* Überschriften zentrieren */
-    word-wrap: break-word; /* Zeilenumbruch bei langen Wörtern */
-  }
-}
-
-/* 🔹 Viewport-Anpassung */
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden; /* Kein horizontales Scrollen */
 }
 </style>

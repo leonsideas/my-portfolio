@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug: list video sources (public)
+      - name: "Debug: list video sources (public)"
         run: |
           echo "=== public/videos (source) ==="
           ls -la docs/public/videos || true
@@ -84,14 +84,14 @@ jobs:
           echo "OK: docs/.vitepress/dist exists"
           ls -la docs/.vitepress/dist || true
 
-      - name: Debug: list deployed videos (dist)
+      - name: "Debug: list deployed videos (dist)"
         run: |
           echo "=== dist/videos (deployed) ==="
           ls -la docs/.vitepress/dist/videos || true
           echo "=== mp4 in dist ==="
           find docs/.vitepress/dist -maxdepth 3 -type f -name "*.mp4" -print || true
 
-      - name: Debug: list deployed assets (dist/videos + dist/images)
+      - name: "Debug: list deployed assets (dist/videos + dist/images)"
         run: |
           echo "=== dist/videos ==="
           ls -la docs/.vitepress/dist/videos || true

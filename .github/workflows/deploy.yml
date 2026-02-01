@@ -97,7 +97,6 @@ jobs:
           ls -la docs/.vitepress/dist/videos || true
           echo "=== dist/images ==="
           ls -la docs/.vitepress/dist/images || true
-
           echo "=== sanity checks ==="
           test -f docs/.vitepress/dist/videos/background.mp4 && echo "OK: background.mp4" || echo "MISSING: background.mp4"
           test -f docs/.vitepress/dist/videos/intro.mp4 && echo "OK: intro.mp4" || echo "MISSING: intro.mp4"

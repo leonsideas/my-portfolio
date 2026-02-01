@@ -31,7 +31,7 @@
                      bg-black/30 hover:bg-black/60
                      border border-white/40 hover:border-white
                      text-white text-xs md:text-sm tracking-[0.25em] uppercase
-                     rounded-full"
+                     rounded-full project-open-btn"
               @click.prevent="handleSlideClick(index, slide)"
             >
               <span>
@@ -649,7 +649,13 @@ h2 {
 
 /* 🔹 Mobile: spezifisch den "Projekt öffnen"-Button anpassen */
 @media (max-width: 639px) {
-  .carousel button.absolute {
+  /* Container sicherstellen, dass er Referenz für absolute Positionierung ist */
+  .carousel .relative.w-full.h-full.bg-gray-900 {
+    position: relative;
+  }
+
+  /* Button immer mittig (horizontal) platzieren */
+  .carousel .project-open-btn {
     bottom: 12vh;
     left: 50%;
     transform: translateX(-50%);
@@ -659,8 +665,9 @@ h2 {
     padding-inline: 1.5rem;
   }
 
+  /* Titel-Overlay leicht nach oben verschieben, damit es sich nicht mit dem Button beißt */
   .carousel .absolute.inset-0.flex.items-start.justify-center {
-    padding-top: 20vh;
+    padding-top: 16vh;
     padding-inline: 1.5rem;
   }
 

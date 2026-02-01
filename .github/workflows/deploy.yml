@@ -1,4 +1,4 @@
-name: Deploy VitePress site to Pages
+name: Deploy VitePress to GitHub Pages
 
 on:
   push:
@@ -12,16 +12,15 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout (with LFS)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           lfs: true
 
       - name: Setup Node
@@ -30,80 +29,13 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug: list video sources (public)
-        run: |
-          echo "=== public/videos (source) ==="
-          ls -la docs/public/videos || true
-
-      - name: Fail if videos are not in docs/public/videos
-        run: |
-          if [ -d "docs/videos" ]; then
-            echo "ERROR: Found docs/videos. Move videos to docs/public/videos so they get deployed to /videos/."
-            ls -la docs/videos || true
-            exit 1
-          fi
-          if [ ! -d "docs/public/videos" ]; then
-            echo "ERROR: Missing docs/public/videos."
-            exit 1
-          fi
-
-      - name: Fail if required public assets are missing
-        run: |
-          set -e
-          echo "=== required assets ==="
-          for f in docs/public/videos/background.mp4 docs/public/videos/intro.mp4; do
-            if [ ! -f "$f" ]; then
-              echo "ERROR: missing $f"
-              echo "--- current docs/public/videos ---"
-              ls -la docs/public/videos || true
-              exit 1
-            fi
-            echo "OK: $f"
-          done
-
-      - name: Build with VitePress
+      - name: Build
         run: npm run docs:build
 
-      - name: Verify dist output exists
-        run: |
-          echo "=== verify build output ==="
-          if [ ! -d "docs/.vitepress/dist" ]; then
-            echo "ERROR: docs/.vitepress/dist not found. Your docs:build script likely doesn't run 'vitepress build docs'."
-            echo "--- listing docs/.vitepress ---"
-            ls -la docs/.vitepress || true
-            echo "--- listing docs ---"
-            ls -la docs || true
-            exit 1
-          fi
-          echo "OK: docs/.vitepress/dist exists"
-          ls -la docs/.vitepress/dist || true
-
-      - name: Debug: list deployed videos (dist)
-        run: |
-          echo "=== dist/videos (deployed) ==="
-          ls -la docs/.vitepress/dist/videos || true
-          echo "=== mp4 in dist ==="
-          find docs/.vitepress/dist -maxdepth 3 -type f -name "*.mp4" -print || true
-
-      - name: Debug: list deployed assets (dist/videos + dist/images)
-        run: |
-          echo "=== dist/videos ==="
-          ls -la docs/.vitepress/dist/videos || true
-          echo "=== dist/images ==="
-          ls -la docs/.vitepress/dist/images || true
-
-          echo "=== sanity checks ==="
-          test -f docs/.vitepress/dist/videos/background.mp4 && echo "OK: background.mp4" || echo "MISSING: background.mp4"
-          test -f docs/.vitepress/dist/videos/intro.mp4 && echo "OK: intro.mp4" || echo "MISSING: intro.mp4"
-          test -f docs/.vitepress/dist/images/background-fallback.jpg && echo "OK: background-fallback.jpg" || echo "MISSING: background-fallback.jpg"
-
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist
@@ -111,11 +43,8 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    name: Deploy
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - name: Deploy
         uses: actions/deploy-pages@v4

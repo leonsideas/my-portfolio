@@ -654,28 +654,31 @@ h2 {
     position: relative;
   }
 
-  /* Button immer mittig (horizontal) platzieren */
+  /* Button wirklich mittig zentrieren, Tailwind-Transform übersteuern */
   .carousel .project-open-btn {
     bottom: 12vh;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70vw;
-    max-width: 320px;
-    font-size: 0.85rem;
-    padding-inline: 1.5rem;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 75vw;
+    max-width: 340px;
+    font-size: 0.9rem;
+    padding-inline: 1.75rem;
   }
 
-  /* Titel-Overlay leicht nach oben verschieben, damit es sich nicht mit dem Button beißt */
+  /* Titel-Overlay etwas höher UND klar zentriert */
   .carousel .absolute.inset-0.flex.items-start.justify-center {
-    padding-top: 16vh;
+    padding-top: 18vh;
     padding-inline: 1.5rem;
   }
 
+  /* h2 auf Mobile größer + echte Zentrierung */
   .carousel h2 {
-    font-size: 2.4rem;
+    font-size: 2.8rem;
     line-height: 1.1;
     padding: 0;
     word-wrap: break-word;
+    max-width: 90vw;
+    margin: 0 auto;
   }
 }
 </style>

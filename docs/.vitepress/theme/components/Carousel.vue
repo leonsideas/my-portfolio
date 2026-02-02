@@ -647,31 +647,13 @@ h2 {
   }
 }
 
-/* 🔹 Mobile: spezifisch den "Projekt öffnen"-Button anpassen */
+/* 🔹 Mobile: spezifisch den Titel anpassen */
 @media (max-width: 639px) {
-  /* Container sicherstellen, dass er Referenz für absolute Positionierung ist */
-  .carousel .relative.w-full.h-full.bg-gray-900 {
-    position: relative;
-  }
-
-  /* Button wirklich mittig zentrieren, Tailwind-Transform übersteuern */
-  .carousel .project-open-btn {
-    bottom: 12vh;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 75vw;
-    max-width: 340px;
-    font-size: 0.9rem;
-    padding-inline: 1.75rem;
-  }
-
-  /* Titel-Overlay etwas höher UND klar zentriert */
   .carousel .absolute.inset-0.flex.items-start.justify-center {
     padding-top: 18vh;
     padding-inline: 1.5rem;
   }
 
-  /* h2 auf Mobile größer + echte Zentrierung */
   .carousel h2 {
     font-size: 2.8rem;
     line-height: 1.1;
@@ -680,6 +662,24 @@ h2 {
     max-width: 90vw;
     margin: 0 auto;
   }
+}
+
+/* Gemeinsame Regeln: Container + Button immer als Referenz + zentriert */
+.carousel .relative.w-full.h-full.bg-gray-900 {
+  position: relative;
+}
+
+/* Button überall horizontal mittig zentrieren */
+.carousel .project-open-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  /* optional: global ein wenig responsiver machen */
+  max-width: 340px;
+  width: 75vw;
+  bottom: 12vh;
 }
 
 /* Grundverhalten: Button als Block in der Mitte falls absolute nicht greift */

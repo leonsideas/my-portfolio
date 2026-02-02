@@ -32,7 +32,7 @@
   // NEU: Spezialfall – Transition_up zurück zum Home-Carousel
   const overlayHomeToRoot = ref(false)
   
-  // NEU: Standard‑Seitentitel merken, damit wir ihn wiederherstellen können
+  // NEU: Standard-Seitentitel merken, damit wir ihn wiederherstellen können
   const defaultDocumentTitle =
     typeof document !== 'undefined' ? document.title : 'Leon Albers | Portfolio'
   
@@ -231,7 +231,7 @@
   onMounted(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.classList.add(WORKPAGE_CLASS)
-      // NEU: Tab‑Titel für WorkPage setzen
+      // NEU: Tab-Titel für WorkPage setzen
       document.title = 'Projects | Leon Albers'
     }
   
@@ -246,7 +246,9 @@
       // WICHTIG: Bei Intro-Video contentVisible NICHT hier setzen.
       // Das passiert erst nach Videoende in handleOverlayEnded().
       updateUrlWithoutPlayParam(id)
-      playProjectIntro(id, withBase('/Transition.mp4'))
+
+      // ✅ OPTION A: Transition liegt unter /videos/...
+      playProjectIntro(id, withBase('/videos/Transition.mp4'))
     } else {
       // Kein Intro-Video -> Content direkt einblenden
       contentVisible.value = true
@@ -307,7 +309,9 @@
       if (id) currentSlug.value = id
       if (id && play) {
         updateUrlWithoutPlayParam(id)
-        playProjectIntro(id, withBase('/Transition.mp4'))
+
+        // ✅ OPTION A: Transition liegt unter /videos/...
+        playProjectIntro(id, withBase('/videos/Transition.mp4'))
       }
     }
   )
@@ -496,7 +500,7 @@
   watch(currentSlug, () => {
     contentKey.value += 1
 
-    // NEU: bei jedem Projektwechsel Tab‑Titel sicher auf „Projects | Leon Albers“ setzen
+    // NEU: bei jedem Projektwechsel Tab-Titel sicher auf „Projects | Leon Albers“ setzen
     if (typeof document !== 'undefined') {
       document.title = 'Projects | Leon Albers'
     }
@@ -547,7 +551,9 @@
     const targetRoute = '/'
     overlayUseHardReload.value = true
     overlayHomeToRoot.value = true
-    playTransitionToRoute(targetRoute, withBase('/Transition_up.mp4'), 'none')
+
+    // ✅ OPTION A: Transition_up liegt unter /videos/...
+    playTransitionToRoute(targetRoute, withBase('/videos/Transition_up.mp4'), 'none')
   }
 
   // NEU: Index/Helfer für Navigation

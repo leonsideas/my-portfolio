@@ -11,6 +11,28 @@ export default defineConfig({
   title: 'Portfolio',
   titleTemplate: ':title | Leon Albers',
 
+  // ✅ Preload Transition-Videos (global im <head>)
+  head: [
+    [
+      'link',
+      {
+        rel: 'preload',
+        as: 'video',
+        href: '/my-portfolio/videos/Transition.mp4',
+        type: 'video/mp4'
+      }
+    ],
+    [
+      'link',
+      {
+        rel: 'preload',
+        as: 'video',
+        href: '/my-portfolio/videos/Transition_up.mp4',
+        type: 'video/mp4'
+      }
+    ]
+  ],
+
   themeConfig: {
     // ...existing code (falls vorhanden)...
   },

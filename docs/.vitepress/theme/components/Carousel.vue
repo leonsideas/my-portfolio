@@ -83,7 +83,7 @@
             >
               <div class="max-w-5xl text-center">
                 <h2
-                  class="mb-4 font-semibold text-6xl md:text-9xl leading-tight whitespace-normal md:whitespace-nowrap title-center"
+                  class="mb-4 font-semibold text-6xl md:text-9xl leading-tight whitespace-normal md:whitespace-nowrap title-center title-diff"
                   :class="slide.titleFontClass"
                 >
                   <!-- NEU: optional verlinkter Titel -->
@@ -617,12 +617,13 @@ function handleTitleClick(slide: Slide) {
   text-align: center !important;
 }
 
-/* zusätzliche Sicherheit: alle h2 im Carousel mittig */
-h2 {
-  text-align: center !important;
+/* Difference-Blend nur direkt auf der Überschrift */
+.title-diff {
+  mix-blend-mode: difference;
 }
 
 /* schwarze Titel, auch wenn gemischte Fonts benutzt werden */
+/* Farbe beibehalten – Kontrast kommt über mix-blend-mode:difference */
 .title-dark {
   color: #000;
 }

@@ -6,7 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   // Für Project Pages: https://<user>.github.io/<repo>/
-  base: '/my-portfolio/',
+  base: '/',
 
   title: 'Portfolio',
   titleTemplate: ':title | Leon Albers',
@@ -18,7 +18,7 @@ export default defineConfig({
       {
         rel: 'preload',
         as: 'video',
-        href: '/my-portfolio/videos/Transition.mp4',
+        href: '/videos/Transition.mp4',
         type: 'video/mp4'
       }
     ],
@@ -27,7 +27,7 @@ export default defineConfig({
       {
         rel: 'preload',
         as: 'video',
-        href: '/my-portfolio/videos/Transition_up.mp4',
+        href: '/videos/Transition_up.mp4',
         type: 'video/mp4'
       }
     ]

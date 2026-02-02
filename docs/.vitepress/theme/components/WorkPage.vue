@@ -644,7 +644,7 @@
           autoplay
           muted
           playsinline
-          preload="auto"
+          preload="metadata"
           @loadeddata="overlayVideoReady = true"
           @canplay="overlayVideoReady = true"
           @error="handleOverlayError"

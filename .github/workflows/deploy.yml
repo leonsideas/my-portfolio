@@ -41,7 +41,7 @@ jobs:
           echo "=== docs/videos (source in repo) ==="
           ls -la docs/videos || true
 
-      # ✅ HIER: Videos im Repo lassen (docs/videos), aber für VitePress Build nach docs/public/videos kopieren
+      # ✅ Videos im Repo lassen (docs/videos), aber für VitePress Build nach docs/public/videos kopieren
       - name: Copy videos from docs/videos to docs/public/videos
         run: |
           set -e
@@ -53,10 +53,32 @@ jobs:
           echo "=== docs/public/videos (after copy) ==="
           ls -la docs/public/videos || true
 
+      - name: "Debug: list image sources (repo docs/images)"
+        run: |
+          echo "=== docs/images (source in repo) ==="
+          ls -la docs/images || true
+
+      # ✅ NEU: Bilder im Repo lassen (docs/images), aber für VitePress Build nach docs/public/images kopieren
+      - name: Copy images from docs/images to docs/public/images
+        run: |
+          set -e
+          mkdir -p docs/public/images
+          if [ -d "docs/images" ]; then
+            echo "Copying docs/images -> docs/public/images"
+            cp -R docs/images/* docs/public/images/
+          fi
+          echo "=== docs/public/images (after copy) ==="
+          ls -la docs/public/images || true
+
       - name: "Debug: list video sources (public)"
         run: |
           echo "=== public/videos (source) ==="
           ls -la docs/public/videos || true
+
+      - name: "Debug: list image sources (public)"
+        run: |
+          echo "=== public/images (source) ==="
+          ls -la docs/public/images || true
 
       - name: Fail if videos are not in docs/public/videos
         run: |
@@ -65,17 +87,28 @@ jobs:
             exit 1
           fi
 
+      - name: Fail if images are not in docs/public/images
+        run: |
+          if [ ! -d "docs/public/images" ]; then
+            echo "ERROR: Missing docs/public/images."
+            exit 1
+          fi
+
       - name: Fail if required public assets are missing
         run: |
           set -e
           echo "=== required assets ==="
-          for f in docs/public/videos/background.mp4 docs/public/videos/intro.mp4; do
+          for f in docs/public/videos/background.mp4 docs/public/videos/intro.mp4 docs/public/images/background-fallback.jpg; do
             if [ ! -f "$f" ]; then
               echo "ERROR: missing $f"
               echo "--- current docs/public/videos ---"
               ls -la docs/public/videos || true
+              echo "--- current docs/public/images ---"
+              ls -la docs/public/images || true
               echo "--- current docs/videos ---"
               ls -la docs/videos || true
+              echo "--- current docs/images ---"
+              ls -la docs/images || true
               exit 1
             fi
             echo "OK: $f"

@@ -44,6 +44,7 @@
               v-if="(slide.previewVideo || slide.video) && !brokenVideoIds.has(String(slide.id ?? index))"
               class="absolute inset-0 w-full h-full"
             >
+              <!-- Intro + alle anderen Slides: Video immer rendern -->
               <video
                 class="w-full h-full object-cover"
                 autoplay
@@ -51,10 +52,20 @@
                 loop
                 playsinline
                 preload="metadata"
+                @loadeddata="handleIntroLoaded(index)"
+                @canplay="handleIntroLoaded(index)"
                 @error="() => markVideoBroken(slide, index)"
               >
                 <source :src="toBase(slide.previewVideo || slide.video)" type="video/mp4" />
               </video>
+
+              <!-- Nur beim ersten Slide: Sheep-Overlay solange Video noch nicht „ready“ ist -->
+              <img
+                v-if="index === 0 && !isIntroVideoLoaded"
+                :src="toBase('/images/Sheep.jpg')"
+                alt=""
+                class="absolute inset-0 w-full h-full object-cover"
+              />
             </div>
 
             <!-- 2) Fallback: Bild-Vorschau -->
@@ -280,6 +291,16 @@ const timer = ref<number | null>(null)
 const isHovered = ref(false)
 
 const brokenVideoIds = ref(new Set<string>())
+
+// NEU: Intro-Video-Ladezustand
+const isIntroVideoLoaded = ref(false)
+
+// wird nur für index === 0 benutzt
+function handleIntroLoaded(index: number) {
+  if (index === 0) {
+    isIntroVideoLoaded.value = true
+  }
+}
 
 function toBase(url?: string | null) {
   if (!url) return ''

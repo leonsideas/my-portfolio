@@ -1,11 +1,5 @@
----
-title: Klanggestalten
-name: Leon Albers
-excerpt: App, Lampe und Installation, die Naturklänge in Licht- und Vibrationsfeedback übersetzt.
-videos:
-  - https://youtu.be/xenrVK3cvyA   # hier deine echte Embed-URL eintragen
----
 # Klanggestalten
+##### 2025
 
 Klanggestalten lädt Nutzer dazu ein, Momente der Natur auf neue Weise wahrzunehmen und zu teilen. Mit der App können sie ihre eigenen Geräusche aufnehmen – beispielsweise Vogelgezwitscher, raschelnde Blätter oder Regentropfen. Diese persönlichen Klangmomente lassen sich speichern, bearbeiten und wiedergeben.
 

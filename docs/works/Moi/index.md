@@ -1,4 +1,5 @@
 # MOI
+###### 2025
 
 MOI ist eine Video Performance, bestehend aus drei Elementen,
 welche miteinander agieren. Ziel des Projekts ist auf abstrakte
@@ -13,6 +14,5 @@ Matter itself is always already open to, or rather
 entangled with, the "Other." The intra-actively
 emergent "parts" of phenomena are coconstituted" - Karen Barad
 
-## Keywords
-Video performance, digital art, stable diffusion, artistic research, karan barad, moi
+##### Video performance, digital art, stable diffusion, artistic research, karan barad, moi
 

@@ -1,4 +1,5 @@
 # Stottern
+##### 2024
 
 Stottern – ein Kurzfilm über den inneren Widerstand gegen Perfektion
 In einer futuristischen Welt, in der Perfektion zur Pflicht geworden ist, erzählt „Stottern“ die Geschichte eines Menschen, der nicht mehr funktionieren will. Wer aus dem Takt gerät, wird korrigiert – wer sich weigert, angepasst.

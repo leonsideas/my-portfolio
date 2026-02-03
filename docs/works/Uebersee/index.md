@@ -1,4 +1,5 @@
 # Mit KI läufts bei uns!
+##### 2025
 
 Wissen zum Leben erwecken mit KI
 
@@ -16,6 +17,5 @@ Wissensvermittlung revolutionieren
 Diese Filme zeigen, wie moderne Technologie die Art und Weise, wie wir lernen, umgestaltet. Wir brauchen keine Käfige – KI ermöglicht es uns, die natürliche Welt auf fesselnde, interaktive und völlig neue Weise zu erleben.
 
 
-## Keywords
-Artificial intelligence, digital education, social media campaign
+##### Artificial intelligence, digital education, social media campaign
 

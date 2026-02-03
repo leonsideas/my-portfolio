@@ -85,18 +85,22 @@
                 <h2
                   class="mb-4 font-semibold text-6xl md:text-9xl leading-tight whitespace-normal md:whitespace-nowrap title-center title-diff"
                   :class="slide.titleFontClass"
+                  :style="mobileTitleStyle(index)"
                 >
-                  <!-- NEU: optional verlinkter Titel -->
+                  <!-- Text, der gemessen wird -->
                   <a
                     v-if="slide.titleLink"
                     :href="slide.titleLink"
-                    class="pointer-events-auto inline-block hover:underline underline-offset-4 title-link-dark"
+                    class="pointer-events-auto inline-block hover:underline underline-offset-4 title-link-dark slide-title-measure"
                     :aria-label="slide.titleLinkAriaLabel || `Öffne ${slide.title || 'Projekt'}`"
                     @click.prevent="handleTitleClick(slide)"
                   >
                     {{ slide.title }}
                   </a>
-                  <span v-else class="title-dark">
+                  <span
+                    v-else
+                    class="title-dark slide-title-measure"
+                  >
                     {{ slide.title }}
                   </span>
                 </h2>
@@ -478,6 +482,99 @@ watchEffect(async () => {
   console.log('[Carousel] first h2 classes:', (el as HTMLElement).className)
 })
 
+// 🔹 Mobile Titel-Größen dynamisch pro Slide
+const mobileTitleSizes = ref<number[]>([])
+
+// Hilfsfunktion: prüft, ob wir im (engen) mobilen Layout sind
+function isNarrowMobile() {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth <= 640
+}
+
+// Berechnet für alle Slides die max. Font-Size, bei der der Titel einzeilig bleibt
+async function computeMobileTitleSizes() {
+  if (typeof document === 'undefined') return
+  if (!isNarrowMobile()) return
+
+  await nextTick()
+
+  // ⬅ jetzt direkt den Text innerhalb des H2 messen
+  const titles = Array.from(
+    document.querySelectorAll<HTMLElement>('.carousel .slide-title-measure')
+  )
+
+  if (!titles.length) return
+
+  const sizes: number[] = []
+
+  titles.forEach((el, idx) => {
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 375
+    // etwas Rand links/rechts abziehen, damit der Text nicht am Rand klebt
+    const padding = 32 // px
+    const availableWidth = vw - padding * 2
+
+    const originalText = el.innerText.trim()
+    if (!originalText) {
+      sizes[idx] = 28
+      return
+    }
+
+    const minSize = 18
+    const maxSize = 120 // sehr groß erlauben
+
+    const testEl = el.cloneNode(true) as HTMLElement
+    testEl.style.visibility = 'hidden'
+    testEl.style.position = 'absolute'
+    testEl.style.whiteSpace = 'nowrap'
+    testEl.style.width = 'auto'
+    testEl.style.height = 'auto'
+    testEl.innerText = originalText
+    document.body.appendChild(testEl)
+
+    let bestSize = minSize
+    // von groß nach klein, bis Breite <= availableWidth
+    for (let size = maxSize; size >= minSize; size -= 1) {
+      testEl.style.fontSize = `${size}px`
+      const width = testEl.getBoundingClientRect().width
+      if (width <= availableWidth) {
+        bestSize = size
+        break
+      }
+    }
+
+    document.body.removeChild(testEl)
+    sizes[idx] = bestSize
+  })
+
+  mobileTitleSizes.value = sizes
+}
+
+// Stil-Funktion für mobile Titel
+function mobileTitleStyle(index: number) {
+  if (!isNarrowMobile()) return {}
+  const size = mobileTitleSizes.value[index] || 28
+  return {
+    fontSize: `${size}px`,
+    lineHeight: '1.02',
+  }
+}
+
+onMounted(() => {
+  // ...existing code...
+  // nach dem ersten Render mobile Größen berechnen
+  computeMobileTitleSizes()
+  // bei Slide-Wechsel oder Slide-Daten-Änderung neu berechnen
+  watchEffect(async () => {
+    // nutzt displaySlides und currentIndex
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    displaySlides.value.length
+    currentIndex.value
+    await computeMobileTitleSizes()
+  })
+  // bei Resize auf mobile zurück neu messen
+  window.addEventListener('resize', computeMobileTitleSizes)
+})
+
 const intervalMs = () => (props.interval && props.interval > 0 ? props.interval : 5000)
 const isLoop = () => props.loop !== false
 
@@ -651,17 +748,21 @@ function handleTitleClick(slide: Slide) {
 /* 🔹 Mobile: spezifisch den Titel anpassen */
 @media (max-width: 639px) {
   .carousel .absolute.inset-0.flex.items-start.justify-center {
-    padding-top: 18vh;
+    /* weiter mittig als vorher */
+    padding-top: 26vh;
     padding-inline: 1.5rem;
   }
 
   .carousel h2 {
-    font-size: 2.8rem;
-    line-height: 1.1;
+    /* Fallback; tatsächliche Größe kommt aus mobileTitleStyle() */
+    font-size: 2.6rem;
+    line-height: 1.02;
     padding: 0;
-    word-wrap: break-word;
-    max-width: 90vw;
+    word-wrap: normal;
+    white-space: nowrap;
+    max-width: 100vw;
     margin: 0 auto;
+    text-align: center;
   }
 }
 

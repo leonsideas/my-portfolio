@@ -1,4 +1,5 @@
 # Uebergangsobjekte
+##### 2026
 
 In meinem Projekt untersuche ich das Smartphone als zeitgenössisches Übergangsobjekt und stelle die Frage, ob es klassische, analoge Übergangsobjekte (z. B. Stofftiere) zunehmend verdrängt oder lediglich neu interpretiert. Ausgangspunkt sind die Überlegungen von Donald Winnicott zum Übergangsobjekt sowie die gesellschafts- und medienkritischen Perspektiven von Byung-Chul Han.
 
@@ -6,6 +7,5 @@ Im Zentrum steht die Diskussion, welche emotionale Funktion das Smartphone heute
 
 Für die visuelle und erzählerische Umsetzung habe ich mich von alten McDonald’s-Toys sowie Figuren aus Kinderserien inspirieren lassen. Diese fungieren als Träger individueller und humorvoller Geschichten, die einen Zugang eröffnen und Diskussionen anregen sollen.
 
-## Keywords
-Übergangsobjekt, smartphone culture, critical design, speculative design, toys
+##### Übergangsobjekt, smartphone culture, critical design, speculative design, toys
 

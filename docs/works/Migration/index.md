@@ -1,4 +1,5 @@
 # Migration
+##### 2025
 
 In meinem Projekt habe ich analoge und digitale Elemente miteinander verbunden, um ein interaktives Erlebnis zu schaffen. Der zentrale Bestandteil ist ein Tisch mit Motorikschleifen – inspiriert von klassischen Kinderspieltischen. Um diese Assoziation weiter zu verstärken, stehen auf beiden Seiten kleine Kinderstühle, darunter liegt ein bunter Spielteppich. Doch dieser Tisch ist nicht für Kinder gedacht: Er dient als Lernplattform, die sich auf berührende Weise mit dem Thema Migration und den Herausforderungen von Vertriebenen auseinandersetzt.
 
@@ -20,7 +21,5 @@ Im Inneren des Tisches steckt ein interaktives System: Mithilfe von Arduino und 
 
 So entsteht eine Erfahrung, die zum Nachdenken anregt – spielerisch in der Form, aber tiefgründig im Inhalt.
 
-
-## Keywords
-Installation, digital art, mixed media, 3D printing, projection mapping, exhibition design, CNC milling, migration
+##### Installation, digital art, mixed media, 3D printing, projection mapping, exhibition design, CNC milling, migration
 

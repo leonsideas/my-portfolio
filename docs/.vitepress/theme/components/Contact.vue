@@ -1,5 +1,12 @@
 <template>
   <section class="contact-screen" aria-label="Kontakt">
+    <!-- Poster-Bild, sichtbar bis Video spielt -->
+    <img
+      v-if="!isVideoPlaying"
+      class="posterImage"
+      :src="posterSrc"
+      alt="Kontakt Hintergrund"
+    />
     <video
       class="bgVideo"
       autoplay
@@ -7,6 +14,8 @@
       loop
       playsinline
       preload="auto"
+      @loadeddata="onVideoLoaded"
+      @playing="onVideoPlaying"
     >
       <source :src="videoSrc" type="video/mp4" />
     </video>
@@ -30,8 +39,20 @@
 
 <script setup lang="ts">
 import { withBase } from 'vitepress'
+import { ref } from 'vue'
 
 const videoSrc = withBase('/videos/contact-bg.mp4')
+const posterSrc = withBase('/images/contact.png')
+
+const isVideoPlaying = ref(false)
+
+const onVideoLoaded = () => {
+  // optional: könnte schon hier auf true setzen
+}
+
+const onVideoPlaying = () => {
+  isVideoPlaying.value = true
+}
 </script>
 
 <style scoped>
@@ -46,32 +67,42 @@ const videoSrc = withBase('/videos/contact-bg.mp4')
   margin: 0;
   padding: 0;
   background: #000;
-  z-index: 0; /* Hintergrund-Layer */
+  z-index: 0;
+  overflow: hidden; /* wichtig gegen "Springen" */
 }
 
-/* Hintergrundvideo */
+/* Poster-Bild über dem Video, gleiche Position/Größe */
+.posterImage,
 .bgVideo {
-  position: fixed;
+  position: absolute; /* statt fixed */
   top: 0;
   left: 0;
 
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 
   object-fit: cover;
+}
 
+/* Bild über dem Video, bis dieses spielt */
+.posterImage {
   z-index: 0;
+  pointer-events: none;
+}
+
+.bgVideo {
+  z-index: -1; /* hinter dem Bild, aber im selben Container */
   pointer-events: none;
 }
 
 /* Dunkles Overlay */
 .overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
 
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 
   background: rgba(0, 0, 0, 0.1);
   z-index: 1;
@@ -80,15 +111,14 @@ const videoSrc = withBase('/videos/contact-bg.mp4')
 
 /* Content */
 .content {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
 
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 
-  z-index: 10; /* über Video, aber unter Navbar falls diese höher ist */
-
+  z-index: 10;
   display: grid;
   place-items: center;
   padding: 24px;

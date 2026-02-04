@@ -2,30 +2,36 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { withBase } from 'vitepress'
 
-// statt direkt Video: erst Bild, dann Video
-const showVideoBg = ref(false)
+// Zustände für die Hintergründe
+const sheepVisible = ref(true)        // zuerst Sheep.jpg
+const showVideoBg = ref(false)        // Video sichtbar, wenn es läuft
+const showFallbackBg = ref(false)     // Fallback nach Ende des Videos
 const videoLoaded = ref(false)
 
 const handleVideoCanPlay = () => {
-  // Video ist bereit, kann abgespielt werden
   videoLoaded.value = true
 }
 
 const handleVideoPlay = () => {
-  // Video läuft -> Bild ausblenden, Text einblenden
-  showVideoBg.value = true
+  // Video startet:
+  sheepVisible.value = false          // Sheep ausblenden
+  showFallbackBg.value = false
+  showVideoBg.value = true           // Video zeigen (ohne Fade)
   startTextFade()
 }
 
 const handleVideoEnded = () => {
-  // nach Ende zurück zum Bild
+  // Video fertig:
   showVideoBg.value = false
+  showFallbackBg.value = true        // Fallback anzeigen
 }
 
 const handleVideoError = () => {
-  // bei Fehler: nur Bild anzeigen, Text trotzdem einblenden
-  showVideoBg.value = false
+  // Video konnte nicht geladen werden:
   videoLoaded.value = false
+  showVideoBg.value = false
+  showFallbackBg.value = false       // kein Fallback, Sheep bleibt
+  sheepVisible.value = true
   startTextFade()
 }
 
@@ -38,10 +44,11 @@ const startTextFade = () => {
   if (textTimer) return
   textTimer = window.setTimeout(() => {
     showText.value = true
-  }, 0) // Fade startet sofort, Dauer steuert die CSS-Transition (5000ms)
+  }, 0)
 }
 
-const bgPoster = withBase('/images/background-fallback.jpg') // Sheep.jpg
+const bgSheep = withBase('/images/Sheep.jpg')                   // immer zuerst
+const bgFallback = withBase('/images/background-fallback.jpg')  // nach Videoende
 const bgVideo = withBase('/videos/background.mp4')
 
 onMounted(() => {
@@ -65,14 +72,14 @@ export default {
   <div class="relative overflow-hidden bg-black">
     <!-- Hintergrund-Layer -->
     <div class="fixed inset-0 w-screen h-screen overflow-hidden">
-      <!-- Video-Hintergrund: immer im DOM, Sichtbarkeit per CSS -->
+      <!-- Video-Hintergrund: immer im DOM, aber OHNE Fade/Transition -->
       <video
-        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+        class="absolute inset-0 w-full h-full object-cover"
         :class="showVideoBg ? 'opacity-100' : 'opacity-0'"
         autoplay
         muted
         playsinline
-        :poster="bgPoster"
+        :poster="bgSheep"
         @canplay="handleVideoCanPlay"
         @play="handleVideoPlay"
         @ended="handleVideoEnded"
@@ -81,13 +88,19 @@ export default {
         <source :src="bgVideo" type="video/mp4" />
       </video>
 
-      <!-- Sheep.jpg:
-           - sichtbar, solange Video NICHT geladen ist (videoLoaded === false)
-           - oder geladen, aber noch nicht gestartet (showVideoBg === false) -->
+      <!-- 1. Sheep.jpg – immer zuerst, und bei Fehler -->
       <img
-        v-if="!videoLoaded || !showVideoBg"
-        :src="bgPoster"
-        alt="Hintergrundbild"
+        v-if="sheepVisible"
+        :src="bgSheep"
+        alt="Sheep Hintergrundbild"
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+
+      <!-- 2. Fallback-Bild NUR nach dem Videoende -->
+      <img
+        v-else-if="showFallbackBg"
+        :src="bgFallback"
+        alt="Fallback Hintergrundbild"
         class="absolute inset-0 w-full h-full object-cover"
       />
     </div>

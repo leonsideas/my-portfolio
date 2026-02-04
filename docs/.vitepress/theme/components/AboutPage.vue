@@ -2,19 +2,34 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { withBase } from 'vitepress'
 
-// Hintergrund: erst Video, dann Bild
-const showVideoBg = ref(true)
+// statt direkt Video: erst Bild, dann Video
+const showVideoBg = ref(false)
+const videoLoaded = ref(false)
+
+const handleVideoCanPlay = () => {
+  // Video ist bereit, kann abgespielt werden
+  videoLoaded.value = true
+}
+
+const handleVideoPlay = () => {
+  // Video läuft -> Bild ausblenden, Text einblenden
+  showVideoBg.value = true
+  startTextFade()
+}
 
 const handleVideoEnded = () => {
+  // nach Ende zurück zum Bild
   showVideoBg.value = false
 }
 
 const handleVideoError = () => {
+  // bei Fehler: nur Bild anzeigen, Text trotzdem einblenden
   showVideoBg.value = false
+  videoLoaded.value = false
+  startTextFade()
 }
 
 // Timeout entfernt, damit das Video nicht vorzeitig ausgeblendet wird
-
 const showText = ref(false)
 let textTimer: number | undefined
 
@@ -26,11 +41,11 @@ const startTextFade = () => {
   }, 0) // Fade startet sofort, Dauer steuert die CSS-Transition (5000ms)
 }
 
-const bgPoster = withBase('/images/background-fallback.jpg')
+const bgPoster = withBase('/images/background-fallback.jpg') // Sheep.jpg
 const bgVideo = withBase('/videos/background.mp4')
 
 onMounted(() => {
-  // Fallback: falls Video nicht spielt (z.B. direkt Bild), starte Fade trotzdem
+  // Fallback: falls Video nie startet, Text trotzdem einblenden
   if (!showVideoBg.value) startTextFade()
 })
 
@@ -50,24 +65,27 @@ export default {
   <div class="relative overflow-hidden bg-black">
     <!-- Hintergrund-Layer -->
     <div class="fixed inset-0 w-screen h-screen overflow-hidden">
-      <!-- Video-Hintergrund -->
+      <!-- Video-Hintergrund: immer im DOM, Sichtbarkeit per CSS -->
       <video
-        v-if="showVideoBg"
-        class="absolute inset-0 w-full h-full object-cover"
+        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+        :class="showVideoBg ? 'opacity-100' : 'opacity-0'"
         autoplay
         muted
         playsinline
         :poster="bgPoster"
-        @play="startTextFade"
+        @canplay="handleVideoCanPlay"
+        @play="handleVideoPlay"
         @ended="handleVideoEnded"
-        @error="() => { handleVideoError(); startTextFade() }"
+        @error="handleVideoError"
       >
         <source :src="bgVideo" type="video/mp4" />
       </video>
 
-      <!-- Fallback-Bild im Fullscreen -->
+      <!-- Sheep.jpg:
+           - sichtbar, solange Video NICHT geladen ist (videoLoaded === false)
+           - oder geladen, aber noch nicht gestartet (showVideoBg === false) -->
       <img
-        v-else
+        v-if="!videoLoaded || !showVideoBg"
         :src="bgPoster"
         alt="Hintergrundbild"
         class="absolute inset-0 w-full h-full object-cover"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { withBase } from 'vitepress'
+import { withBase, useData } from 'vitepress'
 
 // Zustände für die Hintergründe
 const sheepVisible = ref(true)        // zuerst Sheep.jpg
@@ -51,7 +51,14 @@ const bgSheep = withBase('/images/Sheep.jpg')                   // immer zuerst
 const bgFallback = withBase('/images/background-fallback.jpg')  // nach Videoende
 const bgVideo = withBase('/videos/background.mp4')
 
+const { site } = useData()
+
 onMounted(() => {
+  // Globalen Site-Titel NICHT überschreiben, nur Tab-Titel setzen
+  if (typeof document !== 'undefined') {
+    document.title = 'Über mich'
+  }
+
   // Fallback: falls Video nie startet, Text trotzdem einblenden
   if (!showVideoBg.value) startTextFade()
 })
@@ -115,6 +122,11 @@ export default {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-start">
           <!-- Links: Intro -->
           <div>
+            <h1
+              class="text-black mix-blend-difference text-left text-2xl sm:text-3xl md:text-4xl font-semibold mb-6"
+            >
+              Über mich
+            </h1>
             <p
               :class="[
                 'text-black mix-blend-difference text-left text-sm sm:text-base md:text-lg leading-relaxed transition-opacity duration-[5000ms] ease-out',
@@ -167,16 +179,6 @@ export default {
                     </div>
                     <div class="opacity-80">2018–2021</div>
                   </li>
-                </ul>
-              </section>
-
-              <section class="space-y-3">
-                <h3 class="text-base sm:text-lg font-semibold">Skills</h3>
-                <ul class="space-y-2 text-sm sm:text-base leading-relaxed">
-                  <li>Motion Design · After Effects · Premiere</li>
-                  <li>Design · Layout · Typografie</li>
-                  <li>3D/Tools · …</li>
-                  <!-- ... -->
                 </ul>
               </section>
             </div>

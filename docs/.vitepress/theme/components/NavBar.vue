@@ -2,7 +2,7 @@
   import { withBase } from 'vitepress'
   
   const items = [
-    { text: 'Leon Albers', link: '/', isHome: true },
+    { text: 'Home', link: '/', isHome: true },
     { text: 'Über mich', link: '/about', class: 'nav-item--about', isAbout: true },
     { text: 'Kontakt', link: '/contact' },
   ]

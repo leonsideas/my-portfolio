@@ -39,12 +39,22 @@
 
 <script setup lang="ts">
 import { withBase } from 'vitepress'
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const videoSrc = withBase('/videos/contact-bg.mp4')
 const posterSrc = withBase('/images/contact.png')
 
 const isVideoPlaying = ref(false)
+
+const previousTitle = document.title
+
+onMounted(() => {
+  document.title = 'Kontakt'
+})
+
+onBeforeUnmount(() => {
+  document.title = previousTitle
+})
 
 const onVideoLoaded = () => {
   // optional: könnte schon hier auf true setzen

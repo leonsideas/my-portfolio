@@ -56,7 +56,7 @@ const { site } = useData()
 onMounted(() => {
   // Globalen Site-Titel NICHT überschreiben, nur Tab-Titel setzen
   if (typeof document !== 'undefined') {
-    document.title = 'Über mich'
+    document.title = 'https://www.leonalbers.de/Uebermich'
   }
 
   // Fallback: falls Video nie startet, Text trotzdem einblenden

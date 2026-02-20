@@ -49,6 +49,7 @@ const isVideoPlaying = ref(false)
 const previousTitle = document.title
 
 onMounted(() => {
+  // Tab-Titel für /Kontakt
   document.title = 'Kontakt'
 })
 

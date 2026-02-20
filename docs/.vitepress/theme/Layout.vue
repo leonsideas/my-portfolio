@@ -4,7 +4,6 @@ import NavBar from './components/NavBar.vue'
 import WorkPage from './components/WorkPage.vue'
 import WorkStack from './components/WorkStack.vue'
 import AboutPage from './components/AboutPage.vue'
-import HeroSection from './home-page-components/hero-section/HeroSection.vue'
 import { computed } from 'vue'
 
 const { frontmatter, site } = useData()
@@ -15,16 +14,21 @@ const normalizedPath = computed(() => {
   return route.path.replace(base, '/') || '/'
 })
 
-const currentPageComponent = computed(() => {
-  if (frontmatter.value.layout === 'home') return WorkStack
-  if (normalizedPath.value.startsWith('/works/')) return WorkPage
-  if (normalizedPath.value.startsWith('/about')) return AboutPage
-  return null
-})
+// ✅ NEU: About-Route umgestellt auf /Uebermich
+// ✅ Alias: /about bleibt erstmal gültig
+const isAboutPage = computed(() =>
+  normalizedPath.value.startsWith('/Uebermich') || normalizedPath.value.startsWith('/about')
+)
 
-const isAboutPage = computed(() => normalizedPath.value.startsWith('/about'))
 const isWorkPage = computed(() => normalizedPath.value.startsWith('/works/'))
 const isEmptyLayout = computed(() => frontmatter.value.layout === 'empty')
+
+const currentPageComponent = computed(() => {
+  if (frontmatter.value.layout === 'home') return WorkStack
+  if (isWorkPage.value) return WorkPage
+  if (isAboutPage.value) return AboutPage
+  return null
+})
 </script>
 
 <template>
@@ -48,11 +52,11 @@ const isEmptyLayout = computed(() => frontmatter.value.layout === 'empty')
         :key="route.path"
       />
 
-      <!-- Für alle anderen Seiten: bisheriges Layout -->
+      <!-- Für alle anderen Seiten -->
       <div
         v-else
         :class="[
-          !isAboutPage ? 'bg-black' : 'bg-black',
+          'bg-black',
           'min-h-[calc(100vh-4rem)]'
         ]"
       >
@@ -60,8 +64,7 @@ const isEmptyLayout = computed(() => frontmatter.value.layout === 'empty')
           :class="[
             !isAboutPage
               ? 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-8'
-              : 'w-full h-full',
-            isAboutPage ? '' : ''
+              : 'w-full h-full'
           ]"
         >
           <component

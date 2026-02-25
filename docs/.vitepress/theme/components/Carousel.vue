@@ -141,7 +141,7 @@
     <!-- linke Kante: "Projekte" (nur beim ersten Slide) -->
     <a
       v-if="isFirstSlide"
-      href="#projects"
+      href=""
       class="absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
       aria-label="Projekte von hinten durchblättern"
@@ -164,7 +164,7 @@
     <!-- linke Kante: "back" (nur wenn NICHT erster Slide) -->
     <a
       v-if="!isFirstSlide"
-      href="#projects"
+      href=""
       class="absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
       aria-label="Vorheriger Slide"
@@ -184,9 +184,9 @@
       </span>
     </a>
 
-    <!-- rechte Kante: "projects" nur beim ersten Slide, sonst "more" -->
+    <!-- rechte Kante: beim ersten Slide KEIN Hash; bei Projekten: immer "Mehr" -->
     <a
-      :href="isFirstSlide ? '#projects' : '#more'"
+      href=""
       class="absolute right-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
       :aria-label="isFirstSlide ? 'Zu Projekten' : 'Nächster Slide'"
@@ -203,7 +203,7 @@
                tracking-[0.35em] uppercase"
         :class="isFirstSlide ? 'h-40 py-2' : 'h-28 py-1'"
       >
-        {{ isFirstSlide ? 'Projekte' : 'mehr' }}
+        {{ isFirstSlide ? 'Projekte' : 'Mehr' }}
       </span>
     </a>
 

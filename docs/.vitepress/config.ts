@@ -5,13 +5,12 @@ import { dirname, resolve } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
-  // Für Project Pages: https://<user>.github.io/<repo>/
   base: '/',
 
   title: 'Portfolio',
   titleTemplate: ':title | Leon Albers',
 
-  // ✅ Preload Transition-Videos (global im <head>)
+  // ✅ Preload Videos + GitHub Pages Redirect Restore
   head: [
     [
       'link',
@@ -30,19 +29,71 @@ export default defineConfig({
         href: '/videos/Transition_up.mp4',
         type: 'video/mp4'
       }
+    ],
+
+    // ✅ GitHub Pages: stellt /Migration wieder her nach 404 redirect
+    [
+      'script',
+      {},
+      `
+      (function () {
+        var params = new URLSearchParams(location.search);
+        var r = params.get('redirect');
+        if (!r) return;
+
+        try {
+          var decoded = decodeURIComponent(r);
+          history.replaceState(null, '', decoded);
+        } catch (e) {}
+      })();
+      `
     ]
   ],
 
   themeConfig: {
-    // ...existing code (falls vorhanden)...
+    // ...falls du etwas hast, bleibt das hier
   },
 
-  // ✅ Plattformunabhängig (funktioniert lokal + in GitHub Actions)
   vite: {
     resolve: {
       alias: {
         '@theme': resolve(__dirname, './theme'),
       },
     },
+
+    // ✅ LOKALER Clean-URL Fallback
+    // erlaubt Reload / Direktaufruf von /Migration im dev server
+    plugins: [
+      {
+        name: 'local-clean-url-fallback-to-works',
+        configureServer(server) {
+          server.middlewares.use((req, _res, next) => {
+            if (!req.url) return next()
+
+            const original = req.url
+            const path = original.split('?')[0]
+
+            // Dinge, die nicht umgeleitet werden sollen
+            const ignore =
+              path.startsWith('/@') ||
+              path.startsWith('/assets') ||
+              path.startsWith('/works') ||
+              path.startsWith('/cv') ||
+              path.startsWith('/about') ||
+              path.startsWith('/videos') ||
+              path === '/' ||
+              path.endsWith('.html') ||
+              path.includes('.')
+
+            if (ignore) return next()
+
+            // 👉 gleiche Logik wie GitHub Pages 404.html
+            // /Migration -> /works/?redirect=/Migration
+            req.url = `/works/?redirect=${encodeURIComponent(original)}`
+            next()
+          })
+        }
+      }
+    ]
   },
 })

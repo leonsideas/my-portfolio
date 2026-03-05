@@ -112,24 +112,26 @@ export default {
       />
     </div>
 
-    <!-- Vordergrund-Content -->
+    <!-- Vordergrund-Content: auf Mobile scrollbar, auf Desktop fixierte Höhe -->
     <div
-      class="relative z-10 h-screen overflow-hidden px-6 isolate
-           flex items-start justify-center pt-32 sm:pt-40 md:pt-48"
+      class="relative z-10 isolate px-6
+             min-h-screen
+             flex items-start justify-center pt-32 sm:pt-40 md:pt-48 pb-10"
     >
       <div class="w-full max-w-6xl">
-        <!-- NEU: 2-Spalten Layout -->
+        <!-- 2-Spalten Layout -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-start">
-          <!-- Links: Intro -->
-          <div>
+
+          <!-- Links: Intro – auf Desktop eigener Scroll-Container -->
+          <div class="intro-panel text-black mix-blend-difference">
             <h1
-              class="text-black mix-blend-difference text-left text-2xl sm:text-3xl md:text-4xl font-semibold mb-6"
+              class="text-left text-2xl sm:text-3xl md:text-4xl font-semibold mb-6"
             >
               Über mich
             </h1>
             <p
               :class="[
-                'text-black mix-blend-difference text-left text-sm sm:text-base md:text-lg leading-relaxed transition-opacity duration-[5000ms] ease-out',
+                'text-left text-sm sm:text-base md:text-lg leading-relaxed transition-opacity duration-[5000ms] ease-out',
                 showText ? 'opacity-100' : 'opacity-0',
               ]"
             >
@@ -192,21 +194,49 @@ export default {
 <style>
 /* ...existing code (html, body, #app, .VPApp etc.)... */
 
-/* Rechtes Panel: eigener Scrollcontainer (nur hier scrollen) */
+/* Gemeinsame Basis für beide Panels */
+.intro-panel,
+.cv-panel {
+  -webkit-overflow-scrolling: touch;
+  transition: opacity 5000ms ease-out;
+}
+
+/* Auf Desktop: beide Spalten unabhängig scrollbar, feste Höhe */
+@media (min-width: 768px) {
+  .intro-panel,
+  .cv-panel {
+    max-height: calc(100vh - 10rem);
+    overflow-y: auto;
+  }
+
+  .intro-panel {
+    padding-right: 0.75rem;
+  }
+}
+
+/* Auf Mobile: kein eigener Scroll-Container, natürlicher Seitenfluss */
+@media (max-width: 767px) {
+  .intro-panel,
+  .cv-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 .cv-panel {
   max-height: calc(100vh - 10rem); /* ggf. an dein Padding anpassen */
   overflow-y: auto;
   padding-right: 0.75rem;
   transition: opacity 5000ms ease-out;
   -webkit-overflow-scrolling: touch;
-  border-left: 1px solid rgba(255, 255, 255, 0.18);
-  padding-left: 1.25rem;
 }
 
-.cv-panel::-webkit-scrollbar {
+.cv-panel::-webkit-scrollbar,
+.intro-panel::-webkit-scrollbar {
   width: 10px;
 }
-.cv-panel::-webkit-scrollbar-thumb {
+.cv-panel::-webkit-scrollbar-thumb,
+.intro-panel::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.25);
   border-radius: 999px;
   border: 3px solid rgba(0, 0, 0, 0);

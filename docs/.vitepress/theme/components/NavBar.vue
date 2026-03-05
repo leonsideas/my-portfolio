@@ -3,7 +3,7 @@
   
   const items = [
     { text: 'Home', link: '/', isHome: true },
-    { text: 'Über mich', link: '/about', class: 'nav-item--about', isAbout: true },
+    { text: 'Über mich', link: '/uebermich', class: 'nav-item--about', isAbout: true },
     { text: 'Kontakt', link: '/contact' },
   ]
 </script>

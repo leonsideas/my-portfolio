@@ -6,6 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   base: '/',
+  cleanUrls: true,  // ← NEU
 
   title: 'Portfolio',
   titleTemplate: ':title | Leon Albers',
@@ -73,22 +74,32 @@ export default defineConfig({
             const original = req.url
             const path = original.split('?')[0]
 
-            // Dinge, die nicht umgeleitet werden sollen
             const ignore =
               path.startsWith('/@') ||
               path.startsWith('/assets') ||
-              path.startsWith('/works') ||
               path.startsWith('/cv') ||
               path.startsWith('/about') ||
+              path.startsWith('/uebermich') ||
               path.startsWith('/videos') ||
               path === '/' ||
+              path === '/works' ||
+              path === '/works/' ||
               path.endsWith('.html') ||
               path.includes('.')
 
             if (ignore) return next()
 
-            // 👉 gleiche Logik wie GitHub Pages 404.html
-            // /Migration -> /works/?redirect=/Migration
+            // /works/Klanggestalten -> /works/?id=Klanggestalten
+            const worksMatch = path.match(/^\/works\/(.+)$/)
+            if (worksMatch) {
+              const slug = worksMatch[1]
+              const qs = new URLSearchParams(original.split('?')[1] || '')
+              const play = qs.get('play') === '1' ? '&play=1' : ''
+              req.url = `/works/?id=${encodeURIComponent(slug)}${play}`
+              return next()
+            }
+
+            // alles andere (z.B. /Klanggestalten) -> /works/?redirect=...
             req.url = `/works/?redirect=${encodeURIComponent(original)}`
             next()
           })

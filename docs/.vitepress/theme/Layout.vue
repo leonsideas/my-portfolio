@@ -17,7 +17,7 @@ const normalizedPath = computed(() => {
 // ✅ NEU: About-Route umgestellt auf /Uebermich
 // ✅ Alias: /about bleibt erstmal gültig
 const isAboutPage = computed(() =>
-  normalizedPath.value.startsWith('/Über mich') || normalizedPath.value.startsWith('/about')
+  normalizedPath.value.startsWith('/uebermich') || normalizedPath.value.startsWith('/about')
 )
 
 const isWorkPage = computed(() => normalizedPath.value.startsWith('/works/'))

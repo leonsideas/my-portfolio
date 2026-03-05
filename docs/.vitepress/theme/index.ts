@@ -8,12 +8,11 @@ import "./tailwind.css";
 import './styles/fonts.css'
 import type { Theme } from "vitepress";
 import Layout from './Layout.vue'
+import WorkPage from './components/WorkPage.vue'
 
 export default {
   Layout,
-  // extends: DefaultTheme,
-  // enhanceApp({ app }) {
-  //   app.use(TwoslashFloatingVue)
-  //   // ...
-  // }
+  enhanceApp({ app }) {
+    app.component('WorkPage', WorkPage)
+  }
 } satisfies Theme

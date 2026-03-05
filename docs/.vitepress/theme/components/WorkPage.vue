@@ -222,10 +222,8 @@ function showWorkPageFromOverlay() {
   overlayTargetSlug.value = null
   currentSlug.value = target
 
-  // ✅ intern auf /works/ navigieren
   router.go(withBase(`/works/?id=${encodeURIComponent(target)}`))
-  // ✅ außen clean anzeigen
-  setCleanSlugUrl(target)
+  setTimeout(() => setCleanSlugUrl(target), 50)
 }
 
 function getParamsFromLocation() {
@@ -233,8 +231,22 @@ function getParamsFromLocation() {
     return { id: undefined as string | undefined, play: false, redirect: undefined as string | undefined }
   }
   const params = new URLSearchParams(window.location.search)
+  let id = params.get('id') || undefined
+
+  // ✅ Slug aus Pfad lesen wenn kein ?id= vorhanden (z.B. /Moi direkt aufgerufen)
+  if (!id) {
+    const pathMatch = window.location.pathname.match(/^\/([^/]+)\/?$/)
+    if (pathMatch) {
+      const slug = pathMatch[1]
+      const knownPaths = ['works', 'about', 'uebermich', 'cv', '']
+      if (!knownPaths.includes(slug)) {
+        id = slug
+      }
+    }
+  }
+
   return {
-    id: params.get('id') || undefined,
+    id,
     play: params.get('play') === '1',
     redirect: params.get('redirect') || undefined
   }
@@ -259,10 +271,10 @@ function updateInternalUrlWithoutPlayOrRedirect(id?: string) {
 
 function selectCard(slug: string, routePath: string) {
   currentSlug.value = slug
-  // ✅ intern (damit VitePress die Seite wirklich rendert)
+  // intern navigieren, danach sofort clean URL setzen
   router.go(withBase(`/works/?id=${encodeURIComponent(slug)}`))
-  // ✅ außen clean
-  setCleanSlugUrl(slug)
+  // Timeout: nach router.go kommt ggf. ein URL-Update, den wir überschreiben
+  setTimeout(() => setCleanSlugUrl(slug), 50)
 }
 
 function playProjectIntro(slug: string, videoSrc?: string | null) {
@@ -523,15 +535,12 @@ onMounted(() => {
     }
   } else if (id) {
     currentSlug.value = id
-
-    // intern aufräumen (play/redirect weg)
     if (play) updateInternalUrlWithoutPlayOrRedirect(id)
-
-    // außen clean anzeigen (optional play)
-    setCleanSlugUrl(id)
+    // clean URL erst nach kurzem Delay setzen (nach VitePress-Initialisierung)
+    setTimeout(() => setCleanSlugUrl(id), 50)
   } else if (cards.value[0]?.slug) {
     currentSlug.value = cards.value[0].slug
-    setCleanSlugUrl(cards.value[0].slug)
+    setTimeout(() => setCleanSlugUrl(cards.value[0].slug), 50)
   }
 
   // Intro Video
@@ -560,20 +569,11 @@ onBeforeUnmount(() => {
 })
 
 // watcher: wenn intern /works/?id=... geändert wird, URL außen clean halten
-watch(
-  () => (typeof window !== 'undefined' ? window.location.search : ''),
-  () => {
-    const { id, play } = getParamsFromLocation()
-    if (id) {
-      currentSlug.value = id
-      setCleanSlugUrl(id)
-    }
-    if (id && play) {
-      updateInternalUrlWithoutPlayOrRedirect(id)
-      playProjectIntro(id, withBase('/videos/Transition.mp4'))
-    }
-  }
-)
+// watch auf location.search deaktivieren – er kämpft gegen setCleanSlugUrl
+// watch(
+//   () => (typeof window !== 'undefined' ? window.location.search : ''),
+//   ...
+// )
 </script>
 
 <template>

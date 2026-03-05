@@ -8,6 +8,11 @@ export default defineConfig({
   base: '/',
   cleanUrls: true,  // ← NEU
 
+  // ✅ VitePress kennt jetzt /works/ als gültige Route
+  rewrites: {
+    'works/index.md': 'works/index.md',
+  },
+
   title: 'Portfolio',
   titleTemplate: ':title | Leon Albers',
 
@@ -67,12 +72,41 @@ export default defineConfig({
     plugins: [
       {
         name: 'local-clean-url-fallback-to-works',
+        // ✅ Abfangen von dynamischen .md Importen (VitePress intern)
+        resolveId(id) {
+          // z.B. /Moi/index.md oder /Moi.md → auf works/index.md umleiten
+          const mdMatch = id.match(/^\/([^/]+?)(\/index)?\.md$/)
+          if (mdMatch) {
+            const slug = mdMatch[1]
+            const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', '404', 'kontakt']
+            if (!knownRoutes.includes(slug)) {
+              return { id: '/works/index.md', moduleSideEffects: false }
+            }
+          }
+          return undefined
+        },
         configureServer(server) {
+          // ✅ früher einbinden: vor VitePress's eigenem Middleware
           server.middlewares.use((req, _res, next) => {
             if (!req.url) return next()
 
             const original = req.url
             const path = original.split('?')[0]
+
+            // .md?import Requests abfangen die VitePress selbst generiert
+            if (path.endsWith('.md')) {
+              const mdSlugMatch = path.match(/^\/([^/]+?)(\/index)?\.md$/)
+              if (mdSlugMatch) {
+                const slug = mdSlugMatch[1]
+                const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', 'kontakt']
+                if (!knownRoutes.includes(slug)) {
+                  const qs = new URLSearchParams(original.split('?')[1] || '')
+                  const play = qs.get('play') === '1' ? '&play=1' : ''
+                  req.url = `/works/index.md?id=${encodeURIComponent(slug)}${play}`
+                  return next()
+                }
+              }
+            }
 
             const ignore =
               path.startsWith('/@') ||
@@ -80,10 +114,10 @@ export default defineConfig({
               path.startsWith('/cv') ||
               path.startsWith('/about') ||
               path.startsWith('/uebermich') ||
+              path.startsWith('/kontakt') ||
               path.startsWith('/videos') ||
+              path.startsWith('/works') ||
               path === '/' ||
-              path === '/works' ||
-              path === '/works/' ||
               path.endsWith('.html') ||
               path.includes('.')
 
@@ -92,14 +126,23 @@ export default defineConfig({
             // /works/Klanggestalten -> /works/?id=Klanggestalten
             const worksMatch = path.match(/^\/works\/(.+)$/)
             if (worksMatch) {
-              const slug = worksMatch[1]
+              const slug = worksMatch[1].replace(/\/$/, '')
               const qs = new URLSearchParams(original.split('?')[1] || '')
               const play = qs.get('play') === '1' ? '&play=1' : ''
               req.url = `/works/?id=${encodeURIComponent(slug)}${play}`
               return next()
             }
 
-            // alles andere (z.B. /Klanggestalten) -> /works/?redirect=...
+            // /Moi -> /works/?id=Moi
+            const slugMatch = path.match(/^\/([^/]+)\/?$/)
+            if (slugMatch) {
+              const slug = slugMatch[1]
+              const qs = new URLSearchParams(original.split('?')[1] || '')
+              const play = qs.get('play') === '1' ? '&play=1' : ''
+              req.url = `/works/?id=${encodeURIComponent(slug)}${play}`
+              return next()
+            }
+
             req.url = `/works/?redirect=${encodeURIComponent(original)}`
             next()
           })

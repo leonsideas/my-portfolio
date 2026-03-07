@@ -1,3 +1,9 @@
+---
+videos:
+  - url: https://www.youtube.com/embed/jwvHAZlaGLA
+    title: MOI – Video Performance
+---
+
 # MOI
 ###### 2025
 

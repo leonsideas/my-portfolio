@@ -1,3 +1,9 @@
+---
+videos:
+  - url: https://www.youtube.com/embed/9Uwy1a1OipA
+    title: Mit KI läufts bei uns – Übersee-Museum
+---
+
 # Mit KI läufts bei uns!
 ##### 2025
 

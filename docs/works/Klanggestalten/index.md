@@ -1,3 +1,9 @@
+---
+videos:
+  - url: https://www.youtube.com/embed/xenrVK3cvyA
+    title: Klanggestalten
+---
+
 # Klanggestalten
 ##### 2025
 

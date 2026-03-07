@@ -1,13 +1,19 @@
 <template>
-  <section class="contact-screen" aria-label="Kontakt">
+  <section
+    class="contact-screen"
+    aria-label="Kontakt"
+    :class="{ 'is-night': isNight }"
+    :style="isNight ? { backgroundImage: `url(${nightBgSrc})` } : undefined"
+  >
     <!-- Poster-Bild, sichtbar bis Video spielt -->
     <img
-      v-if="!isVideoPlaying"
+      v-if="!isNight && !isVideoPlaying"
       class="posterImage"
       :src="posterSrc"
       alt="Kontakt Hintergrund"
     />
     <video
+      v-if="!isNight"
       class="bgVideo"
       autoplay
       muted
@@ -43,13 +49,18 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const videoSrc = withBase('/videos/contact-bg.mp4')
 const posterSrc = withBase('/images/contact.png')
+const nightBgSrc = withBase('/images/bg-cover-night.png') // ggf. Endung anpassen
 
 const isVideoPlaying = ref(false)
+const isNight = ref(false)
 
 const previousTitle = document.title
 
 onMounted(() => {
   document.title = 'Kontakt'
+
+  const hour = new Date().getHours()
+  isNight.value = hour >= 20 || hour < 6
 })
 
 onBeforeUnmount(() => {
@@ -79,6 +90,13 @@ const onVideoPlaying = () => {
   background: #000;
   z-index: 0;
   overflow: hidden; /* wichtig gegen "Springen" */
+}
+
+/* nachts statt Video/Bild ein cover-Hintergrund */
+.contact-screen.is-night {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Poster-Bild über dem Video, gleiche Position/Größe */
@@ -168,6 +186,17 @@ const onVideoPlaying = () => {
 }
 
 .instagram:hover {
+  text-decoration: underline;
+}
+
+/* nachts: Schrift weiß */
+.contact-screen.is-night .email,
+.contact-screen.is-night .instagram {
+  color: #fff;
+}
+
+.contact-screen.is-night .email:hover,
+.contact-screen.is-night .instagram:hover {
   text-decoration: underline;
 }
 

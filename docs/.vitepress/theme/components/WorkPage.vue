@@ -58,6 +58,65 @@ const projectImageFiles = import.meta.glob('../../../works/**/*.{jpg,jpeg,png,we
   import: 'default'
 })
 
+// Einfacher Frontmatter-Parser aus Raw-Text
+function parseRawFrontmatter(raw: string): Record<string, any> {
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+  if (!match) return {}
+  const block = match[1]
+  const result: Record<string, any> = {}
+  let currentKey: string | null = null
+  let currentArray: any[] | null = null
+
+  for (const line of block.split('\n')) {
+    const topLevel = line.match(/^(\w+)\s*:\s*(.*)$/)
+    if (topLevel) {
+      if (currentKey && currentArray) {
+        result[currentKey] = currentArray
+      }
+      const [, key, val] = topLevel
+      if (val.trim() === '') {
+        currentKey = key
+        currentArray = []
+      } else {
+        result[key] = val.trim()
+        currentKey = null
+        currentArray = null
+      }
+      continue
+    }
+    const arrayItem = line.match(/^\s+-\s+(.*)$/)
+    if (arrayItem && currentArray !== null) {
+      const val = arrayItem[1].trim()
+      if (val.startsWith('url:') || val.startsWith('title:')) {
+        // key-value in object
+        const kv = val.match(/^(\w+):\s*(.*)$/)
+        if (kv) {
+          const last = currentArray[currentArray.length - 1]
+          if (last && typeof last === 'object') {
+            last[kv[1]] = kv[2].trim()
+          } else {
+            currentArray.push({ [kv[1]]: kv[2].trim() })
+          }
+        }
+      } else {
+        currentArray.push(val)
+      }
+      continue
+    }
+    const nestedKv = line.match(/^\s+(\w+):\s*(.*)$/)
+    if (nestedKv && currentArray !== null) {
+      const last = currentArray[currentArray.length - 1]
+      if (last && typeof last === 'object') {
+        last[nestedKv[1]] = nestedKv[2].trim()
+      }
+    }
+  }
+  if (currentKey && currentArray) {
+    result[currentKey] = currentArray
+  }
+  return result
+}
+
 const cards = ref<Card[]>([])
 
 for (const path in markdownFiles) {
@@ -90,7 +149,12 @@ for (const path in markdownFiles) {
 
   const mod = markdownModules[path] as any
 
-  const fm = mod?.frontmatter || {}
+  // Frontmatter: zuerst aus dem kompilierten Modul, dann Fallback aus Raw-Text
+  let fm = mod?.frontmatter
+  if (!fm || (typeof fm === 'object' && Object.keys(fm).length === 0)) {
+    fm = parseRawFrontmatter(raw)
+  }
+
   const fmVideos = Array.isArray(fm.videos) ? fm.videos : []
   const youtubeVideos: CardVideo[] = fmVideos
     .map((v: any) => {
@@ -151,6 +215,12 @@ function clearOverlayFadeTimer() {
     window.clearTimeout(overlayAfterFadeTimer)
     overlayAfterFadeTimer = null
   }
+}
+
+// Nachtmodus: zwischen 20:00 und 06:00 keine Transition-Videos
+function isNightTime(): boolean {
+  const hour = new Date().getHours()
+  return hour >= 20 || hour < 6
 }
 
 // ✅ Clean URL nur anzeigen (ohne VitePress Navigation)
@@ -282,7 +352,7 @@ function playProjectIntro(slug: string, videoSrc?: string | null) {
   if (!card) return
 
   const src = videoSrc ?? card.video
-  if (!src) {
+  if (!src || isNightTime()) {
     selectCard(slug, `/works/?id=${encodeURIComponent(slug)}`)
     contentVisible.value = true
     return
@@ -304,6 +374,21 @@ function playProjectIntro(slug: string, videoSrc?: string | null) {
 }
 
 function playTransitionToRoute(routePath: string, videoSrc: string, fadeMode: OverlayFadeMode = 'fade-out') {
+  if (isNightTime()) {
+    // Direkt navigieren ohne Video
+    if (overlayHomeToRoot.value) {
+      overlayHomeToRoot.value = false
+      if (typeof window !== 'undefined') {
+        window.location.href = withBase(routePath || '/')
+      }
+      return
+    }
+    if (typeof window !== 'undefined') {
+      window.location.href = withBase(routePath || '/')
+    }
+    return
+  }
+
   clearOverlayFadeTimer()
   overlayTimersStarted.value = false
 
@@ -403,6 +488,13 @@ function handleOverlayError() {
 }
 
 const currentCard = computed(() => cards.value.find(card => card.slug === currentSlug.value))
+
+const hasMedia = computed(() => {
+  if (!currentCard.value) return false
+  const hasImages = currentCard.value.images && currentCard.value.images.length > 0
+  const hasVideos = currentCard.value.videos && currentCard.value.videos.length > 0
+  return hasImages || hasVideos
+})
 
 const contentKey = ref(0)
 watch(currentSlug, () => {
@@ -621,7 +713,7 @@ onBeforeUnmount(() => {
 
       <!-- Hauptinhalt -->
       <section v-if="contentVisible" class="flex-1 min-h-0 w-full text-gray-100 workpage-content">
-        <div class="pt-16 px-6 pb-2 h-full flex flex-col lg:min-h-0">
+        <div class="pt-20 lg:pt-24 px-8 lg:px-12 pb-2 h-full flex flex-col lg:min-h-0">
           <Transition name="content-fade" mode="out-in" appear>
             <div v-if="currentCard" :key="contentKey" class="flex flex-col lg:flex-1 lg:min-h-0">
               <div class="flex items-center justify-between gap-4 mb-4 text-xs md:text-sm text-gray-400 shrink-0">
@@ -647,9 +739,12 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="lg:flex-1 lg:min-h-0">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start lg:h-full lg:min-h-0">
+                <div
+                  class="grid grid-cols-1 gap-8 items-start lg:h-full lg:min-h-0"
+                  :class="hasMedia ? 'lg:grid-cols-2' : 'lg:grid-cols-1 lg:max-w-3xl lg:mx-auto'"
+                >
                   <!-- Text -->
-                  <div class="text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-2">
+                  <div class="text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-6">
                     <component
                       v-if="currentCard.component"
                       :is="currentCard.component"
@@ -659,7 +754,8 @@ onBeforeUnmount(() => {
 
                   <!-- Medien -->
                   <div
-                    class="mt-8 lg:mt-0 lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pl-2 relative"
+                    v-if="hasMedia"
+                    class="mt-8 lg:mt-0 lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pl-6 relative"
                     @touchstart.passive="onImagesTouchStart"
                     @touchend.passive="onImagesTouchEnd"
                   >
@@ -694,14 +790,6 @@ onBeforeUnmount(() => {
                             allowfullscreen
                           ></iframe>
                         </figure>
-                      </div>
-
-                      <div
-                        v-if="(!currentCard.images || !currentCard.images.length) &&
-                             (!currentCard.videos || !currentCard.videos.length)"
-                        class="text-sm text-gray-500"
-                      >
-                        Für dieses Projekt sind noch keine Medien hinterlegt.
                       </div>
                     </div>
                   </div>

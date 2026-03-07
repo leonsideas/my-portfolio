@@ -2,7 +2,7 @@
   <!-- eigener schwarzer Hintergrund, NavBar bleibt transparent -->
   <div
     class="carousel relative w-full overflow-hidden bg-black z-20"
-    :class="carouselHeightClass"
+    :class="[carouselHeightClass, { 'is-night': isNightTime }]"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
@@ -241,6 +241,7 @@ type Slide = {
   video?: string | null
   previewVideo?: string | null
   nightPreviewVideo?: string | null
+  nightPreviewImage?: string | null
   href?: string
   titleFontClass?: string
   displayTitle?: string
@@ -322,8 +323,10 @@ function markVideoBroken(slide: Slide, index: number) {
 const firstVideoSlide: Slide = {
   id: 'intro-video',
   video: '/videos/intro.mp4',
+  previewImage: '/images/intro-cover.png',
   // Nacht-Variante
   nightPreviewVideo: '/videos/background-night.mp4',
+  nightPreviewImage: '/images/background-night.png',
   href: undefined,
   titleFontClass: 'font-intro' // Beispiel: eigene Font-Klasse für den Intro-Titel
 }
@@ -367,10 +370,8 @@ const displaySlides = computed<Slide[]>(() => {
       updated.previewVideo = `/videos/${String(updated.id)}-cover.mp4`
     }
 
-    // 2) Nacht-Preview automatisch ableiten, falls du nichts explizit setzt
-    if (!updated.nightPreviewVideo && updated.id) {
-      updated.nightPreviewVideo = `/videos/${String(updated.id)}-cover-night.mp4`
-    }
+    // 2) Nacht-Varianten NUR verwenden, wenn sie explizit im Slide gesetzt wurden
+    //    (KEIN automatisches Ableiten aus id – die Dateien existieren meist nicht)
 
     // 3) Wenn es *trotzdem* kein Video gibt, ein Preview-Bild aus id ableiten
     if (
@@ -419,9 +420,18 @@ const displaySlides = computed<Slide[]>(() => {
       updated.titleFontClass = fontClassByKey[updated.titleFontKey] || updated.titleFontClass
     }
 
-    // 8) zum Schluss – je nach Zeit Tag- oder Nacht-Preview verwenden
-    if (isNightTime.value && updated.nightPreviewVideo) {
-      updated.previewVideo = updated.nightPreviewVideo
+    // 8) Nachts: Video deaktivieren, stattdessen Nacht-Bild aus /images/ nutzen
+    if (isNightTime.value) {
+      // Explizites Nacht-Bild hat Vorrang
+      if (slide.nightPreviewImage) {
+        updated.previewImage = slide.nightPreviewImage
+      } else if (updated.id) {
+        // Automatisch ableiten: /images/Klanggestalten_cover-night.png
+        updated.previewImage = `/images/${String(updated.id)}_cover-night.png`
+      }
+      // Video komplett deaktivieren → Bild-Fallback greift
+      updated.previewVideo = null
+      updated.video = null
     }
 
     return updated
@@ -430,9 +440,11 @@ const displaySlides = computed<Slide[]>(() => {
   // Intro-Slide Tag/Nacht-abhängig behandeln
   const introSlide: Slide = (() => {
     const s: Slide = { ...firstVideoSlide }
-    if (isNightTime.value && s.nightPreviewVideo) {
-      s.previewVideo = s.nightPreviewVideo
-      s.video = s.nightPreviewVideo
+    if (isNightTime.value) {
+      // Nachts: nur Bild, kein Video
+      s.previewVideo = null
+      s.video = null
+      s.previewImage = s.nightPreviewImage ?? '/images/background-night.png'
     } else {
       s.previewVideo = s.previewVideo ?? s.video ?? null
       s.video = '/videos/intro.mp4'
@@ -693,7 +705,8 @@ function handleSlideClick(index: number, slide: Slide) {
 
   if (slide.id) {
     const slug = String(slide.id)
-    window.location.href = withBase(`/works/?id=${encodeURIComponent(slug)}&play=1`)
+    const playParam = isNightTime.value ? '' : '&play=1'
+    window.location.href = withBase(`/works/?id=${encodeURIComponent(slug)}${playParam}`)
     return
   }
 
@@ -752,6 +765,19 @@ function handleTitleClick(slide: Slide) {
 
 .title-link-dark:hover {
   color: #000;
+}
+
+/* Nachtmodus: Schrift weiß (Title + Link) */
+.carousel.is-night .title-dark,
+.carousel.is-night .title-link-dark,
+.carousel.is-night .title-link-dark:hover {
+  color: #fff !important;
+}
+
+/* optional: auch die vertikalen Nav-Pills etwas klarer in der Nacht */
+.carousel.is-night .works-vertical {
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 @media (min-width: 768px) {

@@ -21,7 +21,7 @@
         >
           <!-- Media fullscreen -->
           <div class="relative w-full h-full bg-gray-900">
-            <!-- Einzige Klickfläche, nur für Projekt-Slides (index > 0) -->
+            <!-- Projekt öffnen: nur für Projekt-Slides (index > 0) -->
             <button
               v-if="index !== 0"
               type="button"
@@ -36,6 +36,24 @@
             >
               <span>
                 Projekt öffnen
+              </span>
+            </button>
+
+            <!-- Projekte: nur für Intro-Slide (index === 0) -->
+            <button
+              v-if="index === 0"
+              type="button"
+              class="absolute bottom-10 left-1/2
+                     px-6 py-2 z-10 cursor-pointer
+                     flex items-center justify-center
+                     bg-black/30 hover:bg-black/60
+                     border border-white/40 hover:border-white
+                     text-white text-xs md:text-sm tracking-[0.25em] uppercase
+                     rounded-full project-open-btn"
+              @click.prevent="goTo(firstProjectIndex)"
+            >
+              <span>
+                Projekte
               </span>
             </button>
 
@@ -96,7 +114,7 @@
                 <h2
                   class="mb-4 font-semibold text-6xl md:text-9xl leading-tight whitespace-normal md:whitespace-nowrap title-center title-diff"
                   :class="slide.titleFontClass"
-                  :style="mobileTitleStyle(index)"
+                  :style="undefined"
                 >
                   <!-- Text, der gemessen wird -->
                   <a
@@ -122,56 +140,19 @@
       </div>
     </div>
 
-    <!-- Unsichtbare Hover-/Klick-Zonen für Navigation -->
-    <!--
-    <div
-      class="absolute inset-y-0 left-0 w-1/3"
-      @click="prev"
-    >
-      <div class="w-full h-full cursor-w-resize"></div>
-    </div>
-    <div
-      class="absolute inset-y-0 right-0 w-1/3"
-      @click="next"
-    >
-      <div class="w-full h-full cursor-e-resize"></div>
-    </div>
-    -->
-
-    <!-- linke Kante: "Projekte" (nur beim ersten Slide) -->
-    <a
-      v-if="isFirstSlide"
-      href=""
-      class="absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
-             text-white/90 nav-link-font mix-blend-difference"
-      aria-label="Projekte von hinten durchblättern"
-      @click.prevent="goToProjectsFromEnd()"
-    >
-      <span
-        class="flex items-center justify-center
-               w-10
-               h-40 py-2
-               rounded-full
-               border border-white/40 hover:border-white
-               bg-black/30 hover:bg-black/60
-               transition-colors duration-200
-               tracking-[0.35em] uppercase works-vertical"
-      >
-        Projekte
-      </span>
-    </a>
+    <!-- linke Kante: "Projekte" beim Intro entfernt – jetzt im Slide selbst -->
 
     <!-- linke Kante: "back" (nur wenn NICHT erster Slide) -->
     <a
       v-if="!isFirstSlide"
       href=""
-      class="absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
+      class="carousel-side-nav absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
       aria-label="Vorheriger Slide"
       @click.prevent="prev()"
     >
       <span
-        class="works-vertical back-vertical
+        class="carousel-side-pill carousel-side-pill--unified works-vertical back-vertical
                flex items-center justify-center
                w-10 h-28
                rounded-full
@@ -184,26 +165,27 @@
       </span>
     </a>
 
-    <!-- rechte Kante: beim ersten Slide KEIN Hash; bei Projekten: immer "Mehr" -->
+    <!-- rechte Kante: nur bei Projekten "Mehr" -->
     <a
+      v-if="!isFirstSlide"
       href=""
-      class="absolute right-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
+      class="carousel-side-nav absolute right-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
              text-white/90 nav-link-font mix-blend-difference"
-      :aria-label="isFirstSlide ? 'Zu Projekten' : 'Nächster Slide'"
-      @click.prevent="isFirstSlide ? goTo(firstProjectIndex) : next()"
+      aria-label="Nächster Slide"
+      @click.prevent="next()"
     >
       <span
-        class="works-vertical
+        class="carousel-side-pill carousel-side-pill--unified works-vertical
                flex items-center justify-center
                w-10
                rounded-full
                border border-white/40 hover:border-white
                bg-black/30 hover:bg-black/60
                transition-colors duration-200
-               tracking-[0.35em] uppercase"
-        :class="isFirstSlide ? 'h-40 py-2' : 'h-28 py-1'"
+               tracking-[0.35em] uppercase
+               h-28 py-1"
       >
-        {{ isFirstSlide ? 'Projekte' : 'Mehr' }}
+        Mehr
       </span>
     </a>
 
@@ -267,11 +249,11 @@ const props = defineProps<{
 // NEU: Uhrzeitabhängiger Zustand (Nacht = true, Tag = false)
 const isNightTime = ref(false)
 
-// NEU: Mobile-Flag (Tailwind "sm" = 640px)
+// NEU: Mobile-Flag (Tailwind "md" = 768px)
 const isMobile = ref(false)
 function calcIsMobile(): boolean {
   if (typeof window === 'undefined') return false
-  return window.innerWidth <= 640
+  return window.innerWidth < 768
 }
 function updateIsMobile() {
   isMobile.value = calcIsMobile()
@@ -567,97 +549,11 @@ watchEffect(async () => {
   console.log('[Carousel] first h2 classes:', (el as HTMLElement).className)
 })
 
-// 🔹 Mobile Titel-Größen dynamisch pro Slide
-const mobileTitleSizes = ref<number[]>([])
-
-// Hilfsfunktion: prüft, ob wir im (engen) mobilen Layout sind
-function isNarrowMobile() {
-  if (typeof window === 'undefined') return false
-  return window.innerWidth <= 640
-}
-
-// Berechnet für alle Slides die max. Font-Size, bei der der Titel einzeilig bleibt
-async function computeMobileTitleSizes() {
-  if (typeof document === 'undefined') return
-  if (!isNarrowMobile()) return
-
-  await nextTick()
-
-  // ⬅ jetzt direkt den Text innerhalb des H2 messen
-  const titles = Array.from(
-    document.querySelectorAll<HTMLElement>('.carousel .slide-title-measure')
-  )
-
-  if (!titles.length) return
-
-  const sizes: number[] = []
-
-  titles.forEach((el, idx) => {
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 375
-    // etwas Rand links/rechts abziehen, damit der Text nicht am Rand klebt
-    const padding = 32 // px
-    const availableWidth = vw - padding * 2
-
-    const originalText = el.innerText.trim()
-    if (!originalText) {
-      sizes[idx] = 28
-      return
-    }
-
-    const minSize = 18
-    const maxSize = 120 // sehr groß erlauben
-
-    const testEl = el.cloneNode(true) as HTMLElement
-    testEl.style.visibility = 'hidden'
-    testEl.style.position = 'absolute'
-    testEl.style.whiteSpace = 'nowrap'
-    testEl.style.width = 'auto'
-    testEl.style.height = 'auto'
-    testEl.innerText = originalText
-    document.body.appendChild(testEl)
-
-    let bestSize = minSize
-    // von groß nach klein, bis Breite <= availableWidth
-    for (let size = maxSize; size >= minSize; size -= 1) {
-      testEl.style.fontSize = `${size}px`
-      const width = testEl.getBoundingClientRect().width
-      if (width <= availableWidth) {
-        bestSize = size
-        break
-      }
-    }
-
-    document.body.removeChild(testEl)
-    sizes[idx] = bestSize
-  })
-
-  mobileTitleSizes.value = sizes
-}
-
-// Stil-Funktion für mobile Titel
-function mobileTitleStyle(index: number) {
-  if (!isNarrowMobile()) return {}
-  const size = mobileTitleSizes.value[index] || 28
-  return {
-    fontSize: `${size}px`,
-    lineHeight: '1.02',
-  }
-}
-
 onMounted(() => {
   // ...existing code...
   // nach dem ersten Render mobile Größen berechnen
-  computeMobileTitleSizes()
   // bei Slide-Wechsel oder Slide-Daten-Änderung neu berechnen
-  watchEffect(async () => {
-    // nutzt displaySlides und currentIndex
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    displaySlides.value.length
-    currentIndex.value
-    await computeMobileTitleSizes()
-  })
   // bei Resize auf mobile zurück neu messen
-  window.addEventListener('resize', computeMobileTitleSizes)
 })
 
 const intervalMs = () => (props.interval && props.interval > 0 ? props.interval : 5000)
@@ -842,10 +738,53 @@ function handleTitleClick(slide: Slide) {
   .absolute.inset-0.flex.items-start.justify-center.pt-32.md\:pt-40 {
     padding-top: 11rem; /* feintuning für Desktop */
   }
+
+  /* Desktop: Side-Nav auf gleiche Höhe wie project-open-btn */
+  .carousel .carousel-side-nav {
+    top: auto !important;
+    bottom: 5vh !important;
+    transform: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  /* Vertikal-Schrift auf Desktop horizontal + gleicher Stil wie project-open-btn */
+  .carousel .carousel-side-pill.works-vertical {
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+
+    width: auto !important;
+    height: auto !important;
+    padding: 0.5rem 1.5rem !important;
+    border-radius: 9999px !important;
+
+    /* gleiche Schriftgröße wie project-open-btn (md:text-sm = 0.875rem) */
+    font-size: 0.875rem !important;
+    letter-spacing: 0.25em !important;
+    white-space: nowrap;
+
+    /* NEU: gleiche Mindestbreite wie project-open-btn für einheitliches Erscheinungsbild */
+    min-width: 120px;
+    text-align: center;
+  }
+
+  /* Links neben dem mittleren Button (rechter Rand endet vor Button-Mitte) */
+  .carousel .carousel-side-nav.left-6 {
+    left: 50% !important;
+    right: auto !important;
+    /* 170px = halbe max-width (340/2) vom project-open-btn; + gap */
+    transform: translateX(calc(-170px - 0.75rem - 100%)) !important;
+  }
+
+  /* Rechts neben dem mittleren Button (linker Rand startet nach Button-Mitte) */
+  .carousel .carousel-side-nav.right-6 {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(calc(170px + 0.75rem)) !important;
+  }
 }
 
 /* 🔹 Mobile: spezifisch den Titel anpassen */
-@media (max-width: 639px) {
+@media (max-width: 767px) {
   .carousel .absolute.inset-0.flex.items-start.justify-center {
     /* weiter mittig als vorher */
     padding-top: 26vh;
@@ -853,15 +792,77 @@ function handleTitleClick(slide: Slide) {
   }
 
   .carousel h2 {
-    /* Fallback; tatsächliche Größe kommt aus mobileTitleStyle() */
-    font-size: 2.6rem;
-    line-height: 1.02;
-    padding: 0;
-    word-wrap: normal;
-    white-space: nowrap;
-    max-width: 100vw;
+    /* vorher: clamp(2.5rem, 7vw, 3.25rem) */
+    font-size: clamp(3rem, 9vw, 4.25rem);
+    line-height: 1.05;
     margin: 0 auto;
     text-align: center;
+
+    /* Umbruch erlauben */
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+
+    /* konsistente Zeilenbreite */
+    max-width: 92vw;
+  }
+
+  /* ── Mobile: Side-Nav = gleicher Stil wie project-open-btn ── */
+
+  /* Beide Side-Navs: knapp über dem großen Button */
+  .carousel .carousel-side-nav {
+    top: auto !important;
+    bottom: calc(12vh + 2.4rem) !important; /* näher am project-open-btn */
+    transform: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  /* Linker Button: linke Kante = linke Kante des großen Buttons
+     großer Button: width min(75vw, 340px), zentriert → halbe Breite = min(37.5vw, 170px) */
+  .carousel .carousel-side-nav.left-6 {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(max(-37.5vw, -170px)) !important;
+  }
+
+  /* Rechter Button: rechte Kante = rechte Kante des großen Buttons
+     translateX(halbe Breite) minus eigene Breite (100%) */
+  .carousel .carousel-side-nav.right-6 {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(calc(min(37.5vw, 170px) - 100%)) !important;
+  }
+
+  /* Pill-Span: identischer Look wie project-open-btn */
+  .carousel .carousel-side-pill {
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    white-space: nowrap;
+
+    /* Maße zurücksetzen */
+    width: auto !important;
+    height: auto !important;
+
+    /* Exakt wie project-open-btn */
+    padding: 0.5rem 1.5rem !important;
+    border-radius: 9999px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    color: #fff !important;
+    font-size: 0.75rem !important;       /* text-xs */
+    letter-spacing: 0.25em !important;    /* tracking-[0.25em] */
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .carousel .carousel-side-pill:hover {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(255, 255, 255, 1) !important;
+  }
+
+  /* unified-Klasse braucht keine Extra-Overrides mehr */
+  .carousel .carousel-side-pill--unified {
+    /* alles kommt jetzt aus .carousel-side-pill oben */
   }
 }
 
@@ -883,10 +884,10 @@ function handleTitleClick(slide: Slide) {
   bottom: 12vh;
 }
 
-/* Grundverhalten: Button als Block in der Mitte falls absolute nicht greift */
-.project-open-btn {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
+/* Desktop: Button weiter nach unten */
+@media (min-width: 768px) {
+  .carousel .project-open-btn {
+    bottom: 5vh;
+  }
 }
 </style>

@@ -50,103 +50,46 @@
     padding: 0.75rem 1rem;
     background: transparent;
   }
-  
-  @media (min-width: 640px) {
-    .my-nav__inner {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
-  @media (min-width: 1024px) {
-    .my-nav__inner {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
-  }
-  
+
   .my-nav__list {
     display: flex;
     width: 100%;
-    justify-content: space-between;
-    gap: 0;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
     font-size: 0.875rem;
     font-weight: 500;
   }
-  
+
   .my-nav__item {
-    flex: 1;
+    flex: 1 1 0;
     text-align: center;
+    display: flex;
+    justify-content: center;
   }
 
-  @media (min-width: 1024px) {
-    .my-nav__list {
-      justify-content: center;
-      gap: 1.5rem;
-    }
-
-    .my-nav__item {
-      flex: 0;
-    }
-
-    .nav-pill {
-      width: auto;
-    }
-  }
-
-  .nav-link-font {
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-  
   .nav-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-  
-    padding: 0.4rem 0.9rem;
+
+    padding: 0.4rem 0.5rem;
     border-radius: 9999px;
-  
+
     border: 1px solid rgba(255, 255, 255, 0.7);
     background: transparent;
     color: rgba(255, 255, 255, 0.95);
-  
+
     text-transform: uppercase;
-    letter-spacing: 0.25em;
-  
+    letter-spacing: 0.18em;
+
     transition: border-color 200ms ease, color 200ms ease;
 
-    white-space: nowrap;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-  }
-
-  /* 🔹 Mobile – Layout sauber begrenzen */
-  @media (max-width: 639px) {
-    .my-nav__inner {
-      padding-inline: 0.75rem;
-    }
-
-    .my-nav__list {
-      width: 100%;
-      justify-content: center;
-      gap: 0.5rem;
-      flex-wrap: nowrap;
-    }
-
-    .my-nav__item {
-      flex: 1 1 0;
-      display: flex;
-      justify-content: center;
-    }
-
-    .nav-pill {
-      max-width: 100%;
-      white-space: normal;
-      padding: 0.4rem 0.5rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.18em;
-    }
+    white-space: normal; /* mobile friendly */
+    font-size: 0.7rem;
   }
 
   .nav-pill:hover {
@@ -156,5 +99,32 @@
 
   .nav-blend {
     mix-blend-mode: difference;
+  }
+
+  /* Desktop ONLY */
+  @media (min-width: 1024px) {
+    .my-nav__inner {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    .my-nav__list {
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .my-nav__item {
+      flex: 0;
+      display: block;
+      justify-content: initial;
+    }
+
+    .nav-pill {
+      width: auto;
+      white-space: nowrap;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.875rem;
+      letter-spacing: 0.25em;
+    }
   }
 </style>

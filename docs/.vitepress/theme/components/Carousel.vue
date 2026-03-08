@@ -267,6 +267,27 @@ const props = defineProps<{
 // NEU: Uhrzeitabhängiger Zustand (Nacht = true, Tag = false)
 const isNightTime = ref(false)
 
+// NEU: Mobile-Flag (Tailwind "sm" = 640px)
+const isMobile = ref(false)
+function calcIsMobile(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth <= 640
+}
+function updateIsMobile() {
+  isMobile.value = calcIsMobile()
+}
+
+// optional helper: mobile Cover aus id ableiten
+function mobileCoverCandidatesById(id: string) {
+  // .jpg ist bei dir vorhanden → zuerst probieren
+  return [
+    `/images/${id}-cover_mobile.jpg`,
+    `/images/${id}-cover_mobile.jpeg`,
+    `/images/${id}-cover_mobile.webp`,
+    `/images/${id}-cover_mobile.png`,
+  ]
+}
+
 // NEU: Helper, ob aktuell 20:00–05:59 ist
 function calcIsNight(): boolean {
   if (typeof window === 'undefined') return false
@@ -281,6 +302,10 @@ onMounted(() => {
   setInterval(() => {
     isNightTime.value = calcIsNight()
   }, 60_000)
+
+  // NEU: initial + resize für mobile
+  updateIsMobile()
+  window.addEventListener('resize', updateIsMobile)
 })
 
 const emit = defineEmits<{
@@ -434,6 +459,18 @@ const displaySlides = computed<Slide[]>(() => {
       updated.video = null
     }
 
+    // NEU: Tagsüber auf Mobile: statt Videos/Hintergründen immer *-cover_mobile nutzen
+    if (!isNightTime.value && isMobile.value) {
+      const id = updated.id ? String(updated.id) : ''
+      if (id) {
+        const [mobileSrc] = mobileCoverCandidatesById(id)
+        updated.previewImage = mobileSrc
+      }
+      // Video komplett deaktivieren → Bild-Fallback greift
+      updated.previewVideo = null
+      updated.video = null
+    }
+
     return updated
   })
 
@@ -445,10 +482,25 @@ const displaySlides = computed<Slide[]>(() => {
       s.previewVideo = null
       s.video = null
       s.previewImage = s.nightPreviewImage ?? '/images/background-night.png'
-    } else {
-      s.previewVideo = s.previewVideo ?? s.video ?? null
-      s.video = '/videos/intro.mp4'
+      return s
     }
+
+    // NEU: Tag + Mobile: Intro auch als mobile Cover anzeigen
+    if (isMobile.value) {
+      // wenn du für intro auch eine Datei hast, wird die hier genutzt
+      // (id vom intro ist "intro-video" -> /images/intro-video-cover_mobile.png)
+      s.previewVideo = null
+      s.video = null
+      s.previewImage = '/images/Sheep-cover_mobile.jpg' // dein Asset-Name
+      // optional, falls du lieber webp/png nutzt:
+      // s.previewImage = '/images/Sheep-cover_mobile.webp'
+      // s.previewImage = '/images/Sheep-cover_mobile.png'
+      return s
+    }
+
+    // Tag + Desktop: Video wie bisher
+    s.previewVideo = s.previewVideo ?? s.video ?? null
+    s.video = '/videos/intro.mp4'
     return s
   })()
 

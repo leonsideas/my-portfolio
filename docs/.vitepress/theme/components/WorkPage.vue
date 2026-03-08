@@ -500,7 +500,19 @@ const contentKey = ref(0)
 watch(currentSlug, () => {
   contentKey.value += 1
   if (typeof document !== 'undefined') document.title = 'Projects | Leon Albers'
+  enforceProjectsTitle()
 })
+
+// NEU: VitePress überschreibt den Titel nach Route-Updates manchmal (z.B. 404 handling).
+// Daher nach jeder Route-Änderung den gewünschten Titel erneut setzen.
+watch(
+  () => (router as any)?.route?.path,
+  () => {
+    if (typeof document !== 'undefined') document.title = 'Projects | Leon Albers'
+    enforceProjectsTitle()
+  },
+  { immediate: true }
+)
 
 // Navbar Click-Interceptor
 function interceptHomeNav(e: Event) {
@@ -593,10 +605,32 @@ const backgroundImage = withBase('/erde.jpg')
 /** EINZIGE klasse für workpage-styles */
 const WORKPAGE_CLASS = 'is-workpage'
 
+const FORCE_TITLE = 'Projects | Leon Albers'
+
+function enforceProjectsTitle() {
+  if (typeof document === 'undefined') return
+  // falls der Titel jemals "404" wird (auch "404 | ..."), direkt überschreiben
+  if (/^\s*404\b/i.test(document.title)) document.title = FORCE_TITLE
+}
+
+// Title-MutationObserver (härter als Router-Watch; fängt VitePress/404-Overrides ab)
+let titleObserver: MutationObserver | null = null
+
 onMounted(() => {
   if (typeof document !== 'undefined') {
     document.documentElement.classList.add(WORKPAGE_CLASS)
-    document.title = 'Projects | Leon Albers'
+    document.title = FORCE_TITLE
+
+    const titleEl = document.querySelector('head > title')
+    if (titleEl && typeof MutationObserver !== 'undefined') {
+      titleObserver = new MutationObserver(() => {
+        enforceProjectsTitle()
+      })
+      titleObserver.observe(titleEl, { childList: true, characterData: true, subtree: true })
+    }
+
+    // zusätzlich direkt einmal prüfen (falls VitePress bereits 404 gesetzt hat)
+    enforceProjectsTitle()
   }
 
   // 1) redirect (kommt von 404.html oder lokalem middleware fallback)
@@ -651,6 +685,10 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (titleObserver) {
+    titleObserver.disconnect()
+    titleObserver = null
+  }
   if (typeof document !== 'undefined') {
     document.documentElement.classList.remove(WORKPAGE_CLASS)
     document.removeEventListener('pointerdown', interceptHomeNav, true)

@@ -5,13 +5,14 @@
     :class="{ 'is-night': isNight }"
     :style="isNight ? { backgroundImage: `url(${nightBgSrc})` } : undefined"
   >
-    <!-- Poster-Bild, sichtbar bis Video spielt -->
+    <!-- Poster nur am Tag -->
     <img
       v-if="!isNight && !isVideoPlaying"
       class="posterImage"
       :src="posterSrc"
       alt="Kontakt Hintergrund"
     />
+    <!-- Video nur am Tag -->
     <video
       v-if="!isNight"
       class="bgVideo"

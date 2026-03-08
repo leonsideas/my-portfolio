@@ -53,11 +53,17 @@ const bgVideo = withBase('/videos/background.mp4')
 
 const { site } = useData()
 
+const isNight = ref(false)
+const nightBgSrc = withBase('/images/bg-cover-night.png')
+
 onMounted(() => {
   // Globalen Site-Titel NICHT überschreiben, nur Tab-Titel setzen
   if (typeof document !== 'undefined') {
     document.title = 'Über mich | Leon Albers'
   }
+
+  const hour = new Date().getHours()
+  isNight.value = hour >= 20 || hour < 6
 
   // Fallback: falls Video nie startet, Text trotzdem einblenden
   if (!showVideoBg.value) startTextFade()
@@ -79,37 +85,48 @@ export default {
   <div class="relative overflow-hidden bg-black">
     <!-- Hintergrund-Layer -->
     <div class="fixed inset-0 w-screen h-screen overflow-hidden">
-      <!-- Video-Hintergrund: immer im DOM, aber OHNE Fade/Transition -->
-      <video
-        class="absolute inset-0 w-full h-full object-cover"
-        :class="showVideoBg ? 'opacity-100' : 'opacity-0'"
-        autoplay
-        muted
-        playsinline
-        :poster="bgSheep"
-        @canplay="handleVideoCanPlay"
-        @play="handleVideoPlay"
-        @ended="handleVideoEnded"
-        @error="handleVideoError"
-      >
-        <source :src="bgVideo" type="video/mp4" />
-      </video>
-
-      <!-- 1. Sheep.jpg – immer zuerst, und bei Fehler -->
-      <img
-        v-if="sheepVisible"
-        :src="bgSheep"
-        alt="Sheep Hintergrundbild"
-        class="absolute inset-0 w-full h-full object-cover"
+      <!-- Nacht: fixes Cover-Background statt Video/Bilder -->
+      <div
+        v-if="isNight"
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        :style="{ backgroundImage: `url(${nightBgSrc})` }"
+        aria-hidden="true"
       />
 
-      <!-- 2. Fallback-Bild NUR nach dem Videoende -->
-      <img
-        v-else-if="showFallbackBg"
-        :src="bgFallback"
-        alt="Fallback Hintergrundbild"
-        class="absolute inset-0 w-full h-full object-cover"
-      />
+      <!-- Tag: bisherige Logik -->
+      <template v-else>
+        <!-- Video-Hintergrund: immer im DOM, aber OHNE Fade/Transition -->
+        <video
+          class="absolute inset-0 w-full h-full object-cover"
+          :class="showVideoBg ? 'opacity-100' : 'opacity-0'"
+          autoplay
+          muted
+          playsinline
+          :poster="bgSheep"
+          @canplay="handleVideoCanPlay"
+          @play="handleVideoPlay"
+          @ended="handleVideoEnded"
+          @error="handleVideoError"
+        >
+          <source :src="bgVideo" type="video/mp4" />
+        </video>
+
+        <!-- 1. Sheep.jpg – immer zuerst, und bei Fehler -->
+        <img
+          v-if="sheepVisible"
+          :src="bgSheep"
+          alt="Sheep Hintergrundbild"
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+
+        <!-- 2. Fallback-Bild NUR nach dem Videoende -->
+        <img
+          v-else-if="showFallbackBg"
+          :src="bgFallback"
+          alt="Fallback Hintergrundbild"
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+      </template>
     </div>
 
     <!-- Vordergrund-Content: auf Mobile scrollbar, auf Desktop fixierte Höhe -->

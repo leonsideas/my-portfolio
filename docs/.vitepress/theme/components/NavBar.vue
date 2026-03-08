@@ -1,15 +1,21 @@
 <script setup lang="ts">
   import { withBase } from 'vitepress'
+  import { computed } from 'vue'
   
   const items = [
     { text: 'Home', link: '/', isHome: true },
     { text: 'Über mich', link: '/uebermich', class: 'nav-item--about', isAbout: true },
     { text: 'Kontakt', link: '/kontakt' },
   ]
+
+  const isNight = computed(() => {
+    const h = new Date().getHours()
+    return h >= 20 || h < 6
+  })
 </script>
 
 <template>
-  <header class="my-nav nav-blend">
+  <header class="my-nav nav-blend" :class="{ 'is-night': isNight }">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
           <li
@@ -99,6 +105,21 @@
 
   .nav-blend {
     mix-blend-mode: difference;
+  }
+
+  /* 20:00–06:00: Navbar im Carousel in Weiß erzwingen */
+  .is-night.nav-blend {
+    mix-blend-mode: normal;
+  }
+
+  .is-night .nav-pill {
+    border-color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 1);
+  }
+
+  .is-night .nav-pill:hover {
+    border-color: rgba(255, 255, 255, 1);
+    color: rgba(255, 255, 255, 1);
   }
 
   /* Desktop ONLY */

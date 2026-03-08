@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { withBase, useData } from 'vitepress'
 
 // Zustände für die Hintergründe
@@ -55,6 +55,8 @@ const { site } = useData()
 
 const isNight = ref(false)
 const nightBgSrc = withBase('/images/bg-cover-night.png')
+
+const nightTextClass = computed(() => (isNight.value ? 'night-text' : 'day-text'))
 
 onMounted(() => {
   // Globalen Site-Titel NICHT überschreiben, nur Tab-Titel setzen
@@ -140,7 +142,7 @@ export default {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-start">
 
           <!-- Links: Intro – auf Desktop eigener Scroll-Container -->
-          <div class="intro-panel text-black mix-blend-difference">
+          <div class="intro-panel text-black mix-blend-difference" :class="nightTextClass">
             <h1
               class="text-left text-2xl sm:text-3xl md:text-4xl font-semibold mb-6"
             >
@@ -162,7 +164,7 @@ export default {
           <!-- Rechts: Scrollbares CV -->
           <aside
             class="cv-panel text-black mix-blend-difference"
-            :class="[showText ? 'opacity-100' : 'opacity-0']"
+            :class="[nightTextClass, showText ? 'opacity-100' : 'opacity-0']"
             aria-label="Lebenslauf"
           >
             <div class="space-y-8">
@@ -258,5 +260,15 @@ export default {
   border-radius: 999px;
   border: 3px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
+}
+
+.day-text {
+  color: #000;
+  mix-blend-mode: difference;
+}
+
+.night-text {
+  color: #fff;
+  mix-blend-mode: normal;
 }
 </style>

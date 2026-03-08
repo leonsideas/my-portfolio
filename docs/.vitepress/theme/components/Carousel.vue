@@ -165,7 +165,7 @@
       </span>
     </a>
 
-    <!-- rechte Kante: nur bei Projekten "Mehr" -->
+    <!-- rechte Kante: nur bei Projekten "Weiter" -->
     <a
       v-if="!isFirstSlide"
       href=""
@@ -185,7 +185,7 @@
                tracking-[0.35em] uppercase
                h-28 py-1"
       >
-        Mehr
+        Weiter
       </span>
     </a>
 
@@ -276,6 +276,13 @@ function calcIsNight(): boolean {
   const now = new Date()
   const h = now.getHours()
   return h >= 20 || h < 6
+}
+
+// NEU: Helper -> aus einem nightPreviewImage (png/jpg/whatever) die mobile jpg-Variante machen
+function toNightMobileJpg(src: string): string {
+  // erwartet deine neue Konvention: "cover-night-mobil.jpg"
+  // ersetzt nur das letzte Dateiende, egal ob .png/.jpg/.webp etc.
+  return src.replace(/\.[a-z0-9]+$/i, '-mobil.jpg')
 }
 
 // NEU: beim Mounten initial setzen und alle 60s neu prüfen
@@ -431,11 +438,18 @@ const displaySlides = computed<Slide[]>(() => {
     if (isNightTime.value) {
       // Explizites Nacht-Bild hat Vorrang
       if (slide.nightPreviewImage) {
-        updated.previewImage = slide.nightPreviewImage
+        updated.previewImage = isMobile.value
+          ? toNightMobileJpg(slide.nightPreviewImage)
+          : slide.nightPreviewImage
       } else if (updated.id) {
-        // Automatisch ableiten: /images/Klanggestalten_cover-night.png
-        updated.previewImage = `/images/${String(updated.id)}_cover-night.png`
+        // Automatisch ableiten:
+        // Desktop: /images/<id>_cover-night.png
+        // Mobile:  /images/<id>_cover-night-mobil.jpg
+        updated.previewImage = isMobile.value
+          ? `/images/${String(updated.id)}_cover-night-mobil.jpg`
+          : `/images/${String(updated.id)}_cover-night.png`
       }
+
       // Video komplett deaktivieren → Bild-Fallback greift
       updated.previewVideo = null
       updated.video = null
@@ -463,7 +477,12 @@ const displaySlides = computed<Slide[]>(() => {
       // Nachts: nur Bild, kein Video
       s.previewVideo = null
       s.video = null
-      s.previewImage = s.nightPreviewImage ?? '/images/background-night.png'
+
+      // NEU: Mobile-Nachtbild fürs Intro
+      s.previewImage = isMobile.value
+        ? (s.nightPreviewImage ? toNightMobileJpg(s.nightPreviewImage) : '/images/background-night-mobil.jpg')
+        : (s.nightPreviewImage ?? '/images/background-night.png')
+
       return s
     }
 

@@ -1,21 +1,15 @@
 <script setup lang="ts">
   import { withBase } from 'vitepress'
-  import { computed } from 'vue'
   
   const items = [
     { text: 'Home', link: '/', isHome: true },
     { text: 'Über mich', link: '/uebermich', class: 'nav-item--about', isAbout: true },
     { text: 'Kontakt', link: '/kontakt' },
   ]
-
-  const isNight = computed(() => {
-    const h = new Date().getHours()
-    return h >= 20 || h < 6
-  })
 </script>
 
 <template>
-  <header class="my-nav nav-blend" :class="{ 'is-night': isNight }">
+  <header class="my-nav">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
           <li
@@ -26,7 +20,7 @@
           >
             <a
               :href="withBase(item.link)"
-              class="nav-pill nav-link-font nav-blend"
+              class="nav-pill nav-link-font"
               :data-nav-home="item.isHome ? '1' : null"
               :data-nav-about="item.isAbout ? '1' : null"
             >
@@ -82,9 +76,9 @@
     padding: 0.4rem 0.5rem;
     border-radius: 9999px;
 
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.95);
     background: transparent;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 1);
 
     text-transform: uppercase;
     letter-spacing: 0.18em;
@@ -99,25 +93,6 @@
   }
 
   .nav-pill:hover {
-    border-color: rgba(255, 255, 255, 1);
-    color: rgba(255, 255, 255, 1);
-  }
-
-  .nav-blend {
-    mix-blend-mode: difference;
-  }
-
-  /* 20:00–06:00: Navbar im Carousel in Weiß erzwingen */
-  .is-night.nav-blend {
-    mix-blend-mode: normal;
-  }
-
-  .is-night .nav-pill {
-    border-color: rgba(255, 255, 255, 0.9);
-    color: rgba(255, 255, 255, 1);
-  }
-
-  .is-night .nav-pill:hover {
     border-color: rgba(255, 255, 255, 1);
     color: rgba(255, 255, 255, 1);
   }
@@ -147,5 +122,14 @@
       font-size: 0.875rem;
       letter-spacing: 0.25em;
     }
+  }
+
+  /* Überschriften global weiß setzen (trotz scoped) */
+  :global(h1, h2, h3, h4, h5, h6) {
+    color: rgba(255, 255, 255, 1);
+  }
+
+  :global(h1 a, h2 a, h3 a, h4 a, h5 a, h6 a) {
+    color: rgba(255, 255, 255, 1);
   }
 </style>

@@ -50,7 +50,22 @@
             </button>
 
             <div
-              v-if="slide.previewImage || slide.image"
+              v-if="slide.previewVideo || slide.video"
+              class="w-full h-full"
+            >
+              <video
+                :src="toBase(slide.previewVideo || slide.video)"
+                class="w-full h-full object-cover"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="auto"
+              />
+            </div>
+
+            <div
+              v-else-if="slide.previewImage || slide.image"
               class="w-full h-full"
             >
               <img
@@ -246,8 +261,7 @@ function toBase(url?: string | null) {
 
 const firstImageSlide: Slide = {
   id: 'intro-slide',
-  previewImage: '/images/Sheep.jpg',
-  nightPreviewImage: '/images/background-night.png',
+  previewVideo: '/videos/intro.mp4',
   href: undefined,
   titleFontClass: 'font-intro',
 }
@@ -373,14 +387,14 @@ const displaySlides = computed<Slide[]>(() => {
     }
 
     if (isMobile.value) {
-      s.previewImage = '/images/Sheep-cover_mobile.jpg'
-      s.previewVideo = null
+      s.previewVideo = '/videos/intro-mobil.mp4'
+      s.previewImage = null
       s.video = null
       return s
     }
 
-    s.previewImage = '/images/Sheep.jpg'
-    s.previewVideo = null
+    s.previewVideo = '/videos/intro.mp4'
+    s.previewImage = null
     s.video = null
     return s
   })()

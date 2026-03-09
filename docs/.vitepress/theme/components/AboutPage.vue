@@ -1,18 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { withBase, useData } from 'vitepress'
-
-// Zustände für Text-Einblendung
-const showText = ref(false)
-let textTimer: number | undefined
-
-const startTextFade = () => {
-  if (showText.value) return
-  if (textTimer) return
-  textTimer = window.setTimeout(() => {
-    showText.value = true
-  }, 0)
-}
 
 const bgCover = withBase('/images/Background-cover.jpg')
 const bgCoverMobile = withBase('/images/Background-cover_mobile.jpg')
@@ -32,7 +20,6 @@ const updateIsMobile = () => {
 }
 
 onMounted(() => {
-  // Globalen Site-Titel NICHT überschreiben, nur Tab-Titel setzen
   if (typeof document !== 'undefined') {
     document.title = 'Über mich | Leon Albers'
   }
@@ -42,13 +29,6 @@ onMounted(() => {
 
   updateIsMobile()
   window.addEventListener('resize', updateIsMobile)
-
-  startTextFade()
-})
-
-onBeforeUnmount(() => {
-  if (textTimer) window.clearTimeout(textTimer)
-  window.removeEventListener('resize', updateIsMobile)
 })
 </script>
 
@@ -97,12 +77,7 @@ export default {
             >
               Über mich
             </h1>
-            <p
-              :class="[
-                'text-left text-sm sm:text-base md:text-lg leading-relaxed transition-opacity duration-[5000ms] ease-out',
-                showText ? 'opacity-100' : 'opacity-0',
-              ]"
-            >
+            <p class="text-left text-sm sm:text-base md:text-lg leading-relaxed">
               Moin, ich bin Leon, 27 Jahre alt und Gestalter aus Bremen.<br />
               Aktuell arbeite ich im Bereich Motion Design &amp; Grafik bei der manymany motion GmbH und studiere im fünften Semester Digitale Medien (B.A.) an der Hochschule für Künste Bremen.
               Bevor’s ins Studium ging, habe ich eine Ausbildung zum Mediengestalter für Konzeption und Visualisierung gemacht.
@@ -113,25 +88,12 @@ export default {
           <!-- Rechts: Scrollbares CV -->
           <aside
             class="cv-panel text-white mix-blend-difference"
-            :class="[nightTextClass, showText ? 'opacity-100' : 'opacity-0']"
+            :class="nightTextClass"
             aria-label="Lebenslauf"
           >
             <div class="space-y-8">
               <section>
-                <h2 class="text-lg sm:text-xl md:text-2xl font-semibold">CV</h2>
-              </section>
-
-              <section class="space-y-3">
-                <h3 class="text-base sm:text-lg font-semibold">Erfahrung</h3>
-                <ul class="space-y-3 text-sm sm:text-base leading-relaxed">
-                  <li>
-                    <div class="font-medium">
-                      manymany motion GmbH — Motion Design &amp; Grafik
-                    </div>
-                    <div class="opacity-80">Seit 2021 · Bremen</div>
-                  </li>
-                  <!-- ...weitere Stationen... -->
-                </ul>
+                <h2 class="text-left text-2xl sm:text-3xl md:text-4xl font-semibold mb-6">CV</h2>
               </section>
 
               <section class="space-y-3">
@@ -166,7 +128,6 @@ export default {
 .intro-panel,
 .cv-panel {
   -webkit-overflow-scrolling: touch;
-  transition: opacity 5000ms ease-out;
 }
 
 /* Auf Desktop: beide Spalten unabhängig scrollbar, feste Höhe */
@@ -195,7 +156,6 @@ export default {
   max-height: calc(100vh - 10rem); /* ggf. an dein Padding anpassen */
   overflow-y: auto;
   padding-right: 0.75rem;
-  transition: opacity 5000ms ease-out;
   -webkit-overflow-scrolling: touch;
 }
 

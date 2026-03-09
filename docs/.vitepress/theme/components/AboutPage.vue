@@ -2,40 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { withBase, useData } from 'vitepress'
 
-// Zustände für die Hintergründe
-const sheepVisible = ref(true)        // zuerst Sheep.jpg
-const showVideoBg = ref(false)        // Video sichtbar, wenn es läuft
-const showFallbackBg = ref(false)     // Fallback nach Ende des Videos
-const videoLoaded = ref(false)
-
-const handleVideoCanPlay = () => {
-  videoLoaded.value = true
-}
-
-const handleVideoPlay = () => {
-  // Video startet:
-  sheepVisible.value = false          // Sheep ausblenden
-  showFallbackBg.value = false
-  showVideoBg.value = true           // Video zeigen (ohne Fade)
-  startTextFade()
-}
-
-const handleVideoEnded = () => {
-  // Video fertig:
-  showVideoBg.value = false
-  showFallbackBg.value = true        // Fallback anzeigen
-}
-
-const handleVideoError = () => {
-  // Video konnte nicht geladen werden:
-  videoLoaded.value = false
-  showVideoBg.value = false
-  showFallbackBg.value = false       // kein Fallback, Sheep bleibt
-  sheepVisible.value = true
-  startTextFade()
-}
-
-// Timeout entfernt, damit das Video nicht vorzeitig ausgeblendet wird
+// Zustände für Text-Einblendung
 const showText = ref(false)
 let textTimer: number | undefined
 
@@ -47,16 +14,22 @@ const startTextFade = () => {
   }, 0)
 }
 
-const bgSheep = withBase('/images/Sheep.jpg')                   // immer zuerst
-const bgFallback = withBase('/images/background-fallback.jpg')  // nach Videoende
-const bgVideo = withBase('/videos/background.mp4')
+const bgCover = withBase('/images/Background-cover.jpg')
+const bgCoverMobile = withBase('/images/Background-cover_mobile.jpg')
 
 const { site } = useData()
 
 const isNight = ref(false)
+const isMobile = ref(false)
 const nightBgSrc = withBase('/images/bg-cover-night.png')
 
 const nightTextClass = computed(() => (isNight.value ? 'night-text' : 'day-text'))
+const currentBgCover = computed(() => (isMobile.value ? bgCoverMobile : bgCover))
+
+const updateIsMobile = () => {
+  if (typeof window === 'undefined') return
+  isMobile.value = window.innerWidth < 768
+}
 
 onMounted(() => {
   // Globalen Site-Titel NICHT überschreiben, nur Tab-Titel setzen
@@ -67,12 +40,15 @@ onMounted(() => {
   const hour = new Date().getHours()
   isNight.value = hour >= 20 || hour < 6
 
-  // Fallback: falls Video nie startet, Text trotzdem einblenden
-  if (!showVideoBg.value) startTextFade()
+  updateIsMobile()
+  window.addEventListener('resize', updateIsMobile)
+
+  startTextFade()
 })
 
 onBeforeUnmount(() => {
   if (textTimer) window.clearTimeout(textTimer)
+  window.removeEventListener('resize', updateIsMobile)
 })
 </script>
 
@@ -87,7 +63,7 @@ export default {
   <div class="relative overflow-hidden bg-black">
     <!-- Hintergrund-Layer -->
     <div class="fixed inset-0 w-screen h-screen overflow-hidden">
-      <!-- Nacht: fixes Cover-Background statt Video/Bilder -->
+      <!-- Nacht: fixes Cover-Background -->
       <div
         v-if="isNight"
         class="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -95,40 +71,13 @@ export default {
         aria-hidden="true"
       />
 
-      <!-- Tag: bisherige Logik -->
-      <template v-else>
-        <!-- Video-Hintergrund: immer im DOM, aber OHNE Fade/Transition -->
-        <video
-          class="absolute inset-0 w-full h-full object-cover"
-          :class="showVideoBg ? 'opacity-100' : 'opacity-0'"
-          autoplay
-          muted
-          playsinline
-          :poster="bgSheep"
-          @canplay="handleVideoCanPlay"
-          @play="handleVideoPlay"
-          @ended="handleVideoEnded"
-          @error="handleVideoError"
-        >
-          <source :src="bgVideo" type="video/mp4" />
-        </video>
-
-        <!-- 1. Sheep.jpg – immer zuerst, und bei Fehler -->
-        <img
-          v-if="sheepVisible"
-          :src="bgSheep"
-          alt="Sheep Hintergrundbild"
-          class="absolute inset-0 w-full h-full object-cover"
-        />
-
-        <!-- 2. Fallback-Bild NUR nach dem Videoende -->
-        <img
-          v-else-if="showFallbackBg"
-          :src="bgFallback"
-          alt="Fallback Hintergrundbild"
-          class="absolute inset-0 w-full h-full object-cover"
-        />
-      </template>
+      <!-- Tag: Desktop/Mobile Bild -->
+      <img
+        v-else
+        :src="currentBgCover"
+        alt="Background Cover"
+        class="absolute inset-0 w-full h-full object-cover"
+      />
     </div>
 
     <!-- Vordergrund-Content: auf Mobile scrollbar, auf Desktop fixierte Höhe -->
@@ -142,7 +91,7 @@ export default {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-start">
 
           <!-- Links: Intro – auf Desktop eigener Scroll-Container -->
-          <div class="intro-panel text-black mix-blend-difference" :class="nightTextClass">
+          <div class="intro-panel text-white mix-blend-difference" :class="nightTextClass">
             <h1
               class="text-left text-2xl sm:text-3xl md:text-4xl font-semibold mb-6"
             >
@@ -163,7 +112,7 @@ export default {
 
           <!-- Rechts: Scrollbares CV -->
           <aside
-            class="cv-panel text-black mix-blend-difference"
+            class="cv-panel text-white mix-blend-difference"
             :class="[nightTextClass, showText ? 'opacity-100' : 'opacity-0']"
             aria-label="Lebenslauf"
           >
@@ -254,6 +203,7 @@ export default {
 .intro-panel::-webkit-scrollbar {
   width: 10px;
 }
+
 .cv-panel::-webkit-scrollbar-thumb,
 .intro-panel::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.25);
@@ -263,7 +213,7 @@ export default {
 }
 
 .day-text {
-  color: #000;
+  color: #fff;
   mix-blend-mode: difference;
 }
 

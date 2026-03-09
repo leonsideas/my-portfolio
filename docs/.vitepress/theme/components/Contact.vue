@@ -5,27 +5,14 @@
     :class="{ 'is-night': isNight }"
     :style="isNight ? { backgroundImage: `url(${nightBgSrc})` } : undefined"
   >
-    <!-- Poster nur am Tag -->
+    <!-- Tagsüber statisches Hintergrundbild, mobil/desktop abhängig -->
     <img
-      v-if="!isNight && !isVideoPlaying"
+      v-if="!isNight"
       class="posterImage"
-      :src="posterSrc"
+      :src="currentPosterSrc"
       alt="Kontakt Hintergrund"
     />
-    <!-- Video nur am Tag -->
-    <video
-      v-if="!isNight"
-      class="bgVideo"
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto"
-      @loadeddata="onVideoLoaded"
-      @playing="onVideoPlaying"
-    >
-      <source :src="videoSrc" type="video/mp4" />
-    </video>
+
     <div class="overlay" aria-hidden="true"></div>
 
     <div class="content">
@@ -46,14 +33,23 @@
 
 <script setup lang="ts">
 import { withBase } from 'vitepress'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
-const videoSrc = withBase('/videos/contact-bg.mp4')
-const posterSrc = withBase('/images/contact.png')
-const nightBgSrc = withBase('/images/bg-cover-night.png') // ggf. Endung anpassen
+const posterSrc = withBase('/images/Background-cover.jpg')
+const posterMobileSrc = withBase('/images/Background-cover_mobile.jpg')
+const nightBgSrc = withBase('/images/bg-cover-night.png')
 
-const isVideoPlaying = ref(false)
 const isNight = ref(false)
+const isMobile = ref(false)
+
+const currentPosterSrc = computed(() =>
+  isMobile.value ? posterMobileSrc : posterSrc
+)
+
+const updateIsMobile = () => {
+  if (typeof window === 'undefined') return
+  isMobile.value = window.innerWidth < 768
+}
 
 const previousTitle = document.title
 
@@ -62,19 +58,15 @@ onMounted(() => {
 
   const hour = new Date().getHours()
   isNight.value = hour >= 20 || hour < 6
+
+  updateIsMobile()
+  window.addEventListener('resize', updateIsMobile)
 })
 
 onBeforeUnmount(() => {
   document.title = previousTitle
+  window.removeEventListener('resize', updateIsMobile)
 })
-
-const onVideoLoaded = () => {
-  // optional: könnte schon hier auf true setzen
-}
-
-const onVideoPlaying = () => {
-  isVideoPlaying.value = true
-}
 </script>
 
 <style scoped>
@@ -90,20 +82,19 @@ const onVideoPlaying = () => {
   padding: 0;
   background: #000;
   z-index: 0;
-  overflow: hidden; /* wichtig gegen "Springen" */
+  overflow: hidden;
 }
 
-/* nachts statt Video/Bild ein cover-Hintergrund */
+/* nachts statt Bild ein cover-Hintergrund */
 .contact-screen.is-night {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-/* Poster-Bild über dem Video, gleiche Position/Größe */
-.posterImage,
-.bgVideo {
-  position: absolute; /* statt fixed */
+/* Tagesbild */
+.posterImage {
+  position: absolute;
   top: 0;
   left: 0;
 
@@ -111,16 +102,7 @@ const onVideoPlaying = () => {
   height: 100%;
 
   object-fit: cover;
-}
-
-/* Bild über dem Video, bis dieses spielt */
-.posterImage {
   z-index: 0;
-  pointer-events: none;
-}
-
-.bgVideo {
-  z-index: -1; /* hinter dem Bild, aber im selben Container */
   pointer-events: none;
 }
 
@@ -166,8 +148,7 @@ const onVideoPlaying = () => {
   font-weight: 800;
   letter-spacing: 0.02em;
   text-decoration: none;
-
-  color: #000;
+  color: #fff;
   font-size: clamp(28px, 6vw, 72px);
   line-height: 1.05;
 }
@@ -181,7 +162,7 @@ const onVideoPlaying = () => {
   font-weight: 800;
   letter-spacing: 0.02em;
   text-decoration: none;
-  color: #000;
+  color: #fff;
   font-size: clamp(28px, 6vw, 72px);
   line-height: 1.05;
 }
@@ -190,7 +171,7 @@ const onVideoPlaying = () => {
   text-decoration: underline;
 }
 
-/* nachts: Schrift weiß */
+/* nachts: Schrift ebenfalls weiß */
 .contact-screen.is-night .email,
 .contact-screen.is-night .instagram {
   color: #fff;
@@ -200,5 +181,4 @@ const onVideoPlaying = () => {
 .contact-screen.is-night .instagram:hover {
   text-decoration: underline;
 }
-
 </style>

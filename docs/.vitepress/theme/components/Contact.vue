@@ -13,8 +13,6 @@
       alt="Kontakt Hintergrund"
     />
 
-    <div class="overlay" aria-hidden="true"></div>
-
     <div class="content">
       <div class="links">
         <a class="email" href="mailto:leon-albers@web.de">leon-albers@web.de</a>
@@ -103,20 +101,6 @@ onBeforeUnmount(() => {
 
   object-fit: cover;
   z-index: 0;
-  pointer-events: none;
-}
-
-/* Dunkles Overlay */
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-
-  width: 100%;
-  height: 100%;
-
-  background: rgba(0, 0, 0, 0.1);
-  z-index: 1;
   pointer-events: none;
 }
 

@@ -27,28 +27,48 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 const kontaktDesktopSrc = withBase('/images/Kontakt.png')
 const kontaktMobileSrc = withBase('/images/Kontakt-mobil.jpg')
 
-const isMobile = ref(false)
+const kontaktNightDesktopSrc = withBase('/images/background-night2.jpg')
+const kontaktNightMobileSrc = withBase('/images/background-night-mobil2.jpg')
 
-const currentBgSrc = computed(() =>
-  isMobile.value ? kontaktMobileSrc : kontaktDesktopSrc
-)
+const isMobile = ref(false)
+const isNight = ref(false)
+
+const currentBgSrc = computed(() => {
+  if (isNight.value) {
+    return isMobile.value ? kontaktNightMobileSrc : kontaktNightDesktopSrc
+  }
+  return isMobile.value ? kontaktMobileSrc : kontaktDesktopSrc
+})
 
 const updateIsMobile = () => {
   if (typeof window === 'undefined') return
   isMobile.value = window.innerWidth < 768
 }
 
+const updateIsNight = () => {
+  if (typeof window === 'undefined') return
+  const hour = new Date().getHours()
+  isNight.value = hour >= 20 || hour < 6
+}
+
 const previousTitle = typeof document !== 'undefined' ? document.title : ''
+let nightCheckInterval: number | undefined
 
 onMounted(() => {
   document.title = 'Kontakt'
   updateIsMobile()
+  updateIsNight()
   window.addEventListener('resize', updateIsMobile)
+  nightCheckInterval = window.setInterval(updateIsNight, 60 * 1000)
 })
 
 onBeforeUnmount(() => {
   document.title = previousTitle
   window.removeEventListener('resize', updateIsMobile)
+
+  if (nightCheckInterval) {
+    window.clearInterval(nightCheckInterval)
+  }
 })
 </script>
 

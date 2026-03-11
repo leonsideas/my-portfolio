@@ -5,14 +5,17 @@ import { withBase, useData } from 'vitepress'
 const bgCover = withBase('/images/Background-cover.jpg')
 const bgCoverMobile = withBase('/images/Background-cover_mobile.jpg')
 
+const nightBgDesktop = withBase('/images/background-night.png')
+const nightBgMobile = withBase('/images/background-night-mobil.jpg')
+
 const { site } = useData()
 
 const isNight = ref(false)
 const isMobile = ref(false)
-const nightBgSrc = withBase('/images/bg-cover-night.png')
 
 const nightTextClass = computed(() => (isNight.value ? 'night-text' : 'day-text'))
 const currentBgCover = computed(() => (isMobile.value ? bgCoverMobile : bgCover))
+const currentNightBg = computed(() => (isMobile.value ? nightBgMobile : nightBgDesktop))
 
 const updateIsMobile = () => {
   if (typeof window === 'undefined') return
@@ -39,19 +42,15 @@ export default {
 </script>
 
 <template>
-  <!-- Abstand nach unten von der NavBar: 4rem (passt zu Layout) -->
   <div class="relative overflow-hidden bg-black">
-    <!-- Hintergrund-Layer -->
     <div class="fixed inset-0 w-screen h-screen overflow-hidden">
-      <!-- Nacht: fixes Cover-Background -->
       <div
         v-if="isNight"
         class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        :style="{ backgroundImage: `url(${nightBgSrc})` }"
+        :style="{ backgroundImage: `url(${currentNightBg})` }"
         aria-hidden="true"
       />
 
-      <!-- Tag: Desktop/Mobile Bild -->
       <img
         v-else
         :src="currentBgCover"
@@ -60,17 +59,13 @@ export default {
       />
     </div>
 
-    <!-- Vordergrund-Content: auf Mobile scrollbar, auf Desktop fixierte Höhe -->
     <div
       class="relative z-10 isolate px-6
              min-h-screen
              flex items-start justify-center pt-32 sm:pt-40 md:pt-48 pb-10"
     >
       <div class="w-full max-w-6xl">
-        <!-- 2-Spalten Layout -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-start">
-
-          <!-- Links: Intro – auf Desktop eigener Scroll-Container -->
           <div class="intro-panel text-white mix-blend-difference" :class="nightTextClass">
             <h1
               class="text-left text-2xl sm:text-3xl md:text-4xl font-semibold mb-6"
@@ -85,7 +80,6 @@ export default {
             </p>
           </div>
 
-          <!-- Rechts: Scrollbares CV -->
           <aside
             class="cv-panel text-white mix-blend-difference"
             :class="nightTextClass"
@@ -122,15 +116,11 @@ export default {
 </template>
 
 <style>
-/* ...existing code (html, body, #app, .VPApp etc.)... */
-
-/* Gemeinsame Basis für beide Panels */
 .intro-panel,
 .cv-panel {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Auf Desktop: beide Spalten unabhängig scrollbar, feste Höhe */
 @media (min-width: 768px) {
   .intro-panel,
   .cv-panel {
@@ -143,7 +133,6 @@ export default {
   }
 }
 
-/* Auf Mobile: kein eigener Scroll-Container, natürlicher Seitenfluss */
 @media (max-width: 767px) {
   .intro-panel,
   .cv-panel {
@@ -153,7 +142,7 @@ export default {
 }
 
 .cv-panel {
-  max-height: calc(100vh - 10rem); /* ggf. an dein Padding anpassen */
+  max-height: calc(100vh - 10rem);
   overflow-y: auto;
   padding-right: 0.75rem;
   -webkit-overflow-scrolling: touch;

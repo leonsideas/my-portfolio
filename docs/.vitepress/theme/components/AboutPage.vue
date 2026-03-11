@@ -5,8 +5,8 @@ import { withBase, useData } from 'vitepress'
 const bgCover = withBase('/images/Background-cover.jpg')
 const bgCoverMobile = withBase('/images/Background-cover_mobile.jpg')
 
-const nightBgDesktop = withBase('/images/background-night.png')
-const nightBgMobile = withBase('/images/background-night-mobil.jpg')
+const nightBgDesktop = withBase('/images/bg-cover-night.png')
+const nightBgMobile = withBase('/images/bg-cover-night-mobil.jpg')
 
 const { site } = useData()
 

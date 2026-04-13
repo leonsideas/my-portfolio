@@ -600,7 +600,7 @@ function onImagesTouchEnd(e: TouchEvent) {
   else if (dx > threshold && hasPrev.value) goToPrev()
 }
 
-const backgroundImage = withBase('/erde.jpg')
+const backgroundImage = withBase('/erde.webp')
 
 /** EINZIGE klasse für workpage-styles */
 const WORKPAGE_CLASS = 'is-workpage'

@@ -2,11 +2,11 @@
 import { ref, onMounted, computed } from 'vue'
 import { withBase, useData } from 'vitepress'
 
-const bgCover = withBase('/images/Background-cover.jpg')
-const bgCoverMobile = withBase('/images/Background-cover_mobile.jpg')
+const bgCover = withBase('/images/Background-cover.webp')
+const bgCoverMobile = withBase('/images/Background-cover_mobile.webp')
 
-const nightBgDesktop = withBase('/images/bg-cover-night.png')
-const nightBgMobile = withBase('/images/bg-cover-night-mobil.jpg')
+const nightBgDesktop = withBase('/images/bg-cover-night.webp')
+const nightBgMobile = withBase('/images/bg-cover-night-mobil.webp')
 
 const { site } = useData()
 
@@ -25,6 +25,23 @@ const updateIsMobile = () => {
 onMounted(() => {
   if (typeof document !== 'undefined') {
     document.title = 'Über mich | Leon Albers'
+
+    if (!document.getElementById('ld-person')) {
+      const script = document.createElement('script')
+      script.id = 'ld-person'
+      script.type = 'application/ld+json'
+      script.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: 'Leon Albers',
+        url: 'https://leonsideas.github.io/my-portfolio/',
+        jobTitle: 'Gestalter in Digitalen Medien',
+        worksFor: { '@type': 'Organization', name: 'manymany motion GmbH' },
+        alumniOf: { '@type': 'EducationalOrganization', name: 'Hochschule für Künste Bremen' },
+        sameAs: ['https://www.instagram.com/leonsideas'],
+      })
+      document.head.appendChild(script)
+    }
   }
 
   const hour = new Date().getHours()

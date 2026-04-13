@@ -211,9 +211,8 @@ function updateIsMobile() {
 
 function mobileCoverCandidatesById(id: string) {
   return [
-    `/images/${id}-cover_mobile.jpg`,
-    `/images/${id}-cover_mobile.jpeg`,
     `/images/${id}-cover_mobile.webp`,
+    `/images/${id}-cover_mobile.jpg`,
     `/images/${id}-cover_mobile.png`,
   ]
 }
@@ -338,8 +337,8 @@ const displaySlides = computed<Slide[]>(() => {
           : slide.nightPreviewImage
       } else if (updated.id) {
         updated.previewImage = isMobile.value
-          ? `/images/${String(updated.id)}_cover-night-mobil.jpg`
-          : `/images/${String(updated.id)}_cover-night.png`
+          ? `/images/${String(updated.id)}_cover-night-mobil.webp`
+          : `/images/${String(updated.id)}_cover-night.webp`
       }
 
       updated.previewVideo = null
@@ -360,7 +359,7 @@ const displaySlides = computed<Slide[]>(() => {
     }
 
     if (updated.id) {
-      updated.previewImage = `/images/${String(updated.id)}-cover.jpg`
+      updated.previewImage = `/images/${String(updated.id)}-cover.webp`
     } else if (!updated.previewImage && !updated.image) {
       updated.previewImage = null
     }
@@ -378,8 +377,8 @@ const displaySlides = computed<Slide[]>(() => {
       s.previewImage = isMobile.value
         ? (s.nightPreviewImage
             ? toNightMobileJpg(s.nightPreviewImage)
-            : '/images/background-night-mobil.jpg')
-        : (s.nightPreviewImage ?? '/images/background-night.png')
+            : '/images/background-night-mobil.webp')
+        : (s.nightPreviewImage ?? '/images/background-night.webp')
 
       s.previewVideo = null
       s.video = null

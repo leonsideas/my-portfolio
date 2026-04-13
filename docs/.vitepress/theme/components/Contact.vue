@@ -24,11 +24,11 @@
 import { withBase } from 'vitepress'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
-const kontaktDesktopSrc = withBase('/images/Kontakt.png')
-const kontaktMobileSrc = withBase('/images/Kontakt-mobil.jpg')
+const kontaktDesktopSrc = withBase('/images/Kontakt.webp')
+const kontaktMobileSrc = withBase('/images/Kontakt-mobil.webp')
 
-const kontaktNightDesktopSrc = withBase('/images/background-night2.jpg')
-const kontaktNightMobileSrc = withBase('/images/background-night-mobil2.jpg')
+const kontaktNightDesktopSrc = withBase('/images/background-night2.webp')
+const kontaktNightMobileSrc = withBase('/images/background-night-mobil2.webp')
 
 const isMobile = ref(false)
 const isNight = ref(false)

@@ -401,7 +401,7 @@ function playTransitionToRoute(routePath: string, videoSrc: string, fadeMode: Ov
   overlayVideoSrc.value = videoSrc
   overlayTargetSlug.value = null
 
-  overlayTargetRoute.value = overlayHomeToRoot.value ? null : routePath
+  overlayTargetRoute.value = routePath
 
   overlayVisible.value = true
   contentVisible.value = false
@@ -411,8 +411,9 @@ function playTransitionToRoute(routePath: string, videoSrc: string, fadeMode: Ov
       clearOverlayFadeTimer()
 
       if (overlayHomeToRoot.value && typeof window !== 'undefined') {
-        const target = routePath || '/'
+        const target = overlayTargetRoute.value || routePath || '/'
         overlayHomeToRoot.value = false
+        overlayTargetRoute.value = null
         window.location.href = withBase(target)
         return
       }
@@ -431,8 +432,10 @@ async function handleOverlayEnded() {
   clearOverlayFadeTimer()
 
   if (overlayHomeToRoot.value && typeof window !== 'undefined') {
+    const target = overlayTargetRoute.value || '/'
     overlayHomeToRoot.value = false
-    window.location.href = withBase('/')
+    overlayTargetRoute.value = null
+    window.location.href = withBase(target)
     return
   }
 
@@ -538,7 +541,7 @@ function interceptHomeNav(e: Event) {
     const pathname = hrefUrl.pathname.replace(withBase('/'), '/')
 
     isHome = pathname === '/'
-    isAbout = pathname === '/cv' || pathname === '/about' || rawHref === '#cv'
+    isAbout = pathname === '/cv' || pathname === '/about' || pathname === '/uebermich' || rawHref === '#cv'
   }
 
   if (!isHome && !isAbout) return
@@ -553,7 +556,7 @@ function interceptHomeNav(e: Event) {
 
   if (overlayVisible.value) return
 
-  const targetRoute = '/'
+  const targetRoute = isAbout ? '/uebermich' : '/'
   overlayUseHardReload.value = true
   overlayHomeToRoot.value = true
   playTransitionToRoute(targetRoute, withBase('/videos/Transition_up.mp4'), 'none')

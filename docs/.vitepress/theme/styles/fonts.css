@@ -1,7 +1,7 @@
 /* Passe Dateinamen exakt an deine echten .otf Dateien an */
 @font-face {
   font-family: "Migration";
-  src: url("/fonts/Migration.otf") format("opentype");
+  src: url("/fonts/Migration.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: "Klang";
-  src: url("/fonts/Klang.otf") format("opentype");
+  src: url("/fonts/Klang.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -18,7 +18,7 @@
 /* Beispiel: Neue Schrift "MyNewFont" (Dateiname und font-family frei wählbar) */
 @font-face {
   font-family: "MOI";
-  src: url("/fonts/MOI.otf") format("opentype");
+  src: url("/fonts/Moi.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -31,7 +31,7 @@
 /* FONT 1 */
 @font-face {
   font-family: "Light";
-  src: url("/fonts/Light.otf") format("opentype");
+  src: url("/fonts/Light.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -43,7 +43,7 @@
 /* FONT 2 */
 @font-face {
   font-family: "Kilma";
-  src: url("/fonts/Kilma.otf") format("opentype");
+  src: url("/fonts/Kilma.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -55,7 +55,7 @@
 /* FONT 3 */
 @font-face {
   font-family: "Save";
-  src: url("/fonts/Save.otf") format("opentype");
+  src: url("/fonts/Save.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -91,7 +91,7 @@
 /* @font-face für die Übergangsobjekte-Font */
 @font-face {
   font-family: "Uebergangsobjekte";
-  src: url("/fonts/Uebergangsobjekte.otf") format("opentype");
+  src: url("/fonts/Uebergangsobjekte.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;

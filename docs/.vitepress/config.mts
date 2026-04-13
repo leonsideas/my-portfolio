@@ -48,13 +48,5 @@ export default defineConfig({
     ['meta', { name: 'twitter:creator', content: '@leonsideas' }],
     ['meta', { name: 'twitter:image', content: `${siteUrl}/images/Kontakt.webp` }],
 
-    [
-      'link',
-      {
-        rel: 'stylesheet',
-        href:
-          'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&family=IBM+Plex+Serif&display=swap'
-      }
-    ]
   ]
 })

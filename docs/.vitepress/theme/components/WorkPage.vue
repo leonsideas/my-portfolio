@@ -532,6 +532,7 @@ function interceptHomeNav(e: Event) {
 
   let isHome = isHomeMarked
   let isAbout = isAboutMarked
+  let isKontakt = false
 
   if (!isHome && !isAbout && typeof window !== 'undefined') {
     const hrefUrl = rawHref.startsWith('http')
@@ -542,9 +543,10 @@ function interceptHomeNav(e: Event) {
 
     isHome = pathname === '/'
     isAbout = pathname === '/cv' || pathname === '/about' || pathname === '/uebermich' || rawHref === '#cv'
+    isKontakt = pathname === '/kontakt'
   }
 
-  if (!isHome && !isAbout) return
+  if (!isHome && !isAbout && !isKontakt) return
 
   if (e instanceof MouseEvent) {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
@@ -556,7 +558,7 @@ function interceptHomeNav(e: Event) {
 
   if (overlayVisible.value) return
 
-  const targetRoute = isAbout ? '/uebermich' : '/'
+  const targetRoute = isAbout ? '/uebermich' : isKontakt ? '/kontakt' : '/'
   overlayUseHardReload.value = true
   overlayHomeToRoot.value = true
   playTransitionToRoute(targetRoute, withBase('/videos/Transition_up.mp4'), 'none')

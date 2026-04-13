@@ -402,13 +402,6 @@ const displaySlides = computed<Slide[]>(() => {
 })
 
 
-watchEffect(async () => {
-  await nextTick()
-  if (typeof document === 'undefined') return
-  const el = document.querySelector('html .carousel h2')
-  if (!el) return
-  console.log('[Carousel] first h2 classes:', (el as HTMLElement).className)
-})
 
 const intervalMs = () => (props.interval && props.interval > 0 ? props.interval : 5000)
 const isLoop = () => props.loop !== false

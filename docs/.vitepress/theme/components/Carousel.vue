@@ -60,7 +60,7 @@
                 muted
                 loop
                 playsinline
-                preload="auto"
+                preload="metadata"
               />
             </div>
 

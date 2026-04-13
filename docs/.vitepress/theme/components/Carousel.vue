@@ -401,64 +401,7 @@ const displaySlides = computed<Slide[]>(() => {
   return [introSlide, ...enrichedBaseSlides]
 })
 
-watchEffect(() => {
-  const slide = displaySlides.value.find((s) =>
-    /uebergangsobjekte|Übergangsobjekte/i.test(String(s.id ?? s.title ?? ''))
-  )
-  if (slide) {
-    console.log('[Carousel] Übergangsobjekte slide:', {
-      id: slide.id,
-      title: slide.title,
-      titleFontClass: slide.titleFontClass,
-    })
-  }
-})
 
-let didLogExpectedAssets = false
-watchEffect(() => {
-  if (didLogExpectedAssets) return
-  if (!displaySlides.value.length) return
-  didLogExpectedAssets = true
-
-  const expected = displaySlides.value.map((s, i) => {
-    const id = String(s.id ?? i)
-    return {
-      id,
-      video: s.previewVideo || s.video || null,
-      image: s.previewImage || s.image || null,
-    }
-  })
-
-  console.log('[Carousel] expected assets (relative):', expected)
-})
-
-watchEffect(() => {
-  const ids = displaySlides.value.map((s) => String(s.id ?? '(no-id)'))
-  console.log('[Carousel] slide ids:', ids)
-})
-
-watchEffect(() => {
-  const okMigration =
-    typeof document !== 'undefined' && 'fonts' in document
-      ? document.fonts.check('16px "Migration"')
-      : null
-
-  const okUebergang =
-    typeof document !== 'undefined' && 'fonts' in document
-      ? document.fonts.check('16px "Uebergangsobjekte"')
-      : null
-
-  console.log('[Fonts] Migration verfügbar?', okMigration)
-  console.log('[Fonts] Uebergangsobjekte verfügbar?', okUebergang)
-})
-
-watchEffect(async () => {
-  await nextTick()
-  if (typeof document === 'undefined') return
-  const el = document.querySelector('html .carousel h2')
-  if (!el) return
-  console.log('[Carousel] first h2 classes:', (el as HTMLElement).className)
-})
 
 const intervalMs = () => (props.interval && props.interval > 0 ? props.interval : 5000)
 const isLoop = () => props.loop !== false

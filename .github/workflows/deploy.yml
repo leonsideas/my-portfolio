@@ -98,7 +98,7 @@ jobs:
         run: |
           set -e
           echo "=== required assets ==="
-          for f in docs/public/videos/background.mp4 docs/public/videos/intro.mp4 docs/public/images/background-fallback.jpg; do
+          for f in docs/public/videos/background.mp4 docs/public/videos/intro.mp4 docs/public/images/background-fallback.webp; do
             if [ ! -f "$f" ]; then
               echo "ERROR: missing $f"
               echo "--- current docs/public/videos ---"
@@ -147,7 +147,7 @@ jobs:
           echo "=== sanity checks ==="
           test -f docs/.vitepress/dist/videos/background.mp4 && echo "OK: background.mp4" || echo "MISSING: background.mp4"
           test -f docs/.vitepress/dist/videos/intro.mp4 && echo "OK: intro.mp4" || echo "MISSING: intro.mp4"
-          test -f docs/.vitepress/dist/images/background-fallback.jpg && echo "OK: background-fallback.jpg" || echo "MISSING: background-fallback.jpg"
+          test -f docs/.vitepress/dist/images/background-fallback.webp && echo "OK: background-fallback.webp" || echo "MISSING: background-fallback.webp"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

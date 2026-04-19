@@ -225,7 +225,7 @@ onBeforeUnmount(() => {
     align-items: start;
     justify-items: center;
     column-gap: clamp(32px, 5vw, 80px);
-    padding: clamp(120px, 18vh, 220px) clamp(24px, 6vw, 72px) clamp(40px, 8vh, 72px);
+    padding: clamp(160px, 24vh, 280px) clamp(24px, 6vw, 72px) clamp(40px, 8vh, 72px);
   }
 
   .contact-intro {

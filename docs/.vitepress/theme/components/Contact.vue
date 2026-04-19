@@ -154,8 +154,8 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: clamp(96px, 12vh, 160px) clamp(20px, 6vw, 48px) clamp(28px, 6vh, 56px);
+  justify-content: space-between;
+  padding: clamp(88px, 11vh, 140px) clamp(20px, 6vw, 48px) clamp(40px, 8vh, 72px);
   text-align: center;
   gap: clamp(24px, 5vh, 48px);
 }
@@ -213,6 +213,27 @@ onBeforeUnmount(() => {
   gap: 14px;
   width: 100%;
   max-width: 26rem;
+}
+
+/* Desktop: Links nebeneinander, damit sie weniger vom Motiv verdecken */
+@media (min-width: 768px) {
+  .contact-links {
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    max-width: 52rem;
+    gap: 1rem;
+  }
+
+  .contact-links > li {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+  }
+
+  .contact-links > li > .contact-link {
+    width: 100%;
+  }
 }
 
 .contact-link {

@@ -28,13 +28,17 @@ onBeforeUnmount(() => {
 <div class="rechtliches-page">
   <div class="rechtliches-inner">
 
+<div class="rechtliches-notice">
+  <strong>Hinweis:</strong> Dies ist ein vorläufiger Entwurf. Die Anschrift ist noch ein Platzhalter und muss vor der Veröffentlichung durch eine ladungsfähige Anschrift ersetzt werden.
+</div>
+
 # Impressum
 
 **Angaben gemäß § 5 TMG**
 
 Leon Albers
-[Straße + Hausnummer]
-[PLZ] Bremen
+Musterstraße 1
+28195 Bremen
 Deutschland
 
 **Kontakt**
@@ -42,6 +46,17 @@ E-Mail: [leon-albers@web.de](mailto:leon-albers@web.de)
 
 **Verantwortlich für den Inhalt gemäß § 55 Abs. 2 RStV**
 Leon Albers (Anschrift wie oben)
+
+Diese Website dient der privaten Präsentation meiner gestalterischen Arbeiten und Projekte. Sie verfolgt keine kommerziellen Zwecke und stellt kein Angebot für den Abschluss von Verträgen oder die Erbringung von Leistungen dar.
+
+**Haftung für Inhalte**
+Als Diensteanbieter bin ich gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG bin ich als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+
+**Haftung für Links**
+Mein Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss habe. Deshalb kann ich für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+
+**Urheberrecht**
+Die durch mich erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen meiner schriftlichen Zustimmung.
 
 ---
 
@@ -171,5 +186,21 @@ Für alle Anfragen kannst du dich per E-Mail an mich wenden: [leon-albers@web.de
 
 .rechtliches-back a:hover {
   color: #fff;
+}
+
+.rechtliches-notice {
+  border: 1px solid rgba(239, 114, 52, 0.5);
+  background: rgba(239, 114, 52, 0.12);
+  color: rgba(255, 214, 189, 0.95);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 2.5rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.rechtliches-notice strong {
+  color: #ffbe99;
+  font-weight: 600;
 }
 </style>

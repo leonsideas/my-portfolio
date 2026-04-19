@@ -215,30 +215,48 @@ onBeforeUnmount(() => {
   max-width: 26rem;
 }
 
-/* Desktop: 'Sag Moin' zentriert, Links daneben */
+/* Desktop: 'Sag Moin' zentriert in der Mitte, links und rechts daneben
+   jeweils ein Link */
 @media (min-width: 768px) {
   .contact-content {
-    flex-direction: row;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr;
     align-items: center;
-    gap: clamp(40px, 7vw, 96px);
+    justify-items: center;
+    column-gap: clamp(32px, 5vw, 80px);
     padding: clamp(96px, 12vh, 160px) clamp(24px, 6vw, 72px) clamp(40px, 8vh, 72px);
   }
 
   .contact-intro {
+    grid-column: 2;
+    grid-row: 1;
     max-width: none;
   }
 
   .contact-links {
-    flex-direction: column;
-    max-width: 22rem;
-    gap: 14px;
-    width: auto;
-    flex: 0 1 22rem;
+    display: contents;
   }
 
   .contact-links > li {
-    display: block;
+    width: 100%;
+    max-width: 22rem;
+    grid-row: 1;
+    display: flex;
+  }
+
+  .contact-links > li:nth-child(1) {
+    grid-column: 1;
+    justify-self: end;
+  }
+
+  .contact-links > li:nth-child(2) {
+    grid-column: 3;
+    justify-self: start;
+  }
+
+  .contact-links > li > .contact-link {
+    width: 100%;
   }
 }
 

@@ -616,6 +616,11 @@ function goToNext() {
   if (!hasNext.value || !nextSlug.value) return
   selectCard(nextSlug.value, `/works/?id=${encodeURIComponent(nextSlug.value)}`)
 }
+function goToIndex(idx: number) {
+  const card = cards.value[idx]
+  if (!card || card.slug === currentSlug.value) return
+  selectCard(card.slug, `/works/?id=${encodeURIComponent(card.slug)}`)
+}
 
 // Swipe
 const swipeStartX = ref<number | null>(null)
@@ -640,6 +645,50 @@ function onImagesTouchEnd(e: TouchEvent) {
   const threshold = 50
   if (dx < -threshold && hasNext.value) goToNext()
   else if (dx > threshold && hasPrev.value) goToPrev()
+}
+
+// Swipe auf der gesamten Projektseite (nicht nur über den Bildern).
+// Ignoriert Swipes, die aus interaktiven Elementen (Links, Buttons, Iframes)
+// stammen, damit Klicks/Videos weiterhin funktionieren.
+const contentSwipeStartX = ref<number | null>(null)
+const contentSwipeStartY = ref<number | null>(null)
+
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false
+  return !!target.closest('a, button, input, textarea, select, iframe, video, [role="button"]')
+}
+
+function onContentTouchStart(e: TouchEvent) {
+  if (isInteractiveTarget(e.target)) {
+    contentSwipeStartX.value = null
+    contentSwipeStartY.value = null
+    return
+  }
+  const t = e.touches[0]
+  if (!t) return
+  contentSwipeStartX.value = t.clientX
+  contentSwipeStartY.value = t.clientY
+}
+
+function onContentTouchEnd(e: TouchEvent) {
+  if (contentSwipeStartX.value == null || contentSwipeStartY.value == null) return
+  const t = e.changedTouches[0]
+  if (!t) {
+    contentSwipeStartX.value = null
+    contentSwipeStartY.value = null
+    return
+  }
+  const dx = t.clientX - contentSwipeStartX.value
+  const dy = t.clientY - contentSwipeStartY.value
+
+  contentSwipeStartX.value = null
+  contentSwipeStartY.value = null
+
+  // nur horizontale, deutliche Bewegungen zählen – sonst bleibt vertikaler Scroll normal
+  if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.2) return
+
+  if (dx < 0 && hasNext.value) goToNext()
+  else if (dx > 0 && hasPrev.value) goToPrev()
 }
 
 const backgroundImage = withBase('/images/erde.webp')
@@ -755,7 +804,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="h-screen w-full workpage-root overflow-y-auto lg:overflow-hidden"
+    class="h-screen w-full max-w-full workpage-root overflow-x-hidden overflow-y-auto lg:overflow-hidden"
     :style="{
       backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`,
       backgroundSize: 'cover',
@@ -800,27 +849,63 @@ onBeforeUnmount(() => {
       <section v-if="contentVisible" class="flex-1 min-h-0 w-full text-gray-100 workpage-content">
         <div class="pt-28 lg:pt-32 px-6 sm:px-8 lg:px-12 pb-8 h-full flex flex-col lg:min-h-0">
           <Transition name="content-fade" mode="out-in" appear>
-            <div v-if="currentCard" :key="contentKey" class="flex flex-col lg:flex-1 lg:min-h-0">
-              <div class="flex items-center justify-between gap-4 mb-8 text-xs md:text-sm shrink-0">
+            <div
+              v-if="currentCard"
+              :key="contentKey"
+              class="flex flex-col lg:flex-1 lg:min-h-0"
+              @touchstart.passive="onContentTouchStart"
+              @touchend.passive="onContentTouchEnd"
+            >
+              <div class="workpage-nav-row flex items-center justify-between gap-3 mb-8 text-xs md:text-sm shrink-0">
                 <button
                   v-if="hasPrev"
                   type="button"
                   class="workpage-nav-pill"
                   @click="goToPrev"
+                  aria-label="Vorheriges Projekt"
                 >
                   <span aria-hidden="true">‹</span>
                   <span>Vorheriges Projekt</span>
                 </button>
+                <span
+                  v-else
+                  class="workpage-nav-pill workpage-nav-pill--placeholder"
+                  aria-hidden="true"
+                />
+
+                <div
+                  class="workpage-dots"
+                  role="tablist"
+                  aria-label="Projekt-Navigation"
+                >
+                  <button
+                    v-for="(card, idx) in cards"
+                    :key="card.slug"
+                    type="button"
+                    class="workpage-dot"
+                    :class="{ 'is-active': idx === currentIndex }"
+                    :aria-label="`Zu Projekt: ${card.title}`"
+                    :aria-selected="idx === currentIndex"
+                    role="tab"
+                    @click="goToIndex(idx)"
+                  />
+                </div>
 
                 <button
                   v-if="hasNext"
                   type="button"
-                  class="workpage-nav-pill ml-auto"
+                  class="workpage-nav-pill"
                   @click="goToNext"
+                  aria-label="Nächstes Projekt"
                 >
                   <span>Nächstes Projekt</span>
                   <span aria-hidden="true">›</span>
                 </button>
+                <span
+                  v-else
+                  class="workpage-nav-pill workpage-nav-pill--placeholder"
+                  aria-hidden="true"
+                />
               </div>
               <div class="lg:flex-1 lg:min-h-0">
                 <div
@@ -929,10 +1014,10 @@ onBeforeUnmount(() => {
 .workpage-nav-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   white-space: nowrap;
 
-  padding: 0.45rem 1rem;
+  padding: 0.4rem 0.75rem;
   border-radius: 9999px;
 
   color: rgba(255, 255, 255, 0.8);
@@ -940,9 +1025,11 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(255, 255, 255, 0.2);
 
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  font-size: 0.65rem;
   line-height: 1;
+
+  max-width: 48%;
 
   transition: color 200ms ease, background 200ms ease, border-color 200ms ease;
   cursor: pointer;
@@ -954,10 +1041,86 @@ onBeforeUnmount(() => {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* Platzhalter, damit die Dots beim ersten/letzten Projekt zentriert bleiben */
+.workpage-nav-pill--placeholder {
+  visibility: hidden;
+  pointer-events: none;
+  border-color: transparent;
+  background: transparent;
+}
+
+/* Auf sehr schmalen Screens nur die Pfeil-Icons zeigen, damit nichts überläuft */
+@media (max-width: 480px) {
+  .workpage-nav-pill > span:not([aria-hidden="true"]) {
+    display: none;
+  }
+  .workpage-nav-pill {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.95rem;
+    letter-spacing: 0;
+    gap: 0;
+    min-width: 2.25rem;
+    justify-content: center;
+  }
+  .workpage-nav-pill--placeholder {
+    min-width: 2.25rem;
+  }
+}
+
+/* Dots in der Navigation zwischen den Pfeilen */
+.workpage-nav-row {
+  flex-wrap: nowrap;
+}
+
+.workpage-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 0.5rem;
+}
+
+.workpage-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: background 200ms ease, transform 200ms ease, border-color 200ms ease;
+}
+
+.workpage-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.workpage-dot.is-active {
+  background: #fff;
+  border-color: #fff;
+  transform: scale(1.25);
+}
+
+@media (max-width: 480px) {
+  .workpage-dots {
+    gap: 0.4rem;
+    padding: 0 0.25rem;
+  }
+  .workpage-dot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
 @media (min-width: 1024px) {
   .workpage-nav-pill {
     font-size: 0.75rem;
     padding: 0.5rem 1.15rem;
+    max-width: none;
   }
 }
 

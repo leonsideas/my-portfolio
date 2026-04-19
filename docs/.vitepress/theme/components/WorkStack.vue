@@ -1,7 +1,7 @@
 <template>
   <div
     ref="containerRef"
-    class="fixed inset-0 w-screen h-screen"
+    class="fixed inset-0 overflow-hidden"
   >
     <!-- Full-width Carousel -->
     <Carousel

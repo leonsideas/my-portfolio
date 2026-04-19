@@ -27,14 +27,28 @@
   color: white;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   font-family: var(--font-sans, system-ui, sans-serif);
   color: #000000;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  max-width: 100%;
   /* Hintergrund für die gesamte Site schwarz wie Carousel */
   background: #000000;
+}
+
+/* Home, Über mich, Kontakt, Carousel: kein Body-Scroll – alles soll auf einen Blick sichtbar sein.
+   Projekt-Detailseiten (html.is-workpage) scrollen weiterhin im inneren Container. */
+html:not(.is-workpage),
+html:not(.is-workpage) body {
+  overflow-y: hidden;
+  height: 100dvh;
 }
 
 /* Dotted background */

@@ -993,8 +993,9 @@ onBeforeUnmount(() => {
             </div>
           </Transition>
 
-          <footer class="mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-white/40 shrink-0">
-            © {{ new Date().getFullYear() }} Leon Albers
+          <footer class="mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-white/40 shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <span>© {{ new Date().getFullYear() }} Leon Albers</span>
+            <a :href="withBase('/rechtliches')" class="workpage-footer-link">Impressum &amp; Datenschutz</a>
           </footer>
         </div>
       </section>
@@ -1009,6 +1010,18 @@ onBeforeUnmount(() => {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.workpage-footer-link {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.workpage-footer-link:hover,
+.workpage-footer-link:focus-visible {
+  color: #fff;
+  outline: none;
 }
 
 .workpage-nav-pill {

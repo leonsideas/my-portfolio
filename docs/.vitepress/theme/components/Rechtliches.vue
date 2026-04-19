@@ -141,15 +141,34 @@ onBeforeUnmount(() => {
   padding: clamp(96px, 14vh, 160px) clamp(20px, 6vw, 48px) clamp(40px, 8vh, 80px);
   font-family: var(--font-sans, system-ui, sans-serif);
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   z-index: 0;
 }
 
+/* Solider schwarzer Streifen hinter der NavBar, damit Scroll-Text dahinter
+   verschwindet (NavBar selbst ist transparent). z-index < NavBar (30), > Text. */
+.rechtliches-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(72px, 11vh, 120px);
+  background: #000;
+  z-index: 2;
+  pointer-events: none;
+}
+
 .rechtliches-inner {
+  position: relative;
+  z-index: 1;
   max-width: 40rem;
   margin: 0 auto;
   font-size: 0.95rem;
   line-height: 1.65;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .rechtliches-inner h1 {

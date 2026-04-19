@@ -155,7 +155,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(120px, 16vh, 200px) clamp(20px, 6vw, 48px) clamp(40px, 8vh, 72px);
+  padding: clamp(144px, 19vh, 240px) clamp(20px, 6vw, 48px) clamp(40px, 8vh, 72px);
   text-align: center;
   gap: clamp(24px, 5vh, 48px);
 }

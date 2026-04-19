@@ -11,6 +11,8 @@ type Card = {
   slug: string
   title: string
   name: string
+  year: string
+  keywords: string[]
   excerpt: string
   route: string
   image: string | null
@@ -164,10 +166,45 @@ for (const path in markdownFiles) {
     })
     .filter(Boolean) as CardVideo[]
 
+  // Jahr: erstes ##### mit 4 Ziffern
+  let year = ''
+  for (const line of lines) {
+    const m = line.match(/^#####\s+(\d{4})\s*$/)
+    if (m) { year = m[1]; break }
+  }
+
+  // Keywords: bevorzugt letztes ##### mit Komma-Liste, sonst Absatz nach "## Keywords"
+  let keywords: string[] = []
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const m = lines[i].match(/^#####\s+(.+)$/)
+    if (m) {
+      const content = m[1].trim()
+      if (!/^\d{4}$/.test(content) && content.includes(',')) {
+        keywords = content.split(',')
+          .map(s => s.trim().replace(/\.$/, ''))
+          .filter(Boolean)
+        break
+      }
+    }
+  }
+  if (!keywords.length) {
+    const kwIdx = lines.findIndex(l => /^##\s+Keywords\s*$/i.test(l.trim()))
+    if (kwIdx >= 0) {
+      const next = lines.slice(kwIdx + 1).find(l => l.trim())
+      if (next) {
+        keywords = next.split(',')
+          .map(s => s.trim().replace(/\.$/, ''))
+          .filter(Boolean)
+      }
+    }
+  }
+
   cards.value.push({
     slug,
     title: titleLine?.replace(/^# /, '') || 'Untitled',
     name: nameLine?.replace(/^## /, '') || 'Anonymous',
+    year,
+    keywords,
     excerpt: excerptLine || '',
     route,
     image: coverImage,
@@ -605,7 +642,7 @@ function onImagesTouchEnd(e: TouchEvent) {
   else if (dx > threshold && hasPrev.value) goToPrev()
 }
 
-const backgroundImage = withBase('/erde.webp')
+const backgroundImage = withBase('/images/erde.webp')
 
 /** EINZIGE klasse für workpage-styles */
 const WORKPAGE_CLASS = 'is-workpage'
@@ -624,6 +661,10 @@ let titleObserver: MutationObserver | null = null
 onMounted(() => {
   if (typeof document !== 'undefined') {
     document.documentElement.classList.add(WORKPAGE_CLASS)
+    document.documentElement.style.setProperty(
+      '--workpage-bg-image',
+      `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`
+    )
     document.title = FORCE_TITLE
 
     const titleEl = document.querySelector('head > title')
@@ -696,6 +737,7 @@ onBeforeUnmount(() => {
   }
   if (typeof document !== 'undefined') {
     document.documentElement.classList.remove(WORKPAGE_CLASS)
+    document.documentElement.style.removeProperty('--workpage-bg-image')
     document.removeEventListener('pointerdown', interceptHomeNav, true)
     document.removeEventListener('click', interceptHomeNav, true)
     document.title = defaultDocumentTitle
@@ -713,9 +755,9 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="h-screen w-full bg-black/80 workpage-root overflow-y-auto lg:overflow-hidden"
+    class="h-screen w-full workpage-root overflow-y-auto lg:overflow-hidden"
     :style="{
-      backgroundImage: `url(${backgroundImage})`,
+      backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
@@ -756,43 +798,64 @@ onBeforeUnmount(() => {
 
       <!-- Hauptinhalt -->
       <section v-if="contentVisible" class="flex-1 min-h-0 w-full text-gray-100 workpage-content">
-        <div class="pt-20 lg:pt-24 px-8 lg:px-12 pb-2 h-full flex flex-col lg:min-h-0">
+        <div class="pt-28 lg:pt-32 px-6 sm:px-8 lg:px-12 pb-8 h-full flex flex-col lg:min-h-0">
           <Transition name="content-fade" mode="out-in" appear>
             <div v-if="currentCard" :key="contentKey" class="flex flex-col lg:flex-1 lg:min-h-0">
-              <div class="flex items-center justify-between gap-4 mb-4 text-xs md:text-sm text-gray-400 shrink-0">
+              <div class="flex items-center justify-between gap-4 mb-8 text-xs md:text-sm shrink-0">
                 <button
                   v-if="hasPrev"
                   type="button"
-                  class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10"
+                  class="workpage-nav-pill"
                   @click="goToPrev"
                 >
-                  <span>‹</span>
+                  <span aria-hidden="true">‹</span>
                   <span>Vorheriges Projekt</span>
                 </button>
 
                 <button
                   v-if="hasNext"
                   type="button"
-                  class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 ml-auto"
+                  class="workpage-nav-pill ml-auto"
                   @click="goToNext"
                 >
                   <span>Nächstes Projekt</span>
-                  <span>›</span>
+                  <span aria-hidden="true">›</span>
                 </button>
               </div>
-
               <div class="lg:flex-1 lg:min-h-0">
                 <div
-                  class="grid grid-cols-1 gap-8 items-start lg:h-full lg:min-h-0"
+                  class="grid grid-cols-1 gap-10 items-start lg:h-full lg:min-h-0"
                   :class="hasMedia ? 'lg:grid-cols-2' : 'lg:grid-cols-1 lg:max-w-3xl lg:mx-auto'"
                 >
                   <!-- Text -->
                   <div class="text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-6">
-                    <component
-                      v-if="currentCard.component"
-                      :is="currentCard.component"
-                      class="prose prose-invert prose-base md:prose-lg max-w-none text-left"
-                    />
+                    <div class="max-w-[65ch] mx-auto lg:mx-0">
+                      <div
+                        v-if="currentCard.year"
+                        class="workpage-year"
+                      >
+                        {{ currentCard.year }}
+                      </div>
+
+                      <component
+                        v-if="currentCard.component"
+                        :is="currentCard.component"
+                        class="prose prose-invert prose-base md:prose-lg max-w-none leading-relaxed text-left workpage-prose"
+                      />
+
+                      <div
+                        v-if="currentCard.keywords.length"
+                        class="workpage-keywords"
+                      >
+                        <span
+                          v-for="kw in currentCard.keywords"
+                          :key="kw"
+                          class="workpage-keyword-pill"
+                        >
+                          {{ kw }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <!-- Medien -->
@@ -845,7 +908,7 @@ onBeforeUnmount(() => {
             </div>
           </Transition>
 
-          <footer class="mt-2 pt-2 border-t border-white/10 text-xs text-gray-500 shrink-0">
+          <footer class="mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-white/40 shrink-0">
             © {{ new Date().getFullYear() }} Leon Albers
           </footer>
         </div>
@@ -861,5 +924,90 @@ onBeforeUnmount(() => {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.workpage-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  line-height: 1;
+
+  transition: color 200ms ease, background 200ms ease, border-color 200ms ease;
+  cursor: pointer;
+}
+
+.workpage-nav-pill:hover {
+  color: rgba(255, 255, 255, 1);
+  background: rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+@media (min-width: 1024px) {
+  .workpage-nav-pill {
+    font-size: 0.75rem;
+    padding: 0.5rem 1.15rem;
+  }
+}
+
+/* Jahresangabe – prominent und klar lesbar */
+.workpage-year {
+  display: inline-block;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Keywords als einzelne Pills unter dem Text */
+.workpage-keywords {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.workpage-keyword-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+/* Im Markdown eingetragenes Jahr (erstes h5) und Keyword-Zeile ausblenden,
+   da wir sie über eigene Elemente rendern */
+.workpage-prose :deep(h5) {
+  display: none;
+}
+
+/* Alte "## Keywords"-Überschrift + darunterliegender Absatz unterdrücken */
+.workpage-prose :deep(h2:has(+ p)) {
+  /* no-op: Stabilität */
 }
 </style>

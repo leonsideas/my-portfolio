@@ -17,6 +17,5 @@ Der skulpturale Körper der Lampe wurde im 3D-Druckverfahren hergestellt und beh
 
 Inspiriert von der Natur fungiert Klanggestalten als Brücke zwischen der Außenwelt und Innenräumen. Es zielt darauf ab, Inklusion zu fördern, indem es akustische Erfahrungen über verschiedene Sinne zugänglich macht.
 
-## Keywords
-Installation, digital art, light art, bird sounds, natural sounds.
+##### Installation, digital art, light art, bird sounds, natural sounds
 

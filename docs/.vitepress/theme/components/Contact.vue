@@ -6,14 +6,43 @@
   >
     <div class="content">
       <div class="links">
-        <a class="email" href="mailto:leon-albers@web.de">leon-albers@web.de</a>
+        <a class="contact-pill email" href="mailto:leon-albers@web.de">
+          <svg
+            class="contact-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m3 7 9 6 9-6" />
+          </svg>
+          <span>leon-albers@web.de</span>
+        </a>
         <a
-          class="instagram"
+          class="contact-pill instagram"
           href="https://www.instagram.com/leonsideas"
           target="_blank"
           rel="noopener noreferrer"
         >
-          @leonsideas
+          <svg
+            class="contact-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+          </svg>
+          <span>@leonsideas</span>
         </a>
       </div>
     </div>
@@ -106,21 +135,37 @@ onBeforeUnmount(() => {
 .links {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
 }
 
-.email,
-.instagram {
-  font-weight: 800;
-  letter-spacing: 0.02em;
+.contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+
+  font-weight: 500;
+  letter-spacing: 0.01em;
   text-decoration: none;
   color: #fff;
-  font-size: clamp(12px, 6vw, 72px);
-  line-height: 1.05;
+  font-size: clamp(18px, 4.5vw, 32px);
+  line-height: 1.2;
+
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.55);
+  transition: opacity 200ms ease;
+  opacity: 0.92;
 }
 
-.email:hover,
-.instagram:hover {
+.contact-pill:hover {
+  opacity: 1;
   text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-thickness: 1px;
+}
+
+.contact-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
 }
 </style>

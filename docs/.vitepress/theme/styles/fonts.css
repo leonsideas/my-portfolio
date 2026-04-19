@@ -18,7 +18,7 @@
 /* Beispiel: Neue Schrift "MyNewFont" (Dateiname und font-family frei wählbar) */
 @font-face {
   font-family: "MOI";
-  src: url("/fonts/Moi.woff2") format("woff2");
+  src: url("/fonts/Moi.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -31,7 +31,7 @@
 /* FONT 1 */
 @font-face {
   font-family: "Light";
-  src: url("/fonts/Light.woff2") format("woff2");
+  src: url("/fonts/Light.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;

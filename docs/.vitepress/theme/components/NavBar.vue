@@ -42,6 +42,21 @@
     pointer-events: auto;
     background: transparent;
   }
+
+  /* Auf Projektseiten: fest am oberen Rand, optisch unsichtbar
+     (übernimmt den gleichen Hintergrund wie die Projektseite),
+     damit der scrollende Inhalt hinter der Nav verschwindet */
+  .my-nav.is-workpage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-image: var(--workpage-bg-image);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
   
   .my-nav__inner {
     display: flex;

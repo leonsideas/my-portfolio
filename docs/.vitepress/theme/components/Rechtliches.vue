@@ -1,20 +1,11 @@
 <template>
   <section class="rechtliches-page" aria-label="Impressum und Datenschutz">
     <div class="rechtliches-inner">
-      <div class="rechtliches-notice">
-        <strong>Hinweis:</strong> Dies ist ein vorläufiger Entwurf. Die Anschrift ist noch ein Platzhalter und muss vor der Veröffentlichung durch eine ladungsfähige Anschrift ersetzt werden.
-      </div>
-
       <h1>Impressum</h1>
 
       <p><strong>Angaben gemäß § 5 TMG</strong></p>
 
-      <p>
-        Leon Albers<br />
-        Musterstraße 1<br />
-        28195 Bremen<br />
-        Deutschland
-      </p>
+      <p>Leon Albers</p>
 
       <p><strong>Kontakt</strong><br />
         E-Mail: <a href="mailto:leon-albers@web.de">leon-albers@web.de</a>
@@ -22,7 +13,7 @@
 
       <p>
         <strong>Verantwortlich für den Inhalt gemäß § 55 Abs. 2 RStV</strong><br />
-        Leon Albers (Anschrift wie oben)
+        Leon Albers
       </p>
 
       <p>
@@ -231,19 +222,4 @@ onBeforeUnmount(() => {
   color: #fff;
 }
 
-.rechtliches-notice {
-  border: 1px solid rgba(239, 114, 52, 0.5);
-  background: rgba(239, 114, 52, 0.12);
-  color: rgba(255, 214, 189, 0.95);
-  border-radius: 12px;
-  padding: 0.9rem 1rem;
-  margin-bottom: 2.5rem;
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.rechtliches-notice strong {
-  color: #ffbe99;
-  font-weight: 600;
-}
 </style>

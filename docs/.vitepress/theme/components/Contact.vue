@@ -215,24 +215,30 @@ onBeforeUnmount(() => {
   max-width: 26rem;
 }
 
-/* Desktop: Links nebeneinander, damit sie weniger vom Motiv verdecken */
+/* Desktop: 'Sag Moin' zentriert, Links daneben */
 @media (min-width: 768px) {
-  .contact-links {
+  .contact-content {
     flex-direction: row;
     justify-content: center;
-    align-items: stretch;
-    max-width: 52rem;
-    gap: 1rem;
+    align-items: center;
+    gap: clamp(40px, 7vw, 96px);
+    padding: clamp(96px, 12vh, 160px) clamp(24px, 6vw, 72px) clamp(40px, 8vh, 72px);
+  }
+
+  .contact-intro {
+    max-width: none;
+  }
+
+  .contact-links {
+    flex-direction: column;
+    max-width: 22rem;
+    gap: 14px;
+    width: auto;
+    flex: 0 1 22rem;
   }
 
   .contact-links > li {
-    flex: 1 1 0;
-    min-width: 0;
-    display: flex;
-  }
-
-  .contact-links > li > .contact-link {
-    width: 100%;
+    display: block;
   }
 }
 

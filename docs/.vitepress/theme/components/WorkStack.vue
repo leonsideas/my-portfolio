@@ -28,6 +28,7 @@ type Card = {
   route: string      // `/works/?id=slug`
   image: string | null          // Bild im Projekt selbst
   previewImage: string | null   // separates Vorschaubild fürs Carousel
+  year: string | null
 }
 
 const markdownFiles = import.meta.glob('../../../works/**/index.md', {
@@ -53,6 +54,8 @@ for (const path in markdownFiles) {
   const titleLine = lines.find(line => line.startsWith('# '))
   const nameLine = lines.find(line => line.startsWith('## '))
   const excerptLine = lines.find(line => line.trim() && !line.startsWith('#'))
+  const yearLine = lines.find(line => /^#{3,6}\s+\d{4}\s*$/.test(line))
+  const year = yearLine ? yearLine.replace(/^#+\s+/, '').trim() : null
 
   const match = path.match(/works\/([^/]+)\/index\.md$/)
   const slug = match?.[1] ?? ''
@@ -70,6 +73,7 @@ for (const path in markdownFiles) {
     route,
     image: imageKey ? (imageFiles[imageKey] as string) : null,
     previewImage: previewKey ? (previewImageFiles[previewKey] as string) : null,
+    year,
   })
 }
 
@@ -85,6 +89,7 @@ const slides = computed(() =>
     // optional: das eigentliche Bild kann zusätzlich mitgegeben werden
     image: card.image,
     href: withBase(card.route),
+    year: card.year ?? undefined,
   }))
 )
 

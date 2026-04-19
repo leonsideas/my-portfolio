@@ -5,6 +5,9 @@
     :class="[carouselHeightClass, { 'is-night': isNightTime }]"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
   >
     <!-- Slides: Crossfade statt Translate -->
     <div class="relative h-full w-full">
@@ -39,14 +42,18 @@
               type="button"
               class="absolute bottom-10 left-1/2
                      px-6 py-2 z-10 cursor-pointer
-                     flex items-center justify-center
-                     bg-black/30 hover:bg-black/60
-                     border border-white/40 hover:border-white
-                     text-white text-xs md:text-sm tracking-[0.25em] uppercase
-                     rounded-full project-open-btn"
+                     flex items-center gap-2 justify-center
+                     bg-white/15 hover:bg-white/25
+                     backdrop-blur-sm
+                     border border-white/70 hover:border-white
+                     text-white
+                     text-xs md:text-sm tracking-[0.25em] uppercase
+                     rounded-full project-open-btn
+                     transition-colors duration-200"
               @click.prevent="goTo(firstProjectIndex)"
             >
               <span>Projekte</span>
+              <span aria-hidden="true" class="intro-arrow">→</span>
             </button>
 
             <div
@@ -89,6 +96,7 @@
                 <h2
                   class="mb-4 font-semibold text-6xl md:text-9xl leading-tight whitespace-normal md:whitespace-nowrap title-center title-diff"
                   :class="slide.titleFontClass"
+                  :style="{ '--title-chars': String((slide.title || '').length || 10) }"
                 >
                   <a
                     v-if="slide.titleLink"
@@ -106,11 +114,34 @@
                     {{ slide.title }}
                   </span>
                 </h2>
+                <div
+                  v-if="index !== 0 && slide.year"
+                  class="slide-year text-white/80 text-xs md:text-sm tracking-[0.35em] uppercase mix-blend-difference"
+                >
+                  {{ slide.year }}
+                </div>
               </div>
             </div>
           </div>
         </component>
       </div>
+    </div>
+
+    <!-- Pagination: Dots -->
+    <div
+      v-if="!isFirstSlide"
+      class="carousel-pagination absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-5 z-30
+             flex items-center gap-3 pointer-events-auto select-none"
+    >
+      <button
+        v-for="(slide, idx) in projectSlides"
+        :key="slide.id ?? idx"
+        type="button"
+        class="carousel-dot"
+        :class="{ 'is-active': idx + firstProjectIndex === currentIndex }"
+        :aria-label="`Zu Slide ${idx + 1}`"
+        @click="goTo(idx + firstProjectIndex)"
+      />
     </div>
 
     <a
@@ -181,6 +212,7 @@ type Slide = {
   titleFontKey?: string
   titleLink?: string
   titleLinkAriaLabel?: string
+  year?: string
 }
 
 const router = useRouter()
@@ -413,6 +445,37 @@ const carouselHeightClass = computed(
 
 const isFirstSlide = computed(() => currentIndex.value === 0)
 
+const projectSlides = computed<Slide[]>(() => displaySlides.value.slice(1))
+
+// --- Swipe/Touch support ---
+const touchStartX = ref<number | null>(null)
+const touchStartY = ref<number | null>(null)
+const SWIPE_THRESHOLD = 40
+
+function handleTouchStart(e: TouchEvent) {
+  const t = e.touches[0]
+  if (!t) return
+  touchStartX.value = t.clientX
+  touchStartY.value = t.clientY
+}
+
+function handleTouchMove(_e: TouchEvent) {
+  // allow vertical scroll; handled on end
+}
+
+function handleTouchEnd(e: TouchEvent) {
+  if (touchStartX.value === null || touchStartY.value === null) return
+  const t = e.changedTouches[0]
+  if (!t) return
+  const dx = t.clientX - touchStartX.value
+  const dy = t.clientY - touchStartY.value
+  touchStartX.value = null
+  touchStartY.value = null
+  if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return
+  if (dx < 0) next()
+  else prev()
+}
+
 watchEffect(() => {
   if (typeof document === 'undefined') return
   document.documentElement.classList.toggle('has-carousel-intro', isFirstSlide.value)
@@ -603,14 +666,13 @@ function handleTitleClick(slide: Slide) {
   }
 
   .carousel h2 {
-    font-size: clamp(3rem, 9vw, 4.25rem);
+    /* Elegante Auto-Größe: 92vw / (chars * 0.55) → so groß wie möglich, bleibt in einer Zeile */
+    font-size: clamp(2rem, calc(92vw / var(--title-chars, 10) / 0.55), 5.5rem);
     line-height: 1.05;
     margin: 0 auto;
     text-align: center;
-    white-space: normal !important;
-    overflow-wrap: anywhere;
-    word-break: normal;
-    max-width: 92vw;
+    white-space: nowrap !important;
+    max-width: 96vw;
   }
 
   .carousel .carousel-side-nav {
@@ -676,6 +738,60 @@ function handleTitleClick(slide: Slide) {
 @media (min-width: 768px) {
   .carousel .project-open-btn {
     bottom: 5vh;
+  }
+}
+
+/* --- Pulse / bounce on intro arrow --- */
+.intro-arrow {
+  display: inline-block;
+  animation: intro-arrow-bounce 1.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes intro-arrow-bounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-arrow { animation: none; }
+}
+
+/* --- Pagination dots --- */
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  padding: 0;
+  transition: background 200ms ease, transform 200ms ease, border-color 200ms ease;
+}
+
+.carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.carousel-dot.is-active {
+  background: #fff;
+  border-color: #fff;
+  transform: scale(1.25);
+}
+
+.slide-year {
+  display: inline-block;
+  margin-top: 0.25rem;
+  opacity: 0.9;
+}
+
+@media (max-width: 767px) {
+  .carousel-pagination {
+    bottom: 3.5vh !important;
+  }
+  .slide-year {
+    font-size: 11px;
+    letter-spacing: 0.35em;
   }
 }
 </style>

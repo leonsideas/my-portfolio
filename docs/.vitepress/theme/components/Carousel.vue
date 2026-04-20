@@ -284,6 +284,30 @@ const currentIndex = ref(0)
 const timer = ref<number | null>(null)
 const isHovered = ref(false)
 
+// Alle -animated Videos im docs/videos Ordner automatisch einsammeln.
+// Dadurch erscheinen neue Videos sofort, sobald du sie hineinlegst,
+// ohne Code-Änderung – fehlende Videos fallen auf Bilder zurück.
+const animatedVideoFiles = import.meta.glob(
+  '../../../videos/*-animated.mp4',
+  { eager: true, import: 'default' }
+) as Record<string, string>
+
+const animatedVideoMap: Record<string, string> = {}
+for (const path in animatedVideoFiles) {
+  const filename = path.split('/').pop() || ''
+  animatedVideoMap[filename] = animatedVideoFiles[path]
+}
+
+function getAnimatedDesktop(id: string): string | null {
+  return animatedVideoMap[`${id}-cover-animated.mp4`] ?? null
+}
+function getAnimatedMobile(id: string): string | null {
+  return animatedVideoMap[`${id}-cover_mobile-animated.mp4`] ?? null
+}
+function getAnimatedNight(id: string): string | null {
+  return animatedVideoMap[`${id}_cover-night-animated.mp4`] ?? null
+}
+
 function toBase(url?: string | null) {
   if (!url) return ''
   if (/^https?:\/\//i.test(url)) return url
@@ -362,25 +386,55 @@ const displaySlides = computed<Slide[]>(() => {
         fontClassByKey[updated.titleFontKey] || updated.titleFontClass
     }
 
+    const id = updated.id ? String(updated.id) : ''
+
     if (isNightTime.value) {
+      // 1) Animated Night-Video (gilt für Desktop + Mobile, da kein eigenes Mobile-Night-Video existiert)
+      const nightVideo = id ? getAnimatedNight(id) : null
+      if (nightVideo) {
+        updated.previewVideo = nightVideo
+        updated.previewImage = null
+        updated.video = null
+        return updated
+      }
+
+      // 2) Fallback: Night-Bild
       if (slide.nightPreviewImage) {
         updated.previewImage = isMobile.value
           ? toNightMobileJpg(slide.nightPreviewImage)
           : slide.nightPreviewImage
-      } else if (updated.id) {
+      } else if (id) {
         updated.previewImage = isMobile.value
-          ? `/images/${String(updated.id)}_cover-night-mobil.webp`
-          : `/images/${String(updated.id)}_cover-night.webp`
+          ? `/images/${id}_cover-night-mobil.webp`
+          : `/images/${id}_cover-night.webp`
       }
 
       updated.previewVideo = null
       updated.video = null
-
       return updated
     }
 
     if (isMobile.value) {
-      const id = updated.id ? String(updated.id) : ''
+      // 1) Mobile-Animated-Video
+      const mobileVideo = id ? getAnimatedMobile(id) : null
+      if (mobileVideo) {
+        updated.previewVideo = mobileVideo
+        updated.previewImage = null
+        updated.video = null
+        return updated
+      }
+
+      // 2) Fallback: Desktop-Animated (falls noch kein Mobile-Video existiert –
+      //    besser als gar kein Video auf dem Handy)
+      const desktopVideoFallback = id ? getAnimatedDesktop(id) : null
+      if (desktopVideoFallback) {
+        updated.previewVideo = desktopVideoFallback
+        updated.previewImage = null
+        updated.video = null
+        return updated
+      }
+
+      // 3) Fallback: Mobile-Bild
       if (id) {
         const [mobileSrc] = mobileCoverCandidatesById(id)
         updated.previewImage = mobileSrc
@@ -390,8 +444,19 @@ const displaySlides = computed<Slide[]>(() => {
       return updated
     }
 
-    if (updated.id) {
-      updated.previewImage = `/images/${String(updated.id)}-cover.webp`
+    // Desktop + Tag
+    // 1) Desktop-Animated-Video
+    const desktopVideo = id ? getAnimatedDesktop(id) : null
+    if (desktopVideo) {
+      updated.previewVideo = desktopVideo
+      updated.previewImage = null
+      updated.video = null
+      return updated
+    }
+
+    // 2) Fallback: Desktop-Bild
+    if (id) {
+      updated.previewImage = `/images/${id}-cover.webp`
     } else if (!updated.previewImage && !updated.image) {
       updated.previewImage = null
     }

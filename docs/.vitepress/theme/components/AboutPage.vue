@@ -124,6 +124,18 @@ export default {
                   </li>
                 </ul>
               </section>
+
+              <section class="space-y-2 sm:space-y-3">
+                <h3 class="text-sm sm:text-lg font-semibold">Berufserfahrung</h3>
+                <ul class="space-y-2 sm:space-y-3 text-[13px] sm:text-base leading-snug sm:leading-relaxed">
+                  <li>
+                    <div class="font-medium">
+                      manymany motion GmbH — Motion Designer
+                    </div>
+                    <div class="opacity-80">Seit 2021</div>
+                  </li>
+                </ul>
+              </section>
             </div>
           </aside>
         </div>

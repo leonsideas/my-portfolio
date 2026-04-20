@@ -415,7 +415,7 @@ const displaySlides = computed<Slide[]>(() => {
     }
 
     if (isMobile.value) {
-      // 1) Mobile-Animated-Video
+      // 1) Mobile-Animated-Video (9:16)
       const mobileVideo = id ? getAnimatedMobile(id) : null
       if (mobileVideo) {
         updated.previewVideo = mobileVideo
@@ -424,17 +424,8 @@ const displaySlides = computed<Slide[]>(() => {
         return updated
       }
 
-      // 2) Fallback: Desktop-Animated (falls noch kein Mobile-Video existiert –
-      //    besser als gar kein Video auf dem Handy)
-      const desktopVideoFallback = id ? getAnimatedDesktop(id) : null
-      if (desktopVideoFallback) {
-        updated.previewVideo = desktopVideoFallback
-        updated.previewImage = null
-        updated.video = null
-        return updated
-      }
-
-      // 3) Fallback: Mobile-Bild
+      // 2) Fallback: Mobile-Bild (kein Desktop-16:9-Video auf Mobile,
+      //    damit das Format nicht kaputt aussieht)
       if (id) {
         const [mobileSrc] = mobileCoverCandidatesById(id)
         updated.previewImage = mobileSrc

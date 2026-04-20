@@ -260,6 +260,30 @@ function isNightTime(): boolean {
   return hour >= 20 || hour < 6
 }
 
+// Mobile erkennen, damit mobile Transition-Videos benutzt werden
+function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(max-width: 767px)').matches
+}
+
+// Richtige Transition-Video-Quelle auswählen
+function transitionDownSrc(): string {
+  return withBase(
+    isMobileViewport()
+      ? '/videos/Transition_down-mobil.mp4'
+      : '/videos/Transition.mp4'
+  )
+}
+
+function transitionUpSrc(): string {
+  // Achtung: Dateiname enthält Typo ("Transiton_up-mobil.mp4")
+  return withBase(
+    isMobileViewport()
+      ? '/videos/Transiton_up-mobil.mp4'
+      : '/videos/Transition_up.mp4'
+  )
+}
+
 // ✅ Clean URL nur anzeigen (ohne VitePress Navigation)
 // - entfernt id/redirect aus der sichtbaren URL
 // - behält optional play=1
@@ -598,7 +622,7 @@ function interceptHomeNav(e: Event) {
   const targetRoute = isAbout ? '/uebermich' : isKontakt ? '/kontakt' : '/'
   overlayUseHardReload.value = true
   overlayHomeToRoot.value = true
-  playTransitionToRoute(targetRoute, withBase('/videos/Transition_up.mp4'), 'none')
+  playTransitionToRoute(targetRoute, transitionUpSrc(), 'none')
 }
 
 // Prev/Next
@@ -768,7 +792,7 @@ onMounted(() => {
   if (currentSlug.value && play) {
     // interne URL bereinigen (play weg)
     updateInternalUrlWithoutPlayOrRedirect(currentSlug.value)
-    playProjectIntro(currentSlug.value, withBase('/videos/Transition.mp4'))
+    playProjectIntro(currentSlug.value, transitionDownSrc())
   } else {
     contentVisible.value = true
   }

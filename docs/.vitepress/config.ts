@@ -18,13 +18,15 @@ export default defineConfig({
 
   // ✅ Preload Videos + GitHub Pages Redirect Restore
   head: [
+    // Desktop: normale Transition-Videos
     [
       'link',
       {
         rel: 'preload',
         as: 'video',
         href: '/videos/Transition.mp4',
-        type: 'video/mp4'
+        type: 'video/mp4',
+        media: '(min-width: 768px)'
       }
     ],
     [
@@ -33,7 +35,29 @@ export default defineConfig({
         rel: 'preload',
         as: 'video',
         href: '/videos/Transition_up.mp4',
-        type: 'video/mp4'
+        type: 'video/mp4',
+        media: '(min-width: 768px)'
+      }
+    ],
+    // Mobile: kleinere Transition-Videos
+    [
+      'link',
+      {
+        rel: 'preload',
+        as: 'video',
+        href: '/videos/Transition_down-mobil.mp4',
+        type: 'video/mp4',
+        media: '(max-width: 767px)'
+      }
+    ],
+    [
+      'link',
+      {
+        rel: 'preload',
+        as: 'video',
+        href: '/videos/Transiton_up-mobil.mp4',
+        type: 'video/mp4',
+        media: '(max-width: 767px)'
       }
     ],
 

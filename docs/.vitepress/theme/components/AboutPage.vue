@@ -152,7 +152,6 @@ export default {
   font-size: clamp(2rem, 7vw, 3.75rem);
   line-height: 1.15;
   letter-spacing: -0.02em;
-  text-shadow: 0 1px 24px rgba(0, 0, 0, 0.5);
   padding-top: 0.1em;
 }
 
@@ -214,12 +213,10 @@ export default {
 .day-text {
   color: #fff;
   mix-blend-mode: difference;
-  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.35);
 }
 
 .night-text {
   color: #fff;
   mix-blend-mode: normal;
-  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.35);
 }
 </style>

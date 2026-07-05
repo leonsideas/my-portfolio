@@ -120,7 +120,6 @@ onBeforeUnmount(() => {
   line-height: 1;
   letter-spacing: -0.02em;
   color: #fff;
-  text-shadow: 0 1px 24px rgba(0, 0, 0, 0.5);
 }
 
 .contact-heading-link {

@@ -89,16 +89,14 @@
     justify-content: center;
 
     padding: 0.4rem 0.5rem;
-    border-radius: 9999px;
 
-    border: 1px solid rgba(255, 255, 255, 0.95);
     background: transparent;
     color: rgba(255, 255, 255, 1);
 
     text-transform: uppercase;
     letter-spacing: 0.18em;
 
-    transition: border-color 200ms ease, color 200ms ease;
+    transition: color 200ms ease;
 
     width: 100%;
     max-width: 100%;
@@ -108,7 +106,6 @@
   }
 
   .nav-pill:hover {
-    border-color: rgba(255, 255, 255, 1);
     color: rgba(255, 255, 255, 1);
   }
 

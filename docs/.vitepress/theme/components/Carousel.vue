@@ -2,9 +2,14 @@
   <!-- eigener schwarzer Hintergrund, NavBar bleibt transparent -->
   <div
     class="carousel relative w-full overflow-hidden bg-black z-20"
-    :class="[carouselHeightClass, { 'is-night': isNightTime }]"
+    :class="[carouselHeightClass, {
+      'is-night': isNightTime,
+      'has-custom-cursor': hasFinePointer,
+    }]"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
+    @mousemove="handleMouseMoveNav"
+    @click="handleBackgroundClick"
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
     @touchend="handleTouchEnd"
@@ -35,25 +40,6 @@
               @click.prevent="handleSlideClick(index, slide)"
             >
               <span>Projekt öffnen</span>
-            </button>
-
-            <button
-              v-if="index === 0"
-              type="button"
-              class="absolute bottom-10 left-1/2
-                     px-6 py-2 z-10 cursor-pointer
-                     flex items-center gap-2 justify-center
-                     bg-white/15 hover:bg-white/25
-                     backdrop-blur-sm
-                     border border-white/70 hover:border-white
-                     text-white
-                     text-xs md:text-sm tracking-[0.25em] uppercase
-                     rounded-full project-open-btn
-                     transition-colors duration-200"
-              @click.prevent="goTo(firstProjectIndex)"
-            >
-              <span>Projekte</span>
-              <span aria-hidden="true" class="intro-arrow">→</span>
             </button>
 
             <div
@@ -127,6 +113,44 @@
       </div>
     </div>
 
+    <!-- Eigener Pfeil-Cursor: folgt der Maus auf der ganzen Seite, Richtung je
+         nach Bildhälfte (als Element statt CSS-cursor, da Safari keine
+         SVG-Cursor rendert) -->
+    <div
+      v-show="hasFinePointer && cursorVisible"
+      class="custom-cursor"
+      aria-hidden="true"
+      :style="{ transform: `translate3d(${cursorX - 22}px, ${cursorY - 22}px, 0)` }"
+    >
+      <svg viewBox="0 0 44 44" width="44" height="44" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path :d="cursorArrowPath" stroke="rgba(0, 0, 0, 0.4)" stroke-width="7.5" />
+        <path :d="cursorArrowPath" stroke="#ffffff" stroke-width="4" />
+      </svg>
+    </div>
+
+    <!-- Mobile: sichtbare Pfeile an den Rändern (Desktop nutzt den Pfeil-Cursor) -->
+    <button
+      type="button"
+      class="carousel-edge-arrow carousel-edge-arrow--left"
+      aria-label="Vorheriger Slide"
+      @click.stop="prev()"
+    >
+      <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M37 22 L9 22 M20 11 L9 22 L20 33" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      class="carousel-edge-arrow carousel-edge-arrow--right"
+      aria-label="Nächster Slide"
+      @click.stop="next()"
+    >
+      <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7 22 L35 22 M24 11 L35 22 L24 33" />
+      </svg>
+    </button>
+
     <!-- Pagination: Dots -->
     <div
       v-if="!isFirstSlide"
@@ -144,50 +168,6 @@
       />
     </div>
 
-    <a
-      v-if="!isFirstSlide"
-      href=""
-      class="carousel-side-nav absolute left-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
-             text-white/90 nav-link-font mix-blend-difference"
-      aria-label="Vorheriger Slide"
-      @click.prevent="prev()"
-    >
-      <span
-        class="carousel-side-pill carousel-side-pill--unified works-vertical back-vertical
-               flex items-center justify-center
-               w-10 h-28
-               rounded-full
-               border border-white/40 hover:border-white
-               bg-black/30 hover:bg-black/60
-               transition-colors duration-200
-               tracking-[0.35em] uppercase"
-      >
-        zurück
-      </span>
-    </a>
-
-    <a
-      v-if="!isFirstSlide"
-      href=""
-      class="carousel-side-nav absolute right-6 top-1/2 -translate-y-1/2 z-30 pointer-events-auto select-none
-             text-white/90 nav-link-font mix-blend-difference"
-      aria-label="Nächster Slide"
-      @click.prevent="next()"
-    >
-      <span
-        class="carousel-side-pill carousel-side-pill--unified works-vertical
-               flex items-center justify-center
-               w-10
-               rounded-full
-               border border-white/40 hover:border-white
-               bg-black/30 hover:bg-black/60
-               transition-colors duration-200
-               tracking-[0.35em] uppercase
-               h-28 py-1"
-      >
-        Weiter
-      </span>
-    </a>
   </div>
 </template>
 
@@ -271,6 +251,8 @@ onMounted(() => {
 
   updateIsMobile()
   window.addEventListener('resize', updateIsMobile)
+
+  hasFinePointer.value = window.matchMedia('(hover: hover) and (pointer: fine)').matches
 })
 
 onBeforeUnmount(() => {
@@ -620,6 +602,47 @@ function handleSlideClick(index: number, slide: Slide) {
   }
 }
 
+// --- Pfeil-Cursor-Navigation: linke Hälfte = zurück, rechte Hälfte = weiter ---
+const cursorSide = ref<'left' | 'right'>('right')
+const cursorX = ref(0)
+const cursorY = ref(0)
+const hasFinePointer = ref(false)
+// Über "Projekt öffnen" gilt wieder der normale Zeiger statt des Pfeils
+const overInteractive = ref(false)
+const cursorVisible = computed(() => isHovered.value && !overInteractive.value)
+
+const cursorArrowPath = computed(() =>
+  cursorSide.value === 'left'
+    ? 'M37 22 L9 22 M20 11 L9 22 L20 33'
+    : 'M7 22 L35 22 M24 11 L35 22 L24 33'
+)
+
+function sideFromEvent(e: MouseEvent): 'left' | 'right' {
+  const el = e.currentTarget as HTMLElement | null
+  if (!el) return 'right'
+  const rect = el.getBoundingClientRect()
+  return e.clientX - rect.left < rect.width / 2 ? 'left' : 'right'
+}
+
+function handleMouseMoveNav(e: MouseEvent) {
+  cursorSide.value = sideFromEvent(e)
+  const el = e.currentTarget as HTMLElement | null
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  cursorX.value = e.clientX - rect.left
+  cursorY.value = e.clientY - rect.top
+
+  const target = e.target as HTMLElement | null
+  overInteractive.value = !!target?.closest('.project-open-btn')
+}
+
+function handleBackgroundClick(e: MouseEvent) {
+  const target = e.target as HTMLElement | null
+  if (target?.closest('button, a')) return
+  if (sideFromEvent(e) === 'left') prev()
+  else next()
+}
+
 function handleTitleClick(slide: Slide) {
   if (!slide.titleLink) return
 
@@ -636,9 +659,67 @@ function handleTitleClick(slide: Slide) {
 </script>
 
 <style scoped>
-.works-vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
+/* Eigener Pfeil-Cursor statt Zurück/Weiter-Buttons: der native Mauszeiger
+   wird auf dem Carousel ausgeblendet, stattdessen fährt .custom-cursor mit
+   und zeigt die Blätter-Richtung der jeweiligen Bildhälfte an */
+.carousel.has-custom-cursor,
+.carousel.has-custom-cursor :deep(*) {
+  /* Unsichtbares PNG statt "none", weil Safari cursor:none ignoriert;
+     als Datei statt Data-URI, weil Safari auch Data-URI-Cursor verwirft */
+  cursor: url('../assets/transparent-cursor.png'), none !important;
+}
+
+/* Ausnahme: über "Projekt öffnen" gilt der normale Zeiger */
+.carousel.has-custom-cursor :deep(.project-open-btn),
+.carousel.has-custom-cursor :deep(.project-open-btn *) {
+  cursor: pointer !important;
+}
+
+.custom-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+
+/* Mobile-Pfeile: nur auf Touch-Geräten sichtbar, rahmenlos, mit Schatten
+   für Lesbarkeit auf hellen Bildern */
+.carousel-edge-arrow {
+  display: none;
+}
+
+@media (hover: none), (max-width: 767px) {
+  .carousel-edge-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
+  }
+
+  .carousel-edge-arrow svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .carousel-edge-arrow--left {
+    left: 0.25rem;
+  }
+
+  .carousel-edge-arrow--right {
+    right: 0.25rem;
+  }
 }
 
 .title-center {
@@ -667,11 +748,6 @@ function handleTitleClick(slide: Slide) {
   color: #fff !important;
 }
 
-.carousel.is-night .works-vertical {
-  color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
 @media (min-width: 768px) {
   h2.title-center {
     font-size: 8rem;
@@ -681,38 +757,6 @@ function handleTitleClick(slide: Slide) {
     padding-top: 11rem;
   }
 
-  .carousel .carousel-side-nav {
-    top: auto !important;
-    bottom: 5vh !important;
-    transform: none !important;
-    mix-blend-mode: normal !important;
-  }
-
-  .carousel .carousel-side-pill.works-vertical {
-    writing-mode: horizontal-tb !important;
-    text-orientation: mixed !important;
-    width: auto !important;
-    height: auto !important;
-    padding: 0.5rem 1.5rem !important;
-    border-radius: 9999px !important;
-    font-size: 0.875rem !important;
-    letter-spacing: 0.25em !important;
-    white-space: nowrap;
-    min-width: 120px;
-    text-align: center;
-  }
-
-  .carousel .carousel-side-nav.left-6 {
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(calc(-170px - 0.75rem - 100%)) !important;
-  }
-
-  .carousel .carousel-side-nav.right-6 {
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(calc(170px + 0.75rem)) !important;
-  }
 }
 
 @media (max-width: 767px) {
@@ -731,49 +775,6 @@ function handleTitleClick(slide: Slide) {
     max-width: 96vw;
   }
 
-  .carousel .carousel-side-nav {
-    top: auto !important;
-    bottom: calc(12vh + 2.4rem) !important;
-    transform: none !important;
-    mix-blend-mode: normal !important;
-  }
-
-  .carousel .carousel-side-nav.left-6 {
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(max(-37.5vw, -170px)) !important;
-  }
-
-  .carousel .carousel-side-nav.right-6 {
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(calc(min(37.5vw, 170px) - 100%)) !important;
-  }
-
-  .carousel .carousel-side-pill {
-    writing-mode: horizontal-tb !important;
-    text-orientation: mixed !important;
-    white-space: nowrap;
-    width: auto !important;
-    height: auto !important;
-    padding: 0.5rem 1.5rem !important;
-    border-radius: 9999px !important;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    color: #fff !important;
-    font-size: 0.75rem !important;
-    letter-spacing: 0.25em !important;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-
-  .carousel .carousel-side-pill:hover {
-    background: rgba(0, 0, 0, 0.6) !important;
-    border-color: rgba(255, 255, 255, 1) !important;
-  }
-
-  .carousel .carousel-side-pill--unified {
-  }
 }
 
 .carousel .relative.w-full.h-full.bg-gray-900 {
@@ -795,22 +796,6 @@ function handleTitleClick(slide: Slide) {
   .carousel .project-open-btn {
     bottom: 5vh;
   }
-}
-
-/* --- Pulse / bounce on intro arrow --- */
-.intro-arrow {
-  display: inline-block;
-  animation: intro-arrow-bounce 1.8s ease-in-out infinite;
-  will-change: transform;
-}
-
-@keyframes intro-arrow-bounce {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(4px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .intro-arrow { animation: none; }
 }
 
 /* --- Pagination dots --- */

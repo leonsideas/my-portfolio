@@ -33,10 +33,9 @@
               class="absolute bottom-10 left-1/2
                      px-6 py-2 z-10 cursor-pointer
                      flex items-center justify-center
-                     bg-black/30 hover:bg-black/60
-                     border border-white/40 hover:border-white
                      text-white text-xs md:text-sm tracking-[0.25em] uppercase
-                     rounded-full project-open-btn"
+                     hover:underline underline-offset-4
+                     project-open-btn"
               @click.prevent="handleSlideClick(index, slide)"
             >
               <span>Projekt öffnen</span>

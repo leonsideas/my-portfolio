@@ -1055,11 +1055,8 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 
   padding: 0.4rem 0.75rem;
-  border-radius: 9999px;
 
   color: rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.2);
 
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -1068,14 +1065,12 @@ onBeforeUnmount(() => {
 
   max-width: 48%;
 
-  transition: color 200ms ease, background 200ms ease, border-color 200ms ease;
+  transition: color 200ms ease;
   cursor: pointer;
 }
 
 .workpage-nav-pill:hover {
   color: rgba(255, 255, 255, 1);
-  background: rgba(0, 0, 0, 0.55);
-  border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* Platzhalter, damit die Dots beim ersten/letzten Projekt zentriert bleiben */
@@ -1166,9 +1161,7 @@ onBeforeUnmount(() => {
   display: inline-block;
   margin-top: 0.25rem;
   margin-bottom: 0.75rem;
-  padding: 0.25rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 9999px;
+  padding: 0.25rem 0;
   color: rgba(255, 255, 255, 0.95);
   font-size: 0.8rem;
   letter-spacing: 0.25em;
@@ -1189,14 +1182,11 @@ onBeforeUnmount(() => {
 .workpage-keyword-pill {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.7rem;
+  padding: 0.3rem 0.35rem;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.75);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 9999px;
   white-space: nowrap;
 }
 

@@ -20,7 +20,10 @@
         v-for="(slide, index) in displaySlides"
         :key="slide.id ?? index"
         class="absolute inset-0 w-full h-full transition-opacity duration-700 ease-out"
-        :class="index === currentIndex ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
+        :class="[
+          index === currentIndex ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+          { 'intro-nudge': index === 0 && isFirstSlide },
+        ]"
       >
         <component
           :is="'div'"
@@ -125,17 +128,6 @@
         <path :d="cursorArrowPath" stroke="rgba(0, 0, 0, 0.4)" stroke-width="7.5" />
         <path :d="cursorArrowPath" stroke="#ffffff" stroke-width="4" />
       </svg>
-    </div>
-
-    <!-- Mobile: Wisch-Hinweis auf dem ersten Slide -->
-    <div
-      v-if="isFirstSlide"
-      class="swipe-hint"
-      aria-hidden="true"
-    >
-      <span>←</span>
-      <span class="swipe-hint-label">wischen</span>
-      <span>→</span>
     </div>
 
     <!-- Pagination: Dots -->
@@ -673,41 +665,27 @@ function handleTitleClick(slide: Slide) {
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
 }
 
-/* Mobile: dezenter Wisch-Hinweis auf dem ersten Slide, rahmenlos,
-   mit Schatten für Lesbarkeit auf hellen Bildern */
-.swipe-hint {
-  display: none;
-}
-
+/* Mobile: Wisch-Hinweis ohne UI-Element – das Intro-Bild selbst macht alle
+   paar Sekunden eine kleine seitliche Wisch-Bewegung. Leichtes Scale, damit
+   beim Verschieben keine Ränder sichtbar werden. */
 @media (hover: none), (max-width: 767px) {
-  .swipe-hint {
-    position: absolute;
-    bottom: 12vh;
-    left: 50%;
-    z-index: 30;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    font-size: 0.75rem;
-    pointer-events: none;
-    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
-    animation: swipe-hint-nudge 2.4s ease-in-out infinite;
+  .carousel .intro-nudge video,
+  .carousel .intro-nudge img {
+    animation: intro-nudge 6s ease-in-out 2s infinite;
+    will-change: transform;
   }
 }
 
-@keyframes swipe-hint-nudge {
-  0%, 100% { transform: translateX(-50%); }
-  25% { transform: translateX(calc(-50% - 10px)); }
-  75% { transform: translateX(calc(-50% + 10px)); }
+@keyframes intro-nudge {
+  0%, 78%, 96%, 100% { transform: translateX(0) scale(1); }
+  84% { transform: translateX(-16px) scale(1.05); }
+  90% { transform: translateX(5px) scale(1.05); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .swipe-hint {
+  .carousel .intro-nudge video,
+  .carousel .intro-nudge img {
     animation: none;
-    transform: translateX(-50%);
   }
 }
 

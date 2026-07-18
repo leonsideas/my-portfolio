@@ -370,8 +370,9 @@ const displaySlides = computed<Slide[]>(() => {
     const id = updated.id ? String(updated.id) : ''
 
     if (isNightTime.value) {
-      // 1) Animated Night-Video (gilt für Desktop + Mobile, da kein eigenes Mobile-Night-Video existiert)
-      const nightVideo = id ? getAnimatedNight(id) : null
+      // 1) Animated Night-Video – nur auf Desktop. Auf Mobile (9:16) würde das
+      //    16:9-Video beschnitten, daher dort stattdessen das Nachtbild (Fallback unten)
+      const nightVideo = id && !isMobile.value ? getAnimatedNight(id) : null
       if (nightVideo) {
         updated.previewVideo = nightVideo
         updated.previewImage = null

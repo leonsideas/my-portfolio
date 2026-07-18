@@ -127,28 +127,16 @@
       </svg>
     </div>
 
-    <!-- Mobile: sichtbare Pfeile an den Rändern (Desktop nutzt den Pfeil-Cursor) -->
-    <button
-      type="button"
-      class="carousel-edge-arrow carousel-edge-arrow--left"
-      aria-label="Vorheriger Slide"
-      @click.stop="prev()"
+    <!-- Mobile: Wisch-Hinweis auf dem ersten Slide -->
+    <div
+      v-if="isFirstSlide"
+      class="swipe-hint"
+      aria-hidden="true"
     >
-      <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M37 22 L9 22 M20 11 L9 22 L20 33" />
-      </svg>
-    </button>
-
-    <button
-      type="button"
-      class="carousel-edge-arrow carousel-edge-arrow--right"
-      aria-label="Nächster Slide"
-      @click.stop="next()"
-    >
-      <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M7 22 L35 22 M24 11 L35 22 L24 33" />
-      </svg>
-    </button>
+      <span>←</span>
+      <span class="swipe-hint-label">wischen</span>
+      <span>→</span>
+    </div>
 
     <!-- Pagination: Dots -->
     <div
@@ -685,40 +673,41 @@ function handleTitleClick(slide: Slide) {
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
 }
 
-/* Mobile-Pfeile: nur auf Touch-Geräten sichtbar, rahmenlos, mit Schatten
-   für Lesbarkeit auf hellen Bildern */
-.carousel-edge-arrow {
+/* Mobile: dezenter Wisch-Hinweis auf dem ersten Slide, rahmenlos,
+   mit Schatten für Lesbarkeit auf hellen Bildern */
+.swipe-hint {
   display: none;
 }
 
 @media (hover: none), (max-width: 767px) {
-  .carousel-edge-arrow {
+  .swipe-hint {
+    position: absolute;
+    bottom: 12vh;
+    left: 50%;
+    z-index: 30;
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 30;
-    padding: 0.75rem;
-    background: none;
-    border: none;
+    gap: 0.6rem;
     color: #fff;
-    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-size: 0.75rem;
+    pointer-events: none;
     filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
+    animation: swipe-hint-nudge 2.4s ease-in-out infinite;
   }
+}
 
-  .carousel-edge-arrow svg {
-    width: 26px;
-    height: 26px;
-  }
+@keyframes swipe-hint-nudge {
+  0%, 100% { transform: translateX(-50%); }
+  25% { transform: translateX(calc(-50% - 10px)); }
+  75% { transform: translateX(calc(-50% + 10px)); }
+}
 
-  .carousel-edge-arrow--left {
-    left: 0.25rem;
-  }
-
-  .carousel-edge-arrow--right {
-    right: 0.25rem;
+@media (prefers-reduced-motion: reduce) {
+  .swipe-hint {
+    animation: none;
+    transform: translateX(-50%);
   }
 }
 

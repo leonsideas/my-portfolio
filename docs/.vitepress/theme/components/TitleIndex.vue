@@ -4,9 +4,12 @@
     :class="{
       'is-hovering': cursorHintVisible,
       'has-custom-cursor': hasFinePointer,
+      'is-touch-mode': !hasFinePointer,
     }"
     @mousemove="onPointerMove"
     @mouseleave="handlePointerLeave"
+    @touchstart.passive="onTouchStart"
+    @touchend.passive="onTouchEnd"
   >
     <!-- Hintergrund: zwei Ebenen, die per Crossfade wechseln -->
     <div class="ti-bg page-crop" aria-hidden="true">
@@ -77,8 +80,7 @@
           >
             <span class="ti-title" :class="project.fontClass">{{ project.title }}</span>
             <!-- Ohne Mauszeiger (Touch) steht das Klick-Signal am Titel selbst.
-                 Bewusst in derselben Zeile, damit die Liste nicht umbricht und
-                 der zentrierte Titel nicht verspringt. -->
+                 Es liegt absolut unter dem Titel, damit nichts verspringt. -->
             <span v-if="!hasFinePointer" class="ti-cta" aria-hidden="true">Projekt öffnen →</span>
           </a>
         </li>
@@ -98,6 +100,12 @@
       aria-hidden="true"
     >
       <span>Projekt öffnen</span>
+    </div>
+
+    <div v-if="!hasFinePointer" class="ti-swipe-hint" aria-hidden="true">
+      <span>↑</span>
+      <span>Wischen</span>
+      <span>↓</span>
     </div>
   </div>
 </template>
@@ -201,6 +209,7 @@ const scatterX = ref<number[]>([])
 const scatterY = ref<number[]>([])
 let scrollFrame: number | null = null
 let titleScaleFrame: number | null = null
+let touchStart: { x: number; y: number } | null = null
 let componentMounted = false
 
 /* Abwechselnde Positionen entlang einer unsichtbaren Mittelachse. Lange Titel
@@ -360,12 +369,47 @@ function handlePointerLeave() {
   cursorVisible.value = false
 }
 
+/* Auf Touch-Geräten ersetzt Wischen den Hover. Nach oben oder links geht es
+   vorwärts, nach unten oder rechts zurück; activeMedia wechselt synchron. */
+function selectMobileProject(step: 1 | -1) {
+  if (!props.projects.length) return
+
+  const currentIndex = props.projects.findIndex(project => project.slug === activeSlug.value)
+  const startIndex = currentIndex >= 0 ? currentIndex : 0
+  const nextIndex = (startIndex + step + props.projects.length) % props.projects.length
+  activeSlug.value = props.projects[nextIndex].slug
+}
+
+function onTouchStart(event: TouchEvent) {
+  if (hasFinePointer.value || event.touches.length !== 1) return
+
+  const touch = event.touches[0]
+  touchStart = { x: touch.clientX, y: touch.clientY }
+}
+
+function onTouchEnd(event: TouchEvent) {
+  if (hasFinePointer.value || !touchStart || !event.changedTouches.length) return
+
+  const touch = event.changedTouches[0]
+  const deltaX = touch.clientX - touchStart.x
+  const deltaY = touch.clientY - touchStart.y
+  touchStart = null
+
+  const dominantDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY
+  if (Math.abs(dominantDelta) < 36) return
+
+  selectMobileProject(dominantDelta < 0 ? 1 : -1)
+}
+
 onMounted(() => {
   componentMounted = true
-  // Startzustand: kein Titel gewählt – es läuft das Intro-Motiv, alle Titel
-  // stehen gleichwertig da. Erst der Hover wechselt das Video.
+  // Mit Maus startet die Seite neutral und reagiert auf Hover. Auf Touch wird
+  // das erste Projekt hervorgehoben und anschließend per Wischgeste gewechselt.
   hasFinePointer.value = window.matchMedia('(hover: hover) and (pointer: fine)').matches
   startFilter()
+  if (!hasFinePointer.value && props.projects[0]) {
+    activeSlug.value = props.projects[0].slug
+  }
 
   nextTick(updateTitleScales)
   document.fonts?.ready.then(() => {
@@ -531,6 +575,16 @@ function openProject(slug: string) {
   transform: scale(var(--item-active-scale, var(--active-scale, 1.28)));
 }
 
+.title-index.is-touch-mode {
+  touch-action: pinch-zoom;
+}
+
+.title-index.is-touch-mode .ti-item.is-active .ti-link {
+  transform:
+    translateY(-0.35rem)
+    scale(var(--item-active-scale, var(--active-scale, 1.18)));
+}
+
 /* Nur das Wort selbst ist Hover-Fläche, nicht die ganze Zeilenbreite */
 .ti-link {
   position: relative;
@@ -642,6 +696,23 @@ function openProject(slug: string) {
   transform: translate(-50%, 0.2rem);
 }
 
+.ti-swipe-hint {
+  position: absolute;
+  left: 50%;
+  bottom: max(0.65rem, env(safe-area-inset-bottom));
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--brand-red);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
 /* Kein optischer Randausgleich: alle Titel teilen dieselbe linke Kante. */
 
 @media (max-width: 767px) {
@@ -684,7 +755,8 @@ function openProject(slug: string) {
 @media (prefers-reduced-motion: reduce) {
   .ti-bg__layer,
   .ti-item,
-  .ti-title {
+  .ti-title,
+  .ti-link {
     transition: none;
   }
 }

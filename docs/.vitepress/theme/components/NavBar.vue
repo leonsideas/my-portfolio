@@ -280,6 +280,34 @@
     }
   }
 
+  @media (max-width: 767px) {
+    .my-nav__inner {
+      padding-inline:
+        max(0.5rem, env(safe-area-inset-left))
+        max(0.5rem, env(safe-area-inset-right));
+    }
+
+    .my-nav__list {
+      gap: 0.15rem;
+    }
+
+    .my-nav__item {
+      min-width: 0;
+    }
+
+    .nav-pill {
+      padding-inline: 0.2rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+    }
+
+    .nav-typewriter {
+      width: clamp(6.5rem, 36vw, 8.5rem);
+      font-size: 0.52rem;
+      letter-spacing: 0.035em;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .nav-typewriter__caret {
       display: none;

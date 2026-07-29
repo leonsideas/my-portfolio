@@ -11,6 +11,7 @@
     @touchstart.passive="onTouchStart"
     @touchmove="onTouchMove"
     @touchend.passive="onTouchEnd"
+    @touchcancel.passive="onTouchCancel"
   >
     <!-- Hintergrund: zwei Ebenen, die per Crossfade wechseln -->
     <div class="ti-bg page-crop" aria-hidden="true">
@@ -33,6 +34,7 @@
           loop
           playsinline
           preload="auto"
+          @loadeddata="handleMediaReady(i, layer.key)"
         />
         <img
           v-else-if="layer"
@@ -42,6 +44,7 @@
           class="ti-bg__media ti-bg__source"
           :class="{ 'is-visible-source': keepSourceVisible }"
           alt=""
+          @load="handleMediaReady(i, layer.key)"
         />
         <canvas
           v-if="layer"
@@ -74,8 +77,9 @@
             :href="hrefFor(project.slug)"
             class="ti-link"
             :aria-label="project.title"
+            :data-project-slug="project.slug"
             @mouseenter="handleHover(project.slug)"
-            @mouseleave="clearActive"
+            @mouseleave="scheduleClearActive"
             @focus="handleHover(project.slug)"
             @click.prevent="handleProjectClick(project.slug)"
           >
@@ -105,7 +109,7 @@
 
     <div v-if="!hasFinePointer" class="ti-swipe-hint" aria-hidden="true">
       <span>↑</span>
-      <span>Durch Titel wischen</span>
+      <span>Titel berühren &amp; wischen</span>
       <span>↓</span>
     </div>
   </div>
@@ -146,6 +150,7 @@ function toBase(url?: string | null) {
    --------------------------------------------------------------- */
 
 const activeSlug = ref<string | null>(null)
+let hoverClearTimer: number | undefined
 
 /** Alle Titel gleich groß: die Größe richtet sich nach dem längsten */
 const maxTitleChars = computed(() =>
@@ -157,6 +162,10 @@ function setActive(slug: string | null) {
 }
 
 function handleHover(slug: string) {
+  if (hoverClearTimer) {
+    window.clearTimeout(hoverClearTimer)
+    hoverClearTimer = undefined
+  }
   activeSlug.value = slug
 }
 
@@ -166,7 +175,21 @@ function handleHover(slug: string) {
  * .is-dimmed trägt, stehen wieder alle gleichwertig da.
  */
 function clearActive() {
+  if (hoverClearTimer) {
+    window.clearTimeout(hoverClearTimer)
+    hoverClearTimer = undefined
+  }
   activeSlug.value = null
+}
+
+function scheduleClearActive() {
+  if (!hasFinePointer.value || hoverClearTimer) return
+
+  hoverClearTimer = window.setTimeout(() => {
+    hoverClearTimer = undefined
+    const hoveredTitle = document.querySelector('.title-index .ti-link:hover')
+    if (!hoveredTitle) activeSlug.value = null
+  }, 120)
 }
 
 const activeMedia = computed<CoverMedia>(() =>
@@ -181,20 +204,54 @@ type Layer = { key: string; media: CoverMedia } | null
 
 const layers = ref<Layer[]>([null, null])
 const visibleLayer = ref(0)
+let pendingLayer: number | null = null
+let pendingLayerKey = ''
+const readyLayerKeys = new Set<string>()
+
+function layerReadyKey(index: number, key: string) {
+  return `${index}:${key}`
+}
+
+function handleMediaReady(index: number, key: string) {
+  readyLayerKeys.add(layerReadyKey(index, key))
+  if (pendingLayer !== index || pendingLayerKey !== key) return
+
+  visibleLayer.value = index
+  pendingLayer = null
+  pendingLayerKey = ''
+}
 
 watch(
   activeMedia,
   (media) => {
     const current = layers.value[visibleLayer.value]
-    if (current && current.media.src === media.src) return
+    if (current && current.media.src === media.src) {
+      pendingLayer = null
+      pendingLayerKey = ''
+      return
+    }
+
+    if (pendingLayer !== null && pendingLayerKey === media.src) return
 
     const nextLayer = visibleLayer.value === 0 ? 1 : 0
-    layers.value[nextLayer] = { key: media.src, media }
 
-    // erst rendern lassen, dann einblenden – sonst springt das Bild ohne Fade
-    nextTick(() => {
+    // Liegt das gewünschte Motiv bereits fertig geladen in der inaktiven
+    // Ebene, kann es sofort wieder eingeblendet werden. Auf ein zweites
+    // load-/loadeddata-Ereignis zu warten würde hier dauerhaft hängen.
+    const next = layers.value[nextLayer]
+    if (
+      next?.media.src === media.src &&
+      readyLayerKeys.has(layerReadyKey(nextLayer, next.key))
+    ) {
+      pendingLayer = null
+      pendingLayerKey = ''
       visibleLayer.value = nextLayer
-    })
+      return
+    }
+
+    pendingLayer = nextLayer
+    pendingLayerKey = media.src
+    layers.value[nextLayer] = { key: media.src, media }
   },
   { immediate: true }
 )
@@ -210,8 +267,8 @@ const scatterX = ref<number[]>([])
 const scatterY = ref<number[]>([])
 let scrollFrame: number | null = null
 let titleScaleFrame: number | null = null
-let touchLastY: number | null = null
-let touchDistance = 0
+let touchStartY: number | null = null
+let touchSelecting = false
 let touchDidSelect = false
 let suppressProjectClick = false
 let suppressClickTimer: number | undefined
@@ -348,8 +405,13 @@ function onPointerMove(e: MouseEvent) {
   const hoveredLink = target?.closest('.ti-link')
   cursorHintVisible.value = !!hoveredLink
 
-  if (!hoveredLink && hasFinePointer.value) {
-    clearActive()
+  if (hoveredLink) {
+    if (hoverClearTimer) {
+      window.clearTimeout(hoverClearTimer)
+      hoverClearTimer = undefined
+    }
+  } else if (hasFinePointer.value) {
+    scheduleClearActive()
   }
 }
 
@@ -374,46 +436,72 @@ function handlePointerLeave() {
   cursorVisible.value = false
 }
 
-/* Auf Touch-Geräten ersetzt eine kontinuierliche Wischbewegung den Hover.
-   Je 46 Pixel Weg rastet das nächste Projekt ein – wie bei einem Drehrad. */
-function selectMobileProject(step: 1 | -1) {
-  if (!props.projects.length) return
+/* Das Drehrad startet ausschließlich auf einem Titel. Während der Finger
+   vertikal wandert, wird nur dann gewechselt, wenn er die Höhe einer anderen
+   Titelzeile erreicht. Eine Geste auf dem freien Hintergrund bleibt wirkungslos. */
+function projectSlugAtY(y: number): string | null {
+  const tolerance = 8
 
-  const currentIndex = props.projects.findIndex(project => project.slug === activeSlug.value)
-  const startIndex = currentIndex >= 0 ? currentIndex : 0
-  const nextIndex = (startIndex + step + props.projects.length) % props.projects.length
-  activeSlug.value = props.projects[nextIndex].slug
+  for (let index = 0; index < itemRefs.value.length; index++) {
+    const item = itemRefs.value[index]
+    const project = props.projects[index]
+    if (!item || !project) continue
+
+    const rect = item.getBoundingClientRect()
+    if (y >= rect.top - tolerance && y <= rect.bottom + tolerance) {
+      return project.slug
+    }
+  }
+
+  return null
 }
 
 function onTouchStart(event: TouchEvent) {
   if (hasFinePointer.value || event.touches.length !== 1) return
 
-  touchLastY = event.touches[0].clientY
-  touchDistance = 0
+  const target = event.target instanceof Element
+    ? event.target.closest<HTMLElement>('.ti-link')
+    : null
+  const slug = target?.dataset.projectSlug
+
+  if (!slug) {
+    touchSelecting = false
+    touchStartY = null
+    return
+  }
+
+  touchSelecting = true
+  touchStartY = event.touches[0].clientY
   touchDidSelect = false
+  activeSlug.value = slug
 }
 
 function onTouchMove(event: TouchEvent) {
-  if (hasFinePointer.value || touchLastY === null || event.touches.length !== 1) return
+  if (
+    hasFinePointer.value ||
+    !touchSelecting ||
+    touchStartY === null ||
+    event.touches.length !== 1
+  ) return
 
   if (event.cancelable) event.preventDefault()
 
   const currentY = event.touches[0].clientY
-  touchDistance += touchLastY - currentY
-  touchLastY = currentY
-
-  const stepDistance = 46
-  while (Math.abs(touchDistance) >= stepDistance) {
-    const direction: 1 | -1 = touchDistance > 0 ? 1 : -1
-    selectMobileProject(direction)
-    touchDistance -= direction * stepDistance
+  if (Math.abs(currentY - touchStartY) > 10) {
     touchDidSelect = true
+  }
+
+  const slug = projectSlugAtY(currentY)
+  if (slug && slug !== activeSlug.value) {
+    activeSlug.value = slug
   }
 }
 
 function onTouchEnd() {
-  touchLastY = null
-  touchDistance = 0
+  if (!touchSelecting) return
+
+  touchSelecting = false
+  touchStartY = null
 
   // Das abschließende Touch-Ereignis nach einer Auswahlgeste darf nicht
   // versehentlich das Projekt öffnen. Ein späteres echtes Tippen bleibt frei.
@@ -424,6 +512,12 @@ function onTouchEnd() {
       suppressProjectClick = false
     }, 450)
   }
+}
+
+function onTouchCancel() {
+  touchSelecting = false
+  touchStartY = null
+  touchDidSelect = false
 }
 
 function handleProjectClick(slug: string) {
@@ -437,13 +531,10 @@ function handleProjectClick(slug: string) {
 
 onMounted(() => {
   componentMounted = true
-  // Mit Maus startet die Seite neutral und reagiert auf Hover. Auf Touch wird
-  // das erste Projekt hervorgehoben und anschließend per Wischgeste gewechselt.
+  // Die Seite startet neutral. Mausgeräte reagieren auf Hover; auf Touch
+  // beginnt die Auswahl erst mit der direkten Berührung eines Titels.
   hasFinePointer.value = window.matchMedia('(hover: hover) and (pointer: fine)').matches
   startFilter()
-  if (!hasFinePointer.value && props.projects[0]) {
-    activeSlug.value = props.projects[0].slug
-  }
 
   nextTick(updateTitleScales)
   document.fonts?.ready.then(() => {
@@ -456,6 +547,7 @@ onBeforeUnmount(() => {
   componentMounted = false
   if (scrollFrame !== null) cancelAnimationFrame(scrollFrame)
   if (titleScaleFrame !== null) cancelAnimationFrame(titleScaleFrame)
+  if (hoverClearTimer) window.clearTimeout(hoverClearTimer)
   if (suppressClickTimer) window.clearTimeout(suppressClickTimer)
   window.removeEventListener('resize', updateTitleScales)
 })
@@ -610,14 +702,14 @@ function openProject(slug: string) {
   transform: scale(var(--item-active-scale, var(--active-scale, 1.28)));
 }
 
-.title-index.is-touch-mode {
-  touch-action: pinch-zoom;
-}
-
 .title-index.is-touch-mode .ti-item.is-active .ti-link {
   transform:
     translateY(-0.35rem)
     scale(var(--item-active-scale, var(--active-scale, 1.18)));
+}
+
+.title-index.is-touch-mode .ti-link {
+  touch-action: none;
 }
 
 /* Nur das Wort selbst ist Hover-Fläche, nicht die ganze Zeilenbreite */

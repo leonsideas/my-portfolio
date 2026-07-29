@@ -27,7 +27,7 @@ const isWorkPage = computed(() => {
   const params = new URLSearchParams(window.location.search)
   if (params.has('id')) return true
   // ✅ Jeder Pfad der nicht bekannt ist → WorkPage
-  const knownPaths = ['/', '/about', '/uebermich', '/cv']
+  const knownPaths = ['/', '/about', '/uebermich', '/cv', '/kontakt', '/rechtliches']
   const path = normalizedPath.value.replace(/\/$/, '') || '/'
   return !knownPaths.some(p => path === p || path.startsWith(p + '/'))
 })

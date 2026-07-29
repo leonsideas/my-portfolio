@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { withBase, useData } from 'vitepress'
+import { useBackgroundFilter, BACKGROUND_FILTER } from '../composables/useBackgroundFilter'
 
 const bgCover = withBase('/images/Background-cover.webp')
-const bgCoverMobile = withBase('/images/Background-cover_mobile.webp')
 
 const nightBgDesktop = withBase('/images/bg-cover-night.webp')
-const nightBgMobile = withBase('/images/bg-cover-night-mobil.webp')
 
 const { site } = useData()
+const { setSource, setCanvas, start: startFilter } = useBackgroundFilter()
+const keepSourceVisible = BACKGROUND_FILTER.mode === 'none'
 
 const isNight = ref(false)
 const isMobile = ref(false)
 
 const nightTextClass = computed(() => (isNight.value ? 'night-text' : 'day-text'))
-const currentBgCover = computed(() => (isMobile.value ? bgCoverMobile : bgCover))
-const currentNightBg = computed(() => (isMobile.value ? nightBgMobile : nightBgDesktop))
+/* Motiv fuer den Bildausschnitt: ab 20 Uhr das Nachtbild.
+   Die Mobil-Varianten sind hier bewusst nicht im Spiel – der Ausschnitt ist
+   auf allen Groessen querformatig, die 9:16-Fassungen wuerden beschnitten. */
+const cropSrc = computed(() => (isNight.value ? nightBgDesktop : bgCover))
 
 const updateIsMobile = () => {
   if (typeof window === 'undefined') return
@@ -47,6 +50,7 @@ onMounted(() => {
   const hour = new Date().getHours()
   isNight.value = hour >= 20 || hour < 6
 
+  startFilter()
   updateIsMobile()
   window.addEventListener('resize', updateIsMobile)
 })
@@ -59,46 +63,30 @@ export default {
 </script>
 
 <template>
-  <div class="relative overflow-hidden bg-black aboutpage-root">
-    <div class="fixed inset-0 overflow-hidden">
-      <div
-        v-if="isNight"
-        class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        :style="{ backgroundImage: `url(${currentNightBg})` }"
-        aria-hidden="true"
-      />
-
+  <div class="relative overflow-hidden aboutpage-root">
+    <div class="page-crop filtered-crop" aria-hidden="true">
       <img
-        v-else
-        :src="currentBgCover"
-        alt="Background Cover"
-        class="absolute inset-0 w-full h-full object-cover"
+        :ref="el => setSource(0, el)"
+        :src="cropSrc"
+        class="filtered-crop__source"
+        :class="{ 'is-visible-source': keepSourceVisible }"
+        alt=""
+      />
+      <canvas
+        :ref="el => setCanvas(0, el)"
+        class="filtered-crop__canvas"
       />
     </div>
 
     <div
       class="relative z-10 isolate px-5 sm:px-6
              h-[100dvh] overflow-hidden
-             flex items-start justify-center pt-20 sm:pt-40 md:pt-48 pb-6 sm:pb-10"
+             flex items-center justify-center py-20"
     >
       <div class="w-full max-w-6xl">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-10 md:gap-14 items-start">
-          <div class="intro-panel text-white mix-blend-difference" :class="nightTextClass">
-            <h1
-              class="about-heading text-left mb-3 sm:mb-6"
-            >
-              Über mich
-            </h1>
-            <p class="text-left text-[13px] sm:text-base md:text-lg leading-snug sm:leading-relaxed">
-              Moin, ich bin Leon, 27 Jahre alt und Gestalter aus Bremen.<br />
-              Aktuell arbeite ich im Bereich Motion Design &amp; Grafik bei der manymany motion GmbH und studiere im fünften Semester Digitale Medien (B.A.) an der Hochschule für Künste Bremen.
-              Bevor’s ins Studium ging, habe ich eine Ausbildung zum Mediengestalter für Konzeption und Visualisierung gemacht.
-              Was mich antreibt? Viel Bewegen. Mit ganz neuen Ideen, Geschichten und immer neuen Wegen.
-            </p>
-          </div>
-
+        <div class="flex justify-center">
           <aside
-            class="cv-panel text-white mix-blend-difference"
+            class="cv-panel"
             :class="nightTextClass"
             aria-label="Lebenslauf"
           >
@@ -181,6 +169,8 @@ export default {
 }
 
 .aboutpage-root {
+  background: var(--page-bg);
+  color: var(--brand-red);
   /* kein Body-Scroll auf der Über-mich-Seite – außerhalb des Layout-Wrappers fixieren */
   position: fixed;
   top: 0;
@@ -204,19 +194,17 @@ export default {
 
 .cv-panel::-webkit-scrollbar-thumb,
 .intro-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(20, 16, 14, 0.2);
   border-radius: 999px;
   border: 3px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
 }
 
-.day-text {
-  color: #fff;
-  mix-blend-mode: difference;
-}
-
+/* Wie auf der Startseite: heller Grund, rote Schrift, kein Blend.
+   Tag und Nacht sehen hier gleich aus – der Wechsel haengt am Motiv, und
+   das gibt es auf dieser Seite nicht mehr. */
+.day-text,
 .night-text {
-  color: #fff;
-  mix-blend-mode: normal;
+  color: var(--brand-red);
 }
 </style>

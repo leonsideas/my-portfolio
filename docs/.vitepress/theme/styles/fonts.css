@@ -1,7 +1,8 @@
 /* Passe Dateinamen exakt an deine echten .otf Dateien an */
 @font-face {
   font-family: "Migration";
-  src: url("/fonts/Migration.woff2") format("woff2");
+  src: url("/fonts/Migration-full.woff2") format("woff2"),
+       url("/fonts/Migration.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -9,7 +10,8 @@
 
 @font-face {
   font-family: "Klang";
-  src: url("/fonts/Klang.woff2") format("woff2");
+  src: url("/fonts/Klang-full.woff2") format("woff2"),
+       url("/fonts/Klang.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -18,7 +20,8 @@
 /* Beispiel: Neue Schrift "MyNewFont" (Dateiname und font-family frei wählbar) */
 @font-face {
   font-family: "MOI";
-  src: url("/fonts/Moi.otf") format("opentype");
+  src: url("/fonts/Moi-full.woff2") format("woff2"),
+       url("/fonts/Moi.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -31,7 +34,8 @@
 /* FONT 1 */
 @font-face {
   font-family: "Light";
-  src: url("/fonts/Light.otf") format("opentype");
+  src: url("/fonts/Light-full.woff2") format("woff2"),
+       url("/fonts/Light.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -43,7 +47,8 @@
 /* FONT 2 */
 @font-face {
   font-family: "Kilma";
-  src: url("/fonts/Kilma.woff2") format("woff2");
+  src: url("/fonts/Kilma-full.woff2") format("woff2"),
+       url("/fonts/Kilma.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -55,7 +60,8 @@
 /* FONT 3 */
 @font-face {
   font-family: "Save";
-  src: url("/fonts/Save.woff2") format("woff2");
+  src: url("/fonts/Save-full.woff2") format("woff2"),
+       url("/fonts/Save.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -64,34 +70,34 @@
   font-family: "Save", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
 }
 
-/* FONT 4 */
-@font-face {
-  font-family: "Font04";
-  src: url("/fonts/Font04.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* FONT 4 – Platzhalter, bis eine eigene Schriftdatei vorliegt */
 .font-font04 {
-  font-family: "Font04", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
 }
 
-/* FONT 5 */
+/* FONT 5 – Platzhalter, bis eine eigene Schriftdatei vorliegt */
+.font-font05 {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* Stottern */
 @font-face {
-  font-family: "Font05";
-  src: url("/fonts/Font05.otf") format("opentype");
+  font-family: "Futurist";
+  src: url("/fonts/Futurist-full.woff2") format("woff2"),
+       url("/fonts/FUTRFW.TTF") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
-.font-font05 {
-  font-family: "Font05", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+.font-stottern {
+  font-family: "Futurist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
 }
 
 /* @font-face für die Übergangsobjekte-Font */
 @font-face {
   font-family: "Uebergangsobjekte";
-  src: url("/fonts/Uebergangsobjekte.woff2") format("woff2");
+  src: url("/fonts/Uebergangsobjekte-full.woff2") format("woff2"),
+       url("/fonts/Uebergangsobjekte.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -133,15 +139,30 @@
   font-family: "Font03", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
 }
 
-.font-font04 {
-  font-family: "Font04", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-}
-
-.font-font05 {
-  font-family: "Font05", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-}
-
 /* NEU: Übergangsobjekte – Utility-Klasse (Font-Face ist in style.css) */
 .font-uebergangsobjekte {
   font-family: "Uebergangsobjekte", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+/* Für diese beiden Projekte gibt es noch keine eigene Schriftdatei.
+   Platzhalter mit eigenem Charakter, damit in der Titelliste keine zwei
+   Titel gleich aussehen – einfach @font-face ergänzen und ersetzen. */
+.font-portfolio {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/Montserrat-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-uebersee {
+  font-family: "Montserrat", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }

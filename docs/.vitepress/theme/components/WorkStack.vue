@@ -1,113 +1,80 @@
 <template>
-  <div
-    ref="containerRef"
-    class="fixed inset-0 overflow-hidden"
-  >
-    <!-- Full-width Carousel -->
-    <Carousel
-      v-if="cards.length"
-      :slides="slides"
-      :autoplay="true"
-      :interval="5000"
-      :loop="true"
-      class="w-full h-full"
-    />
+  <div class="fixed inset-0 overflow-hidden">
+    <TitleIndex v-if="projects.length" :projects="projects" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { withBase } from 'vitepress'
-import Carousel from './Carousel.vue'
+import { computed } from 'vue'
+import TitleIndex from './TitleIndex.vue'
 
-type Card = {
+type Project = {
   slug: string
   title: string
-  name: string
-  excerpt: string
-  route: string      // `/works/?id=slug`
-  image: string | null          // Bild im Projekt selbst
-  previewImage: string | null   // separates Vorschaubild fürs Carousel
   year: string | null
+  fontClass: string
 }
 
 const markdownFiles = import.meta.glob('../../../works/**/index.md', {
-  as: 'raw',
-  eager: true,
-})
-const imageFiles = import.meta.glob('../../../works/**/cover.{jpg,jpeg,png,webp}', {
-  eager: true,
+  query: '?raw',
   import: 'default',
-})
-// NEU: eigene Vorschaubilder, z.B. preview.jpg im gleichen Ordner wie index.md
-const previewImageFiles = import.meta.glob('../../../works/**/preview.{jpg,jpeg,png,webp}', {
   eager: true,
-  import: 'default',
 })
 
-const cards = ref<Card[]>([])
+// Jedes Projekt bekommt seine eigene Schrift. Fehlt hier ein Eintrag,
+// greift die Reihenfolge in fallbackFontClasses.
+const fontClassBySlug: Record<string, string> = {
+  Kilma: 'font-kilma',
+  Klanggestalten: 'font-klanggestalten',
+  LightbyNight: 'font-lightbynight',
+  Migration: 'font-migration',
+  Moi: 'font-moi',
+  Portfolio: 'font-portfolio',
+  Stottern: 'font-stottern',
+  Uebergangsobjekte: 'font-uebergangsobjekte',
+  Uebersee: 'font-uebersee',
+}
 
-for (const path in markdownFiles) {
-  const raw = markdownFiles[path] as string
-  const lines = raw.split('\n')
+const fallbackFontClasses = [
+  'font-migration',
+  'font-klanggestalten',
+  'font-moi',
+  'font-lightbynight',
+  'font-kilma',
+  'font-save',
+  'font-uebergangsobjekte',
+]
 
-  const titleLine = lines.find(line => line.startsWith('# '))
-  const nameLine = lines.find(line => line.startsWith('## '))
-  const excerptLine = lines.find(line => line.trim() && !line.startsWith('#'))
-  const yearLine = lines.find(line => /^#{3,6}\s+\d{4}\s*$/.test(line))
-  const year = yearLine ? yearLine.replace(/^#+\s+/, '').trim() : null
+const projects = computed<Project[]>(() => {
+  const list: Project[] = []
 
-  const match = path.match(/works\/([^/]+)\/index\.md$/)
-  const slug = match?.[1] ?? ''
-  const route = `/works/?id=${slug}`
+  for (const path in markdownFiles) {
+    const raw = markdownFiles[path] as string
+    const lines = raw.split('\n')
 
-  const folder = path.replace(/\/index\.md$/, '/')
-  const imageKey = Object.keys(imageFiles).find(k => k.startsWith(folder))
-  const previewKey = Object.keys(previewImageFiles).find(k => k.startsWith(folder))
+    const match = path.match(/works\/([^/]+)\/index\.md$/)
+    const slug = match?.[1] ?? ''
+    if (!slug) continue
 
-  cards.value.push({
-    slug,
-    title: titleLine?.replace(/^# /, '') || 'Untitled',
-    name: nameLine?.replace(/^## /, '') || 'Anonymous',
-    excerpt: excerptLine || '',
-    route,
-    image: imageKey ? (imageFiles[imageKey] as string) : null,
-    previewImage: previewKey ? (previewImageFiles[previewKey] as string) : null,
-    year,
+    const titleLine = lines.find(line => line.startsWith('# '))
+    const yearLine = lines.find(line => /^#{3,6}\s+\d{4}\s*$/.test(line))
+
+    list.push({
+      slug,
+      title: titleLine?.replace(/^# /, '').trim() || slug,
+      year: yearLine ? yearLine.replace(/^#+\s+/, '').trim() : null,
+      fontClass:
+        fontClassBySlug[slug] ||
+        fallbackFontClasses[list.length % fallbackFontClasses.length],
+    })
+  }
+
+  // Neueste Projekte zuerst, Projekte ohne Jahr ans Ende
+  return list.sort((a, b) => {
+    if (a.year === b.year) return a.title.localeCompare(b.title)
+    if (!a.year) return 1
+    if (!b.year) return -1
+    return Number(b.year) - Number(a.year)
   })
-}
-
-// Slides für das Carousel aus cards ableiten
-const slides = computed(() =>
-  cards.value.map(card => ({
-    id: card.slug,
-    title: card.title,
-    subtitle: card.name,
-    description: card.excerpt,
-    // wichtig: hier das Vorschaubild an Carousel geben
-    previewImage: card.previewImage,
-    // optional: das eigentliche Bild kann zusätzlich mitgegeben werden
-    image: card.image,
-    href: withBase(card.route),
-    year: card.year ?? undefined,
-  }))
-)
-
-// Optional: falls containerRef weiterhin gebraucht wird
-const containerRef = ref<HTMLElement | null>(null)
+})
 </script>
-
-<style scoped>
-/* Optional: sicherstellen, dass der Container selbst auch 100% Höhe hat, falls nötig */
-:host {
-  display: block;
-  height: 100vh;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>

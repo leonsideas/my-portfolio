@@ -40,7 +40,11 @@ const defaultDocumentTitle =
 const markdownModules = import.meta.glob('../../../works/**/index.md', { eager: true })
 
 // 2) Raw markdown text for meta (title, name, excerpt)
-const markdownFiles = import.meta.glob('../../../works/**/index.md', { as: 'raw', eager: true })
+const markdownFiles = import.meta.glob('../../../works/**/index.md', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
 
 // Images
 const imageFiles = import.meta.glob('../../../works/**/cover.{jpg,jpeg,png,webp}', {
@@ -366,10 +370,14 @@ function getParamsFromLocation() {
 
   // ✅ Slug aus Pfad lesen wenn kein ?id= vorhanden (z.B. /Moi direkt aufgerufen)
   if (!id) {
-    const pathMatch = window.location.pathname.match(/^\/([^/]+)\/?$/)
+    const basePath = withBase('/')
+    const pathname = window.location.pathname.startsWith(basePath)
+      ? `/${window.location.pathname.slice(basePath.length)}`
+      : window.location.pathname
+    const pathMatch = pathname.match(/^\/([^/]+)\/?$/)
     if (pathMatch) {
       const slug = pathMatch[1]
-      const knownPaths = ['works', 'about', 'uebermich', 'cv', '']
+      const knownPaths = ['works', 'about', 'uebermich', 'cv', 'kontakt', 'rechtliches', '']
       if (!knownPaths.includes(slug)) {
         id = slug
       }
@@ -715,7 +723,10 @@ function onContentTouchEnd(e: TouchEvent) {
   else if (dx > 0 && hasPrev.value) goToPrev()
 }
 
-const backgroundImage = withBase('/images/erde.webp')
+/* Projektseiten liegen auf demselben hellen Grund wie die Startseite.
+   Die Navigation blendet sich ueber --workpage-bg-image ein und braucht dort
+   einen background-image-Wert, daher der Verlauf aus einer einzigen Farbe. */
+const WORKPAGE_BG = 'linear-gradient(var(--page-bg), var(--page-bg))'
 
 /** EINZIGE klasse für workpage-styles */
 const WORKPAGE_CLASS = 'is-workpage'
@@ -736,7 +747,7 @@ onMounted(() => {
     document.documentElement.classList.add(WORKPAGE_CLASS)
     document.documentElement.style.setProperty(
       '--workpage-bg-image',
-      `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`
+      WORKPAGE_BG
     )
     document.title = FORCE_TITLE
 
@@ -788,18 +799,15 @@ onMounted(() => {
     setTimeout(() => setCleanSlugUrl(cards.value[0].slug), 50)
   }
 
-  // Intro Video
+  // Uebergangsvideos sind abgeschaltet – der Inhalt steht sofort da
   if (currentSlug.value && play) {
-    // interne URL bereinigen (play weg)
     updateInternalUrlWithoutPlayOrRedirect(currentSlug.value)
-    playProjectIntro(currentSlug.value, transitionDownSrc())
-  } else {
-    contentVisible.value = true
   }
+  contentVisible.value = true
 
   if (typeof document !== 'undefined') {
-    document.addEventListener('pointerdown', interceptHomeNav, true)
-    document.addEventListener('click', interceptHomeNav, true)
+    // Uebergangsvideos abgeschaltet: die Navigationslinks laufen wieder
+    // normal. Sie wurden vorher abgefangen, um Transition_up zu starten.
   }
 })
 
@@ -811,8 +819,7 @@ onBeforeUnmount(() => {
   if (typeof document !== 'undefined') {
     document.documentElement.classList.remove(WORKPAGE_CLASS)
     document.documentElement.style.removeProperty('--workpage-bg-image')
-    document.removeEventListener('pointerdown', interceptHomeNav, true)
-    document.removeEventListener('click', interceptHomeNav, true)
+
     document.title = defaultDocumentTitle
   }
   clearOverlayFadeTimer()
@@ -829,48 +836,10 @@ onBeforeUnmount(() => {
 <template>
   <div
     class="h-screen w-full max-w-full workpage-root overflow-x-hidden overflow-y-auto lg:overflow-hidden"
-    :style="{
-      backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }"
   >
     <div class="flex flex-col h-full min-h-0">
-      <!-- Overlay mit Transition-Video -->
-      <div
-        v-if="overlayVisible && overlayVideoSrc"
-        class="workpage-overlay fixed inset-0 bg-black flex items-center justify-center z-[9999]"
-      >
-        <video
-          :src="overlayVideoSrc"
-          class="w-full h-full object-cover"
-          :class="overlayVideoReady ? 'opacity-100' : 'opacity-0'"
-          autoplay
-          muted
-          playsinline
-          preload="metadata"
-          @loadeddata="overlayVideoReady = true"
-          @canplay="overlayVideoReady = true"
-          @playing="startOverlayTimersAfterPlaybackStarts()"
-          @error="handleOverlayError"
-          @ended="handleOverlayEnded"
-        />
-
-        <div
-          v-if="!overlayFadeDisabled"
-          class="absolute inset-0 bg-black pointer-events-none transition-opacity ease-in-out"
-          style="transition-duration: 2000ms;"
-          :class="[
-            overlayFadeMode === 'fade-out'
-              ? (overlayFadingOut ? 'opacity-100' : 'opacity-0')
-              : (overlayFadingOut ? 'opacity-0' : 'opacity-100')
-          ]"
-        />
-      </div>
-
       <!-- Hauptinhalt -->
-      <section v-if="contentVisible" class="flex-1 min-h-0 w-full text-gray-100 workpage-content">
+      <section v-if="contentVisible" class="flex-1 min-h-0 w-full workpage-content">
         <div class="pt-28 lg:pt-32 px-6 sm:px-8 lg:px-12 pb-8 h-full flex flex-col lg:min-h-0">
           <Transition name="content-fade" mode="out-in" appear>
             <div
@@ -949,7 +918,7 @@ onBeforeUnmount(() => {
                       <component
                         v-if="currentCard.component"
                         :is="currentCard.component"
-                        class="prose prose-invert prose-base md:prose-lg max-w-none leading-relaxed text-left workpage-prose"
+                        class="prose prose-base md:prose-lg max-w-none leading-relaxed text-left workpage-prose"
                       />
 
                       <div
@@ -1012,12 +981,12 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div v-else :key="'not-found'" class="text-gray-300">
+            <div v-else :key="'not-found'" class="workpage-notfound">
               Projekt nicht gefunden.
             </div>
           </Transition>
 
-          <footer class="mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-white/40 shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <footer class="mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-[#ff2d16] shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <span>© {{ new Date().getFullYear() }} Leon Albers</span>
             <a :href="withBase('/rechtliches')" class="workpage-footer-link">Impressum &amp; Datenschutz</a>
           </footer>
@@ -1030,21 +999,18 @@ onBeforeUnmount(() => {
 <style scoped>
 .workpage-root {
   -webkit-overflow-scrolling: touch;
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: var(--page-bg);
 }
 
 .workpage-footer-link {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--brand-red);
   text-decoration: none;
   transition: color 200ms ease;
 }
 
 .workpage-footer-link:hover,
 .workpage-footer-link:focus-visible {
-  color: #fff;
+  color: var(--brand-red);
   outline: none;
 }
 
@@ -1056,7 +1022,7 @@ onBeforeUnmount(() => {
 
   padding: 0.4rem 0.75rem;
 
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--brand-red);
 
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -1070,7 +1036,7 @@ onBeforeUnmount(() => {
 }
 
 .workpage-nav-pill:hover {
-  color: rgba(255, 255, 255, 1);
+  color: rgba(255, 45, 22, 1);
 }
 
 /* Platzhalter, damit die Dots beim ersten/letzten Projekt zentriert bleiben */
@@ -1120,20 +1086,20 @@ onBeforeUnmount(() => {
   height: 7px;
   padding: 0;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 45, 22, 0.3);
+  border: 1px solid rgba(255, 45, 22, 0.45);
   cursor: pointer;
   transition: background 200ms ease, transform 200ms ease, border-color 200ms ease;
 }
 
 .workpage-dot:hover {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 45, 22, 0.6);
+  border-color: rgba(255, 45, 22, 0.7);
 }
 
 .workpage-dot.is-active {
-  background: #fff;
-  border-color: #fff;
+  background: var(--brand-red);
+  border-color: var(--brand-red);
   transform: scale(1.25);
 }
 
@@ -1162,7 +1128,7 @@ onBeforeUnmount(() => {
   margin-top: 0.25rem;
   margin-bottom: 0.75rem;
   padding: 0.25rem 0;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--brand-red);
   font-size: 0.8rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -1173,7 +1139,7 @@ onBeforeUnmount(() => {
 .workpage-keywords {
   margin-top: 2rem;
   padding-top: 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 45, 22, 0.1);
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -1186,12 +1152,33 @@ onBeforeUnmount(() => {
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--brand-red);
   white-space: nowrap;
 }
 
 /* Im Markdown eingetragenes Jahr (erstes h5) und Keyword-Zeile ausblenden,
    da wir sie über eigene Elemente rendern */
+/* Der Fliesstext kommt aus dem Typography-Plugin und braeuchte sonst fuer
+   jede Auszeichnung eine eigene Regel – deshalb hier gesammelt. */
+.workpage-prose,
+.workpage-prose :deep(p),
+.workpage-prose :deep(li),
+.workpage-prose :deep(strong),
+.workpage-prose :deep(em),
+.workpage-prose :deep(h1),
+.workpage-prose :deep(h2),
+.workpage-prose :deep(h3),
+.workpage-prose :deep(h4),
+.workpage-prose :deep(h6),
+.workpage-notfound {
+  color: var(--brand-red);
+}
+
+.workpage-prose :deep(a) {
+  color: var(--brand-red);
+  text-decoration: underline;
+}
+
 .workpage-prose :deep(h5) {
   display: none;
 }

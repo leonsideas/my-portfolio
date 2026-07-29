@@ -2,6 +2,20 @@
  * Colors
  * -------------------------------------------------------------------------- */
 
+/* Signalrot der Seite – Navigation, Fließtext auf Über mich und Kontakt
+   sowie das Punktraster des Hintergrundfilters. */
+:root {
+  --brand-red: #ff2d16;
+  /* Heller Grundton der Startseite. Muss mit dem `background` des
+     Hintergrundfilters uebereinstimmen, sonst blitzt beim Ueberblenden und an
+     den Raendern die alte Farbe durch. */
+  --page-bg: #f2efe9;
+  /* Tiefschwarz des Punktrasters. Bewusst nicht dieselbe Farbe wie die
+     Schrift: Rot auf Rot traegt nur 1,5:1, Rot auf Schwarz dagegen 5,6:1
+     und Rot auf Creme 3,2:1 – Bild und Text bleiben so immer trennbar. */
+  --raster-black: #14100e;
+}
+
 :root {
   --vp-c-brand: #646cff;
   --vp-c-brand-light: #747bff;

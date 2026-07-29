@@ -4,6 +4,7 @@ import TwoslashFloatingVue from '@shikijs/vitepress-twoslash/client'
 import '@shikijs/vitepress-twoslash/style.css'
 import './styles/vars.css'
 import './styles/landing.css'
+import './styles/layout.css'
 import "./tailwind.css";
 import './styles/fonts.css'
 import type { Theme } from "vitepress";

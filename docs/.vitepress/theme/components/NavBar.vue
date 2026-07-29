@@ -1,30 +1,126 @@
 <script setup lang="ts">
-  import { withBase } from 'vitepress'
-  
-  const items = [
-    { text: 'Home', link: '/', isHome: true },
-    { text: 'Über mich', link: '/uebermich', class: 'nav-item--about', isAbout: true },
-    { text: 'Kontakt', link: '/kontakt' },
+  import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+  import { useData, useRoute, withBase } from 'vitepress'
+
+  const route = useRoute()
+  const { site } = useData()
+  const phrases = [
+    'Hallo, ich bin Leon Albers',
+    'Hello, I’m Leon Albers',
   ]
+  const typedText = ref('')
+
+  let phraseIndex = 0
+  let characterIndex = 0
+  let isDeleting = false
+  let typeTimer: number | undefined
+
+  function queueTypeStep(delay: number) {
+    typeTimer = window.setTimeout(typeStep, delay)
+  }
+
+  function typeStep() {
+    const phrase = phrases[phraseIndex]
+
+    if (!isDeleting) {
+      characterIndex += 1
+      typedText.value = phrase.slice(0, characterIndex)
+
+      if (characterIndex >= phrase.length) {
+        isDeleting = true
+        queueTypeStep(1700)
+      } else {
+        queueTypeStep(72)
+      }
+      return
+    }
+
+    characterIndex -= 1
+    typedText.value = phrase.slice(0, characterIndex)
+
+    if (characterIndex <= 0) {
+      isDeleting = false
+      phraseIndex = (phraseIndex + 1) % phrases.length
+      queueTypeStep(380)
+    } else {
+      queueTypeStep(36)
+    }
+  }
+
+  onMounted(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      typedText.value = phrases[0]
+      return
+    }
+
+    queueTypeStep(450)
+  })
+
+  onBeforeUnmount(() => {
+    if (typeTimer) window.clearTimeout(typeTimer)
+  })
+
+  const normalizedPath = computed(() => {
+    const base = site.value.base || '/'
+    let path = route.path
+
+    if (base !== '/' && path.startsWith(base)) {
+      path = `/${path.slice(base.length)}`
+    }
+
+    return path.replace(/\/+$/, '') || '/'
+  })
+
+  const isAboutPage = computed(() =>
+    ['/uebermich', '/about', '/cv'].some(path =>
+      normalizedPath.value === path || normalizedPath.value.startsWith(`${path}/`)
+    )
+  )
+
+  const isContactPage = computed(() =>
+    normalizedPath.value === '/kontakt' || normalizedPath.value.startsWith('/kontakt/')
+  )
+
+  const leftNavItem = computed(() =>
+    isAboutPage.value
+      ? { text: 'Projekte', link: '/', isAbout: false }
+      : { text: 'CV', link: '/uebermich', isAbout: true }
+  )
+
+  const rightNavItem = computed(() =>
+    isContactPage.value
+      ? { text: 'Projekte', link: '/' }
+      : { text: 'Kontakt', link: '/kontakt' }
+  )
 </script>
 
 <template>
   <header class="my-nav">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
-          <li
-            v-for="item in items"
-            :key="item.link"
-            class="my-nav__item"
-            :class="item.class"
-          >
+          <li class="my-nav__item my-nav__item--left">
             <a
-              :href="withBase(item.link)"
+              :href="withBase(leftNavItem.link)"
               class="nav-pill nav-link-font"
-              :data-nav-home="item.isHome ? '1' : null"
-              :data-nav-about="item.isAbout ? '1' : null"
+              :data-nav-about="leftNavItem.isAbout ? '1' : null"
             >
-              {{ item.text }}
+              {{ leftNavItem.text }}
+            </a>
+          </li>
+
+          <li class="my-nav__item my-nav__item--center">
+            <span
+              class="nav-pill nav-link-font nav-typewriter"
+            >
+              <span class="visually-hidden">Hallo, ich bin Leon Albers</span>
+              <span aria-hidden="true">{{ typedText }}</span>
+              <span class="nav-typewriter__caret" aria-hidden="true" />
+            </span>
+          </li>
+
+          <li class="my-nav__item my-nav__item--right">
+            <a :href="withBase(rightNavItem.link)" class="nav-pill nav-link-font">
+              {{ rightNavItem.text }}
             </a>
           </li>
         </ul>
@@ -67,20 +163,29 @@
   }
 
   .my-nav__list {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     width: 100%;
-    justify-content: center;
     gap: 0.5rem;
-    flex-wrap: nowrap;
     font-size: 0.875rem;
     font-weight: 500;
   }
 
   .my-nav__item {
-    flex: 1 1 0;
-    text-align: center;
     display: flex;
-    justify-content: center;
+  }
+
+  .my-nav__item--left {
+    justify-self: start;
+  }
+
+  .my-nav__item--center {
+    justify-self: center;
+  }
+
+  .my-nav__item--right {
+    justify-self: end;
   }
 
   .nav-pill {
@@ -91,22 +196,63 @@
     padding: 0.4rem 0.5rem;
 
     background: transparent;
-    color: rgba(255, 255, 255, 1);
+    color: var(--brand-red);
 
     text-transform: uppercase;
     letter-spacing: 0.18em;
 
     transition: color 200ms ease;
 
-    width: 100%;
-    max-width: 100%;
+    width: auto;
     box-sizing: border-box;
-    white-space: normal; /* mobile friendly */
+    white-space: nowrap;
     font-size: 0.7rem;
   }
 
   .nav-pill:hover {
-    color: rgba(255, 255, 255, 1);
+    color: var(--brand-red);
+  }
+
+  .nav-typewriter {
+    width: clamp(9.5rem, 52vw, 17rem);
+    padding-inline: 0;
+    overflow: hidden;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+
+  .nav-typewriter__caret {
+    flex: 0 0 auto;
+    width: 1px;
+    height: 0.95em;
+    margin-left: 0.18em;
+    background: currentColor;
+    animation: type-caret 760ms steps(1, end) infinite;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @keyframes type-caret {
+    0%,
+    48% {
+      opacity: 1;
+    }
+
+    49%,
+    100% {
+      opacity: 0;
+    }
   }
 
   /* Desktop ONLY */
@@ -116,15 +262,8 @@
       padding-right: 2rem;
     }
 
-    .my-nav__list {
-      justify-content: center;
-      gap: 1.5rem;
-    }
-
     .my-nav__item {
-      flex: 0;
       display: block;
-      justify-content: initial;
     }
 
     .nav-pill {
@@ -134,14 +273,25 @@
       font-size: 0.875rem;
       letter-spacing: 0.25em;
     }
+
+    .nav-typewriter {
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-typewriter__caret {
+      display: none;
+    }
   }
 
   /* Überschriften global weiß setzen (trotz scoped) */
   :global(h1, h2, h3, h4, h5, h6) {
-    color: rgba(255, 255, 255, 1);
+    color: var(--brand-red);
   }
 
   :global(h1 a, h2 a, h3 a, h4 a, h5 a, h6 a) {
-    color: rgba(255, 255, 255, 1);
+    color: var(--brand-red);
   }
 </style>

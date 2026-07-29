@@ -1,0 +1,57 @@
+/* /////////////////////////// */
+/* Gemeinsame Layout-Bausteine */
+/* /////////////////////////// */
+
+/**
+ * Bildausschnitt: ein festes Rechteck in der Bildschirmmitte, außen bleibt
+ * der helle Grund stehen. Wird auf Startseite, CV und Kontakt gleichermaßen
+ * benutzt – die Maße stehen deshalb hier und nicht in den Komponenten,
+ * damit die drei Seiten nicht auseinanderlaufen.
+ *
+ * Das Medium darin braucht `object-fit: cover`, sonst wird es verzerrt statt
+ * beschnitten.
+ */
+.page-crop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52vw;
+  height: 62vh;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.page-crop > img,
+.page-crop > video,
+.page-crop > canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Gefilterte Einzelbilder auf CV und Kontakt: Die Bildquelle bleibt für die
+   Abtastung im Layout, sichtbar ist darüber das technische Raster-Canvas. */
+.filtered-crop__source {
+  opacity: 0;
+}
+
+.filtered-crop__source.is-visible-source {
+  opacity: 1;
+}
+
+.filtered-crop__canvas {
+  position: absolute;
+  inset: 0;
+  object-fit: fill;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 767px) {
+  .page-crop {
+    width: 78vw;
+    height: 44vh;
+  }
+}

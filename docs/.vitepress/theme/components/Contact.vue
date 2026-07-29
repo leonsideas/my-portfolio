@@ -1,10 +1,18 @@
 <template>
-  <section
-    class="contact-screen"
-    aria-label="Kontakt"
-    :style="{ backgroundImage: `url(${currentBgSrc})` }"
-  >
-    <div class="contact-overlay" aria-hidden="true" />
+  <section class="contact-screen" aria-label="Kontakt">
+    <div class="page-crop filtered-crop" aria-hidden="true">
+      <img
+        :ref="el => setSource(0, el)"
+        :src="kontaktSrc"
+        class="filtered-crop__source"
+        :class="{ 'is-visible-source': keepSourceVisible }"
+        alt=""
+      />
+      <canvas
+        :ref="el => setCanvas(0, el)"
+        class="filtered-crop__canvas"
+      />
+    </div>
 
     <div class="contact-content">
       <h1 class="contact-heading">
@@ -13,7 +21,7 @@
           href="mailto:leon-albers@web.de"
           aria-label="E-Mail an leon-albers@web.de schreiben"
         >
-          Sag Moin
+          Moin
         </a>
       </h1>
     </div>
@@ -21,29 +29,20 @@
 </template>
 
 <script setup lang="ts">
-import { withBase } from 'vitepress'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { withBase } from 'vitepress'
+import { useBackgroundFilter, BACKGROUND_FILTER } from '../composables/useBackgroundFilter'
 
-const kontaktDesktopSrc = withBase('/images/Kontakt.webp')
-const kontaktMobileSrc = withBase('/images/Kontakt-mobil.webp')
+/* Motiv fuer den Bildausschnitt: ab 20 Uhr das Nachtbild.
+   Die Mobil-Varianten sind hier bewusst nicht im Spiel – der Ausschnitt ist
+   auf allen Groessen querformatig, die 9:16-Fassungen wuerden beschnitten. */
+const kontaktDay = withBase('/images/Kontakt.webp')
+const kontaktNight = withBase('/images/background-night2.webp')
 
-const kontaktNightDesktopSrc = withBase('/images/background-night2.webp')
-const kontaktNightMobileSrc = withBase('/images/background-night-mobil2.webp')
-
-const isMobile = ref(false)
 const isNight = ref(false)
-
-const currentBgSrc = computed(() => {
-  if (isNight.value) {
-    return isMobile.value ? kontaktNightMobileSrc : kontaktNightDesktopSrc
-  }
-  return isMobile.value ? kontaktMobileSrc : kontaktDesktopSrc
-})
-
-const updateIsMobile = () => {
-  if (typeof window === 'undefined') return
-  isMobile.value = window.innerWidth < 768
-}
+const kontaktSrc = computed(() => (isNight.value ? kontaktNight : kontaktDay))
+const { setSource, setCanvas, start: startFilter } = useBackgroundFilter()
+const keepSourceVisible = BACKGROUND_FILTER.mode === 'none'
 
 const updateIsNight = () => {
   if (typeof window === 'undefined') return
@@ -51,24 +50,20 @@ const updateIsNight = () => {
   isNight.value = hour >= 20 || hour < 6
 }
 
-const previousTitle = typeof document !== 'undefined' ? document.title : ''
 let nightCheckInterval: number | undefined
+
+const previousTitle = typeof document !== 'undefined' ? document.title : ''
 
 onMounted(() => {
   document.title = 'Kontakt'
-  updateIsMobile()
   updateIsNight()
-  window.addEventListener('resize', updateIsMobile)
+  startFilter()
   nightCheckInterval = window.setInterval(updateIsNight, 60 * 1000)
 })
 
 onBeforeUnmount(() => {
   document.title = previousTitle
-  window.removeEventListener('resize', updateIsMobile)
-
-  if (nightCheckInterval) {
-    window.clearInterval(nightCheckInterval)
-  }
+  if (nightCheckInterval) window.clearInterval(nightCheckInterval)
 })
 </script>
 
@@ -78,24 +73,11 @@ onBeforeUnmount(() => {
   inset: 0;
   margin: 0;
   padding: 0;
-  background-color: #000;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  /* Heller Grund wie auf der Startseite, rote Schrift, kein Motiv */
+  background-color: var(--page-bg);
   z-index: 0;
   overflow: hidden;
-  color: #fff;
-}
-
-/* Dezenter dunkler Verlauf oben und unten, damit Text auf hellem Hintergrund
-   immer gut lesbar bleibt */
-.contact-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0.25) 100%);
-  z-index: 1;
+  color: var(--brand-red);
 }
 
 .contact-content {
@@ -106,8 +88,8 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: clamp(144px, 24vh, 280px) clamp(20px, 6vw, 48px) clamp(40px, 8vh, 72px);
+  justify-content: center;
+  padding: clamp(64px, 8vh, 96px) clamp(20px, 6vw, 48px);
   text-align: center;
 }
 
@@ -119,7 +101,7 @@ onBeforeUnmount(() => {
   font-size: clamp(2.75rem, 11vw, 5.25rem);
   line-height: 1;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--brand-red);
 }
 
 .contact-heading-link {

@@ -9,6 +9,7 @@
     @mousemove="onPointerMove"
     @mouseleave="handlePointerLeave"
     @touchstart.passive="onTouchStart"
+    @touchmove="onTouchMove"
     @touchend.passive="onTouchEnd"
   >
     <!-- Hintergrund: zwei Ebenen, die per Crossfade wechseln -->
@@ -76,7 +77,7 @@
             @mouseenter="handleHover(project.slug)"
             @mouseleave="clearActive"
             @focus="handleHover(project.slug)"
-            @click.prevent="openProject(project.slug)"
+            @click.prevent="handleProjectClick(project.slug)"
           >
             <span class="ti-title" :class="project.fontClass">{{ project.title }}</span>
             <!-- Ohne Mauszeiger (Touch) steht das Klick-Signal am Titel selbst.
@@ -104,7 +105,7 @@
 
     <div v-if="!hasFinePointer" class="ti-swipe-hint" aria-hidden="true">
       <span>↑</span>
-      <span>Wischen</span>
+      <span>Durch Titel wischen</span>
       <span>↓</span>
     </div>
   </div>
@@ -209,7 +210,11 @@ const scatterX = ref<number[]>([])
 const scatterY = ref<number[]>([])
 let scrollFrame: number | null = null
 let titleScaleFrame: number | null = null
-let touchStart: { x: number; y: number } | null = null
+let touchLastY: number | null = null
+let touchDistance = 0
+let touchDidSelect = false
+let suppressProjectClick = false
+let suppressClickTimer: number | undefined
 let componentMounted = false
 
 /* Abwechselnde Positionen entlang einer unsichtbaren Mittelachse. Lange Titel
@@ -369,8 +374,8 @@ function handlePointerLeave() {
   cursorVisible.value = false
 }
 
-/* Auf Touch-Geräten ersetzt Wischen den Hover. Nach oben oder links geht es
-   vorwärts, nach unten oder rechts zurück; activeMedia wechselt synchron. */
+/* Auf Touch-Geräten ersetzt eine kontinuierliche Wischbewegung den Hover.
+   Je 46 Pixel Weg rastet das nächste Projekt ein – wie bei einem Drehrad. */
 function selectMobileProject(step: 1 | -1) {
   if (!props.projects.length) return
 
@@ -383,22 +388,51 @@ function selectMobileProject(step: 1 | -1) {
 function onTouchStart(event: TouchEvent) {
   if (hasFinePointer.value || event.touches.length !== 1) return
 
-  const touch = event.touches[0]
-  touchStart = { x: touch.clientX, y: touch.clientY }
+  touchLastY = event.touches[0].clientY
+  touchDistance = 0
+  touchDidSelect = false
 }
 
-function onTouchEnd(event: TouchEvent) {
-  if (hasFinePointer.value || !touchStart || !event.changedTouches.length) return
+function onTouchMove(event: TouchEvent) {
+  if (hasFinePointer.value || touchLastY === null || event.touches.length !== 1) return
 
-  const touch = event.changedTouches[0]
-  const deltaX = touch.clientX - touchStart.x
-  const deltaY = touch.clientY - touchStart.y
-  touchStart = null
+  if (event.cancelable) event.preventDefault()
 
-  const dominantDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY
-  if (Math.abs(dominantDelta) < 36) return
+  const currentY = event.touches[0].clientY
+  touchDistance += touchLastY - currentY
+  touchLastY = currentY
 
-  selectMobileProject(dominantDelta < 0 ? 1 : -1)
+  const stepDistance = 46
+  while (Math.abs(touchDistance) >= stepDistance) {
+    const direction: 1 | -1 = touchDistance > 0 ? 1 : -1
+    selectMobileProject(direction)
+    touchDistance -= direction * stepDistance
+    touchDidSelect = true
+  }
+}
+
+function onTouchEnd() {
+  touchLastY = null
+  touchDistance = 0
+
+  // Das abschließende Touch-Ereignis nach einer Auswahlgeste darf nicht
+  // versehentlich das Projekt öffnen. Ein späteres echtes Tippen bleibt frei.
+  if (touchDidSelect) {
+    suppressProjectClick = true
+    if (suppressClickTimer) window.clearTimeout(suppressClickTimer)
+    suppressClickTimer = window.setTimeout(() => {
+      suppressProjectClick = false
+    }, 450)
+  }
+}
+
+function handleProjectClick(slug: string) {
+  if (suppressProjectClick) {
+    suppressProjectClick = false
+    return
+  }
+
+  openProject(slug)
 }
 
 onMounted(() => {
@@ -422,6 +456,7 @@ onBeforeUnmount(() => {
   componentMounted = false
   if (scrollFrame !== null) cancelAnimationFrame(scrollFrame)
   if (titleScaleFrame !== null) cancelAnimationFrame(titleScaleFrame)
+  if (suppressClickTimer) window.clearTimeout(suppressClickTimer)
   window.removeEventListener('resize', updateTitleScales)
 })
 

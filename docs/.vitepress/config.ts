@@ -102,7 +102,7 @@ export default defineConfig({
           const mdMatch = id.match(/^\/([^/]+?)(\/index)?\.md$/)
           if (mdMatch) {
             const slug = mdMatch[1]
-            const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', '404', 'kontakt']
+            const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', '404', 'kontakt', 'rechtliches']
             if (!knownRoutes.includes(slug)) {
               return { id: '/works/index.md', moduleSideEffects: false }
             }
@@ -122,7 +122,7 @@ export default defineConfig({
               const mdSlugMatch = path.match(/^\/([^/]+?)(\/index)?\.md$/)
               if (mdSlugMatch) {
                 const slug = mdSlugMatch[1]
-                const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', 'kontakt']
+                const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', 'kontakt', 'rechtliches']
                 if (!knownRoutes.includes(slug)) {
                   const qs = new URLSearchParams(original.split('?')[1] || '')
                   const play = qs.get('play') === '1' ? '&play=1' : ''
@@ -139,6 +139,7 @@ export default defineConfig({
               path.startsWith('/about') ||
               path.startsWith('/uebermich') ||
               path.startsWith('/kontakt') ||
+              path.startsWith('/rechtliches') ||
               path.startsWith('/videos') ||
               path.startsWith('/works') ||
               path === '/' ||

@@ -4,6 +4,7 @@ import NavBar from './components/NavBar.vue'
 import WorkPage from './components/WorkPage.vue'
 import WorkStack from './components/WorkStack.vue'
 import AboutPage from './components/AboutPage.vue'
+import SiteFooter from './components/SiteFooter.vue'
 import { computed, onMounted, ref } from 'vue'
 
 const { frontmatter, site } = useData()
@@ -48,6 +49,7 @@ const currentPageComponent = computed(() => {
     <div class="min-h-screen font-plexsans text-black">
       <NavBar :class="{ 'is-workpage': isWorkPage }" />
       <Content class="empty-layout-content" />
+      <SiteFooter />
     </div>
   </template>
 
@@ -89,6 +91,9 @@ const currentPageComponent = computed(() => {
           />
         </main>
       </div>
+
+      <!-- Projektseiten bringen ihre eigene Fusszeile mit -->
+      <SiteFooter v-if="!isWorkPage" />
     </div>
   </template>
 </template>

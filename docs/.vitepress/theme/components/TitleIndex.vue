@@ -84,9 +84,6 @@
             @click.prevent="handleProjectClick(project.slug)"
           >
             <span class="ti-title" :class="project.fontClass">{{ project.title }}</span>
-            <!-- Ohne Mauszeiger (Touch) steht das Klick-Signal am Titel selbst.
-                 Es liegt absolut unter dem Titel, damit nichts verspringt. -->
-            <span v-if="!hasFinePointer" class="ti-cta" aria-hidden="true">Projekt öffnen →</span>
           </a>
         </li>
       </ul>
@@ -107,11 +104,6 @@
       <span>Projekt öffnen</span>
     </div>
 
-    <div v-if="!hasFinePointer" class="ti-swipe-hint" aria-hidden="true">
-      <span>↑</span>
-      <span>Titel berühren &amp; wischen</span>
-      <span>↓</span>
-    </div>
   </div>
 </template>
 
@@ -802,42 +794,6 @@ function openProject(slug: string) {
 .ti-cursor.is-expanded span {
   opacity: 1;
   transform: scale(1);
-}
-
-/* Klick-Hinweis am Titel (nur ohne Mauszeiger) */
-.ti-cta {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  font-size: 0.7rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translate(-50%, -0.25rem);
-  transition: opacity 300ms ease, transform 300ms ease;
-}
-
-.ti-item.is-active .ti-cta {
-  opacity: 0.9;
-  transform: translate(-50%, 0.2rem);
-}
-
-.ti-swipe-hint {
-  position: absolute;
-  left: 50%;
-  bottom: max(0.65rem, env(safe-area-inset-bottom));
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--brand-red);
-  font-size: 0.55rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  transform: translateX(-50%);
-  opacity: 0.72;
-  pointer-events: none;
 }
 
 /* Kein optischer Randausgleich: alle Titel teilen dieselbe linke Kante. */

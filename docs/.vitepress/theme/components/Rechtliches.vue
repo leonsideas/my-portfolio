@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   background: #000;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--brand-red);
   padding: clamp(96px, 14vh, 160px) clamp(20px, 6vw, 48px) clamp(40px, 8vh, 80px);
   font-family: var(--font-sans, system-ui, sans-serif);
   overflow-y: auto;
@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
   font-size: clamp(2rem, 6vw, 3rem);
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--brand-red);
   margin: 2.5rem 0 1.25rem;
 }
 
@@ -189,38 +189,38 @@ onBeforeUnmount(() => {
 .rechtliches-inner h2 {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--brand-red);
   letter-spacing: 0.02em;
   margin: 2rem 0 0.5rem;
 }
 
 .rechtliches-inner p {
   margin: 0.75rem 0;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--brand-red);
 }
 
 .rechtliches-inner a {
-  color: #fff;
+  color: var(--brand-red);
   text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, 0.4);
+  text-decoration-color: rgba(255, 45, 22, 0.5);
   text-underline-offset: 3px;
   transition: text-decoration-color 200ms ease;
 }
 
 .rechtliches-inner a:hover,
 .rechtliches-inner a:focus-visible {
-  text-decoration-color: #fff;
+  text-decoration-color: var(--brand-red);
   outline: none;
 }
 
 .rechtliches-inner strong {
-  color: #fff;
+  color: var(--brand-red);
   font-weight: 600;
 }
 
 .rechtliches-inner hr {
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 45, 22, 0.25);
   margin: 2.5rem 0;
 }
 
@@ -233,12 +233,12 @@ onBeforeUnmount(() => {
 }
 
 .rechtliches-back a {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--brand-red);
   text-decoration: none;
 }
 
 .rechtliches-back a:hover {
-  color: #fff;
+  color: var(--brand-red);
 }
 
 </style>

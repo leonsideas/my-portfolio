@@ -57,7 +57,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: clamp(150px, 23vh, 210px) clamp(20px, 6vw, 48px) 32vh;
+  padding: clamp(178px, 28vh, 250px) clamp(20px, 6vw, 48px) 32vh;
   text-align: center;
 }
 
@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
   font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
   font-weight: 600;
   font-style: italic;
-  font-size: clamp(2.75rem, 11vw, 5.25rem);
+  font-size: clamp(3.25rem, 13vw, 6.25rem);
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--brand-red);
@@ -104,7 +104,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 767px) {
   .contact-content {
-    padding-top: clamp(132px, 20vh, 180px);
+    padding-top: clamp(158px, 24vh, 210px);
   }
 
   .contact-cutout {

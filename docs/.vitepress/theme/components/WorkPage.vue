@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { withBase, useRouter } from 'vitepress'
-import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, markRaw, onMounted, watch, onBeforeUnmount } from 'vue'
 
 type CardVideo = {
   url: string
@@ -14,11 +14,16 @@ type Card = {
   year: string
   keywords: string[]
   excerpt: string
+  summary: string
+  role: string
+  format: string
+  tools: string[]
   route: string
   image: string | null
   video: string | null
   component: any
   images: string[]
+  btsImages: string[]
   videos: CardVideo[]
 }
 
@@ -47,7 +52,7 @@ const markdownFiles = import.meta.glob('../../../works/**/index.md', {
 })
 
 // Images
-const imageFiles = import.meta.glob('../../../works/**/cover.{jpg,jpeg,png,webp}', {
+const imageFiles = import.meta.glob('../../../works/**/cover.{webp,gif}', {
   eager: true,
   import: 'default'
 })
@@ -59,7 +64,7 @@ const videoFiles = import.meta.glob('../../../works/**/cover.{mp4,webm,ogg}', {
 })
 
 // beliebige Projektbilder
-const projectImageFiles = import.meta.glob('../../../works/**/*.{jpg,jpeg,png,webp,gif}', {
+const projectImageFiles = import.meta.glob('../../../works/**/*.{webp,gif}', {
   eager: true,
   import: 'default'
 })
@@ -73,6 +78,17 @@ function parseRawFrontmatter(raw: string): Record<string, any> {
   let currentKey: string | null = null
   let currentArray: any[] | null = null
 
+  const cleanScalar = (value: string) => {
+    const trimmed = value.trim()
+    if (
+      (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+      (trimmed.startsWith("'") && trimmed.endsWith("'"))
+    ) {
+      return trimmed.slice(1, -1)
+    }
+    return trimmed
+  }
+
   for (const line of block.split('\n')) {
     const topLevel = line.match(/^(\w+)\s*:\s*(.*)$/)
     if (topLevel) {
@@ -84,7 +100,7 @@ function parseRawFrontmatter(raw: string): Record<string, any> {
         currentKey = key
         currentArray = []
       } else {
-        result[key] = val.trim()
+        result[key] = cleanScalar(val)
         currentKey = null
         currentArray = null
       }
@@ -92,16 +108,16 @@ function parseRawFrontmatter(raw: string): Record<string, any> {
     }
     const arrayItem = line.match(/^\s+-\s+(.*)$/)
     if (arrayItem && currentArray !== null) {
-      const val = arrayItem[1].trim()
+      const val = cleanScalar(arrayItem[1])
       if (val.startsWith('url:') || val.startsWith('title:')) {
         // key-value in object
         const kv = val.match(/^(\w+):\s*(.*)$/)
         if (kv) {
           const last = currentArray[currentArray.length - 1]
           if (last && typeof last === 'object') {
-            last[kv[1]] = kv[2].trim()
+            last[kv[1]] = cleanScalar(kv[2])
           } else {
-            currentArray.push({ [kv[1]]: kv[2].trim() })
+            currentArray.push({ [kv[1]]: cleanScalar(kv[2]) })
           }
         }
       } else {
@@ -113,7 +129,7 @@ function parseRawFrontmatter(raw: string): Record<string, any> {
     if (nestedKv && currentArray !== null) {
       const last = currentArray[currentArray.length - 1]
       if (last && typeof last === 'object') {
-        last[nestedKv[1]] = nestedKv[2].trim()
+        last[nestedKv[1]] = cleanScalar(nestedKv[2])
       }
     }
   }
@@ -135,9 +151,9 @@ for (const path in markdownFiles) {
 
   const match = path.match(/works\/([^/]+)\/index\.md$/)
   const slug = match?.[1] ?? ''
+  if (!slug) continue
 
-  // ✅ intern echte VitePress-Seite (existiert wirklich)
-  const route = `/works/?id=${slug}`
+  const route = `/works/${slug}/`
 
   const folder = path.replace(/\/index\.md$/, '/')
   const imageKey = Object.keys(imageFiles).find(k => k.startsWith(folder))
@@ -145,9 +161,17 @@ for (const path in markdownFiles) {
 
   const coverImage = imageKey ? (imageFiles[imageKey] as string) : null
 
-  const projectImages: string[] = Object.keys(projectImageFiles)
+  const allProjectImageKeys = Object.keys(projectImageFiles)
     .filter(k => k.startsWith(folder))
-    .filter(k => !/\/cover\.(jpg|jpeg|png|webp|gif)$/i.test(k))
+    .filter(k => !/\/cover\.(webp|gif)$/i.test(k))
+
+  const projectImages: string[] = allProjectImageKeys
+    .filter(k => !/(?:^|[-_/])bts(?:[-_.])/i.test(k))
+    .map(k => projectImageFiles[k] as string)
+    .sort()
+
+  const btsImages: string[] = allProjectImageKeys
+    .filter(k => /(?:^|[-_/])bts(?:[-_.])/i.test(k))
     .map(k => projectImageFiles[k] as string)
     .sort()
 
@@ -210,14 +234,40 @@ for (const path in markdownFiles) {
     year,
     keywords,
     excerpt: excerptLine || '',
+    summary: typeof fm.summary === 'string' ? fm.summary : '',
+    role: typeof fm.role === 'string' ? fm.role : '',
+    format: typeof fm.format === 'string' ? fm.format : '',
+    tools: Array.isArray(fm.tools) ? fm.tools.map(String) : [],
     route,
     image: coverImage,
     video: videoKey ? (videoFiles[videoKey] as string) : null,
-    component: mod?.default || null,
+    component: mod?.default ? markRaw(mod.default) : null,
     images,
+    btsImages,
     videos: youtubeVideos
   })
 }
+
+const preferredProjectOrder = [
+  'Klanggestalten',
+  'Migration',
+  'Uebergangsobjekte',
+  'Stottern',
+  'Portfolio',
+  'Uebersee',
+  'Moi',
+  'Kilma',
+  'LightbyNight',
+  'Reefresh',
+]
+
+cards.value.sort((a, b) => {
+  const indexA = preferredProjectOrder.indexOf(a.slug)
+  const indexB = preferredProjectOrder.indexOf(b.slug)
+  if (indexA < 0) return 1
+  if (indexB < 0) return -1
+  return indexA - indexB
+})
 
 const router = useRouter()
 const currentSlug = ref<string | undefined>(cards.value[0]?.slug)
@@ -288,20 +338,6 @@ function transitionUpSrc(): string {
   )
 }
 
-// ✅ Clean URL nur anzeigen (ohne VitePress Navigation)
-// - entfernt id/redirect aus der sichtbaren URL
-// - behält optional play=1
-function setCleanSlugUrl(slug: string) {
-  if (typeof window === 'undefined') return
-
-  const params = new URLSearchParams(window.location.search)
-  const play = params.get('play') === '1' ? '1' : null
-  const cleanPath = withBase(`/${encodeURIComponent(slug)}`)
-  const cleanQuery = play ? `?play=1` : ''
-
-  window.history.replaceState({}, '', cleanPath + cleanQuery)
-}
-
 // ✅ Timer erst nach echtem Playback-Start starten
 function startOverlayTimersAfterPlaybackStarts() {
   if (!overlayVisible.value) return
@@ -357,8 +393,7 @@ function showWorkPageFromOverlay() {
   overlayTargetSlug.value = null
   currentSlug.value = target
 
-  router.go(withBase(`/works/?id=${encodeURIComponent(target)}`))
-  setTimeout(() => setCleanSlugUrl(target), 50)
+  router.go(withBase(`/works/${encodeURIComponent(target)}/`))
 }
 
 function getParamsFromLocation() {
@@ -368,13 +403,15 @@ function getParamsFromLocation() {
   const params = new URLSearchParams(window.location.search)
   let id = params.get('id') || undefined
 
-  // ✅ Slug aus Pfad lesen wenn kein ?id= vorhanden (z.B. /Moi direkt aufgerufen)
+  // Reguläre Projektadresse: /works/Projektname/
   if (!id) {
     const basePath = withBase('/')
     const pathname = window.location.pathname.startsWith(basePath)
       ? `/${window.location.pathname.slice(basePath.length)}`
       : window.location.pathname
-    const pathMatch = pathname.match(/^\/([^/]+)\/?$/)
+    const workPathMatch = pathname.match(/^\/works\/([^/]+)\/?$/)
+    const legacyPathMatch = pathname.match(/^\/([^/]+)\/?$/)
+    const pathMatch = workPathMatch || legacyPathMatch
     if (pathMatch) {
       const slug = pathMatch[1]
       const knownPaths = ['works', 'about', 'uebermich', 'cv', 'kontakt', 'rechtliches', '']
@@ -391,29 +428,9 @@ function getParamsFromLocation() {
   }
 }
 
-// internen URL-Query aufräumen (id bleibt intern, aber play/redirect weg)
-function updateInternalUrlWithoutPlayOrRedirect(id?: string) {
-  if (typeof window === 'undefined') return
-
-  const url = new URL(window.location.href)
-  const params = url.searchParams
-
-  if (id) params.set('id', id)
-  else if (!params.get('id') && cards.value[0]?.slug) params.set('id', cards.value[0].slug)
-
-  params.delete('play')
-  params.delete('redirect')
-
-  url.search = params.toString()
-  window.history.replaceState({}, '', url.toString())
-}
-
-function selectCard(slug: string, routePath: string) {
+function selectCard(slug: string) {
   currentSlug.value = slug
-  // intern navigieren, danach sofort clean URL setzen
-  router.go(withBase(`/works/?id=${encodeURIComponent(slug)}`))
-  // Timeout: nach router.go kommt ggf. ein URL-Update, den wir überschreiben
-  setTimeout(() => setCleanSlugUrl(slug), 50)
+  router.go(withBase(`/works/${encodeURIComponent(slug)}/`))
 }
 
 function playProjectIntro(slug: string, videoSrc?: string | null) {
@@ -422,7 +439,7 @@ function playProjectIntro(slug: string, videoSrc?: string | null) {
 
   const src = videoSrc ?? card.video
   if (!src || isNightTime()) {
-    selectCard(slug, `/works/?id=${encodeURIComponent(slug)}`)
+    selectCard(slug)
     contentVisible.value = true
     return
   }
@@ -561,18 +578,46 @@ function handleOverlayError() {
 
 const currentCard = computed(() => cards.value.find(card => card.slug === currentSlug.value))
 
+// Die Projektbilder sind vorübergehend ausgeblendet. Die Bildlisten bleiben
+// vollständig erhalten und können über diesen Schalter wieder aktiviert werden.
+const showProjectImages = false
+
+// Hauptbilder und Making-of-Aufnahmen bilden gemeinsam die rechte Bildfolge.
+// Die Dateinamen halten die BTS-Bilder innerhalb ihrer Gruppe in Reihenfolge.
+const displayImages = computed(() => {
+  if (!showProjectImages || !currentCard.value) return []
+  return [...currentCard.value.images, ...currentCard.value.btsImages]
+})
+
 const hasMedia = computed(() => {
   if (!currentCard.value) return false
-  const hasImages = currentCard.value.images && currentCard.value.images.length > 0
+  const hasImages = displayImages.value.length > 0
   const hasVideos = currentCard.value.videos && currentCard.value.videos.length > 0
   return hasImages || hasVideos
 })
 
+const mobileLeadImage = computed(() => displayImages.value[0] || null)
+const mobileLeadVideo = computed(() =>
+  mobileLeadImage.value ? null : currentCard.value?.videos[0] || null
+)
+const mobileRemainingImages = computed(() => displayImages.value.slice(1))
+const mobileRemainingVideos = computed(() =>
+  mobileLeadVideo.value
+    ? currentCard.value?.videos.slice(1) || []
+    : currentCard.value?.videos || []
+)
+
+function updateDocumentTitle() {
+  if (typeof document === 'undefined') return
+  document.title = currentCard.value
+    ? `${currentCard.value.title} | Leon Albers`
+    : 'Projekte | Leon Albers'
+}
+
 const contentKey = ref(0)
 watch(currentSlug, () => {
   contentKey.value += 1
-  if (typeof document !== 'undefined') document.title = 'Projects | Leon Albers'
-  enforceProjectsTitle()
+  updateDocumentTitle()
 })
 
 // NEU: VitePress überschreibt den Titel nach Route-Updates manchmal (z.B. 404 handling).
@@ -580,8 +625,7 @@ watch(currentSlug, () => {
 watch(
   () => (router as any)?.route?.path,
   () => {
-    if (typeof document !== 'undefined') document.title = 'Projects | Leon Albers'
-    enforceProjectsTitle()
+    if (typeof window !== 'undefined') window.setTimeout(updateDocumentTitle, 0)
   },
   { immediate: true }
 )
@@ -642,16 +686,16 @@ const nextSlug = computed(() => (hasNext.value ? cards.value[currentIndex.value 
 
 function goToPrev() {
   if (!hasPrev.value || !prevSlug.value) return
-  selectCard(prevSlug.value, `/works/?id=${encodeURIComponent(prevSlug.value)}`)
+  selectCard(prevSlug.value)
 }
 function goToNext() {
   if (!hasNext.value || !nextSlug.value) return
-  selectCard(nextSlug.value, `/works/?id=${encodeURIComponent(nextSlug.value)}`)
+  selectCard(nextSlug.value)
 }
 function goToIndex(idx: number) {
   const card = cards.value[idx]
   if (!card || card.slug === currentSlug.value) return
-  selectCard(card.slug, `/works/?id=${encodeURIComponent(card.slug)}`)
+  selectCard(card.slug)
 }
 
 // Swipe
@@ -731,17 +775,6 @@ const WORKPAGE_BG = 'linear-gradient(var(--page-bg), var(--page-bg))'
 /** EINZIGE klasse für workpage-styles */
 const WORKPAGE_CLASS = 'is-workpage'
 
-const FORCE_TITLE = 'Projects | Leon Albers'
-
-function enforceProjectsTitle() {
-  if (typeof document === 'undefined') return
-  // falls der Titel jemals "404" wird (auch "404 | ..."), direkt überschreiben
-  if (/^\s*404\b/i.test(document.title)) document.title = FORCE_TITLE
-}
-
-// Title-MutationObserver (härter als Router-Watch; fängt VitePress/404-Overrides ab)
-let titleObserver: MutationObserver | null = null
-
 onMounted(() => {
   if (typeof document !== 'undefined') {
     document.documentElement.classList.add(WORKPAGE_CLASS)
@@ -749,73 +782,43 @@ onMounted(() => {
       '--workpage-bg-image',
       WORKPAGE_BG
     )
-    document.title = FORCE_TITLE
-
-    const titleEl = document.querySelector('head > title')
-    if (titleEl && typeof MutationObserver !== 'undefined') {
-      titleObserver = new MutationObserver(() => {
-        enforceProjectsTitle()
-      })
-      titleObserver.observe(titleEl, { childList: true, characterData: true, subtree: true })
-    }
-
-    // zusätzlich direkt einmal prüfen (falls VitePress bereits 404 gesetzt hat)
-    enforceProjectsTitle()
   }
 
-  // 1) redirect (kommt von 404.html oder lokalem middleware fallback)
+  // Alte Query- und 404-Adressen werden auf die echte statische Projektseite geführt.
   const { id, play, redirect } = getParamsFromLocation()
 
   if (redirect && typeof window !== 'undefined') {
-    // redirect enthält z.B. "/Klanggestalten?play=1"
     const decoded = decodeURIComponent(redirect)
-    const slug = decoded.replace(/^\/+|\/+$/g, '').split('?')[0].split('#')[0]
+    const slug = decoded
+      .replace(/^\/+|\/+$/g, '')
+      .replace(/^works\//, '')
+      .split('?')[0]
+      .split('#')[0]
     if (slug) {
-      currentSlug.value = slug
-
-      // intern echte Seite + id setzen
-      router.go(withBase(`/works/?id=${encodeURIComponent(slug)}`))
-
-      // play ggf. wieder aktivieren (aus redirect)
-      const hasPlay = decoded.includes('play=1')
-
-      // intern query aufräumen (redirect raus)
-      updateInternalUrlWithoutPlayOrRedirect(slug)
-
-      // außen clean anzeigen (mit play, wenn nötig)
-      if (hasPlay) {
-        window.history.replaceState({}, '', withBase(`/${encodeURIComponent(slug)}?play=1`))
-      } else {
-        setCleanSlugUrl(slug)
-      }
+      router.go(withBase(`/works/${encodeURIComponent(slug)}/`))
+      return
     }
   } else if (id) {
     currentSlug.value = id
-    if (play) updateInternalUrlWithoutPlayOrRedirect(id)
-    // clean URL erst nach kurzem Delay setzen (nach VitePress-Initialisierung)
-    setTimeout(() => setCleanSlugUrl(id), 50)
+
+    const normalizedPath = window.location.pathname.replace(/\/$/, '')
+    const queryRoute = normalizedPath.endsWith('/works')
+    const legacyRootRoute = !normalizedPath.includes('/works/')
+    if (queryRoute || legacyRootRoute) {
+      router.go(withBase(`/works/${encodeURIComponent(id)}/`))
+      return
+    }
   } else if (cards.value[0]?.slug) {
     currentSlug.value = cards.value[0].slug
-    setTimeout(() => setCleanSlugUrl(cards.value[0].slug), 50)
   }
 
-  // Uebergangsvideos sind abgeschaltet – der Inhalt steht sofort da
-  if (currentSlug.value && play) {
-    updateInternalUrlWithoutPlayOrRedirect(currentSlug.value)
-  }
+  // Übergangsvideos sind derzeit abgeschaltet – der Inhalt steht sofort da.
+  void play
   contentVisible.value = true
-
-  if (typeof document !== 'undefined') {
-    // Uebergangsvideos abgeschaltet: die Navigationslinks laufen wieder
-    // normal. Sie wurden vorher abgefangen, um Transition_up zu starten.
-  }
+  updateDocumentTitle()
 })
 
 onBeforeUnmount(() => {
-  if (titleObserver) {
-    titleObserver.disconnect()
-    titleObserver = null
-  }
   if (typeof document !== 'undefined') {
     document.documentElement.classList.remove(WORKPAGE_CLASS)
     document.documentElement.style.removeProperty('--workpage-bg-image')
@@ -824,13 +827,6 @@ onBeforeUnmount(() => {
   }
   clearOverlayFadeTimer()
 })
-
-// watcher: wenn intern /works/?id=... geändert wird, URL außen clean halten
-// watch auf location.search deaktivieren – er kämpft gegen setCleanSlugUrl
-// watch(
-//   () => (typeof window !== 'undefined' ? window.location.search : ''),
-//   ...
-// )
 </script>
 
 <template>
@@ -905,14 +901,43 @@ onBeforeUnmount(() => {
                   class="grid grid-cols-1 gap-10 items-start lg:h-full lg:min-h-0"
                   :class="hasMedia ? 'lg:grid-cols-2' : 'lg:grid-cols-1 lg:max-w-3xl lg:mx-auto'"
                 >
-                  <!-- Text -->
-                  <div class="text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-6">
+                  <article class="text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-6">
                     <div class="max-w-[65ch] mx-auto lg:mx-0">
-                      <div
-                        v-if="currentCard.year"
-                        class="workpage-year"
-                      >
+                      <div v-if="currentCard.year" class="workpage-year">
                         {{ currentCard.year }}
+                      </div>
+
+                      <h1 class="workpage-title">{{ currentCard.title }}</h1>
+
+                      <p v-if="currentCard.summary" class="workpage-summary">
+                        {{ currentCard.summary }}
+                      </p>
+
+                      <div
+                        v-if="hasMedia"
+                        class="workpage-mobile-lead lg:hidden"
+                        @touchstart.passive="onImagesTouchStart"
+                        @touchend.passive="onImagesTouchEnd"
+                      >
+                        <figure v-if="mobileLeadImage" class="workpage-media-frame">
+                          <img
+                            :src="mobileLeadImage"
+                            :alt="currentCard.title + ' – Projektansicht'"
+                            loading="eager"
+                            fetchpriority="high"
+                          />
+                        </figure>
+                        <figure v-else-if="mobileLeadVideo" class="workpage-media-frame aspect-video">
+                          <iframe
+                            class="w-full h-full"
+                            :src="mobileLeadVideo.url"
+                            :title="mobileLeadVideo.title || currentCard.title"
+                            frameborder="0"
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                          />
+                        </figure>
                       </div>
 
                       <component
@@ -921,10 +946,37 @@ onBeforeUnmount(() => {
                         class="prose prose-base md:prose-lg max-w-none leading-relaxed text-left workpage-prose"
                       />
 
-                      <div
-                        v-if="currentCard.keywords.length"
-                        class="workpage-keywords"
-                      >
+                      <div v-if="hasMedia" class="workpage-mobile-gallery lg:hidden">
+                        <figure
+                          v-for="(img, idx) in mobileRemainingImages"
+                          :key="img + '-mobile-' + idx"
+                          class="workpage-media-frame"
+                        >
+                          <img
+                            :src="img"
+                            :alt="currentCard.title + ' – Bild ' + (idx + 2)"
+                            loading="lazy"
+                          />
+                        </figure>
+                        <figure
+                          v-for="(vid, vIdx) in mobileRemainingVideos"
+                          :key="vid.url + '-mobile-' + vIdx"
+                          class="workpage-media-frame aspect-video"
+                        >
+                          <iframe
+                            class="w-full h-full"
+                            :src="vid.url"
+                            :title="vid.title || currentCard.title"
+                            frameborder="0"
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                          />
+                        </figure>
+
+                      </div>
+
+                      <div v-if="currentCard.keywords.length" class="workpage-keywords">
                         <span
                           v-for="kw in currentCard.keywords"
                           :key="kw"
@@ -934,47 +986,41 @@ onBeforeUnmount(() => {
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </article>
 
-                  <!-- Medien -->
                   <div
                     v-if="hasMedia"
-                    class="mt-8 lg:mt-0 lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pl-6 relative"
-                    @touchstart.passive="onImagesTouchStart"
-                    @touchend.passive="onImagesTouchEnd"
+                    class="hidden lg:block lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pl-6 relative"
                   >
                     <div class="space-y-6">
-                      <div v-if="currentCard.images && currentCard.images.length" class="grid grid-cols-1 gap-4">
-                        <figure
-                          v-for="(img, idx) in currentCard.images"
-                          :key="img + '-' + idx"
-                          class="w-full overflow-hidden rounded-lg bg-neutral-900"
-                        >
-                          <img
-                            :src="img"
-                            :alt="currentCard.title + ' – Bild ' + (idx + 1)"
-                            class="w-full h-auto object-contain"
-                            loading="lazy"
-                          />
-                        </figure>
-                      </div>
+                      <figure
+                        v-for="(img, idx) in displayImages"
+                        :key="img + '-desktop-' + idx"
+                        class="workpage-media-frame"
+                      >
+                        <img
+                          :src="img"
+                          :alt="currentCard.title + ' – Bild ' + (idx + 1)"
+                          :loading="idx === 0 ? 'eager' : 'lazy'"
+                        />
+                      </figure>
 
-                      <div v-if="currentCard.videos && currentCard.videos.length" class="grid grid-cols-1 gap-4">
-                        <figure
-                          v-for="(vid, vIdx) in currentCard.videos"
-                          :key="vid.url + '-' + vIdx"
-                          class="w-full overflow-hidden rounded-lg bg-neutral-900 aspect-video"
-                        >
-                          <iframe
-                            class="w-full h-full"
-                            :src="vid.url"
-                            title="YouTube video player"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowfullscreen
-                          ></iframe>
-                        </figure>
-                      </div>
+                      <figure
+                        v-for="(vid, vIdx) in currentCard.videos"
+                        :key="vid.url + '-desktop-' + vIdx"
+                        class="workpage-media-frame aspect-video"
+                      >
+                        <iframe
+                          class="w-full h-full"
+                          :src="vid.url"
+                          :title="vid.title || currentCard.title"
+                          frameborder="0"
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowfullscreen
+                        />
+                      </figure>
+
                     </div>
                   </div>
                 </div>
@@ -1082,35 +1128,32 @@ onBeforeUnmount(() => {
 }
 
 .workpage-dot {
-  width: 7px;
-  height: 7px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border-radius: 9999px;
-  background: rgba(255, 45, 22, 0.3);
-  border: 1px solid rgba(255, 45, 22, 0.45);
+  background: radial-gradient(circle, rgba(255, 45, 22, 0.38) 0 3px, transparent 3.5px);
+  border: 0;
   cursor: pointer;
   transition: background 200ms ease, transform 200ms ease, border-color 200ms ease;
 }
 
 .workpage-dot:hover {
-  background: rgba(255, 45, 22, 0.6);
-  border-color: rgba(255, 45, 22, 0.7);
+  background: radial-gradient(circle, rgba(255, 45, 22, 0.72) 0 3.5px, transparent 4px);
 }
 
 .workpage-dot.is-active {
-  background: var(--brand-red);
-  border-color: var(--brand-red);
-  transform: scale(1.25);
+  background: radial-gradient(circle, var(--brand-red) 0 4px, transparent 4.5px);
 }
 
 @media (max-width: 480px) {
   .workpage-dots {
-    gap: 0.4rem;
+    gap: 0;
     padding: 0 0.25rem;
   }
   .workpage-dot {
-    width: 6px;
-    height: 6px;
+    width: 24px;
+    height: 24px;
   }
 }
 
@@ -1133,6 +1176,53 @@ onBeforeUnmount(() => {
   letter-spacing: 0.25em;
   text-transform: uppercase;
   font-weight: 500;
+}
+
+.workpage-title {
+  margin: 0;
+  color: var(--brand-red);
+  font-size: clamp(2.35rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.workpage-summary {
+  margin: 1.2rem 0 0;
+  color: var(--brand-red);
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.workpage-mobile-lead {
+  margin: 1.75rem 0 2.25rem;
+}
+
+.workpage-mobile-gallery {
+  display: none;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 1023px) {
+  .workpage-mobile-gallery {
+    display: grid;
+  }
+}
+
+.workpage-media-frame {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #14100e;
+}
+
+.workpage-media-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 /* Keywords als einzelne Pills unter dem Text */
@@ -1177,6 +1267,24 @@ onBeforeUnmount(() => {
 .workpage-prose :deep(a) {
   color: var(--brand-red);
   text-decoration: underline;
+}
+
+.workpage-prose :deep(h1) {
+  display: none;
+}
+
+.workpage-prose :deep(h2) {
+  margin-top: 2.25rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.workpage-prose :deep(p) {
+  margin-top: 0;
+  margin-bottom: 1.2rem;
 }
 
 .workpage-prose :deep(h5) {

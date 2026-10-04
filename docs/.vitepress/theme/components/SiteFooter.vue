@@ -33,6 +33,7 @@ const year = new Date().getFullYear()
   letter-spacing: 0.18em;
   text-transform: uppercase;
   pointer-events: none;
+  transition: color 260ms ease;
 }
 
 /* Nur die Schrift selbst soll klickbar sein, nicht die ganze Leiste –
@@ -51,6 +52,10 @@ const year = new Date().getFullYear()
 .site-footer__link:focus-visible {
   text-decoration: underline;
   text-underline-offset: 0.25em;
+}
+
+:global(html.home-intro-active .site-footer) {
+  color: var(--page-bg);
 }
 
 @media (min-width: 1024px) {

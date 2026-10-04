@@ -8,20 +8,24 @@
     }"
     @mousemove="onPointerMove"
     @mouseleave="handlePointerLeave"
-    @touchstart.passive="onTouchStart"
-    @touchmove="onTouchMove"
-    @touchend.passive="onTouchEnd"
-    @touchcancel.passive="onTouchCancel"
   >
-    <!-- Hintergrund: zwei Ebenen, die per Crossfade wechseln -->
-    <div class="ti-bg page-crop" aria-hidden="true">
+    <!-- Hintergrund: Default-Schafvideo, beim Hover das jeweilige Projekt. -->
+    <div
+      class="ti-bg page-crop"
+      :style="{
+        '--media-shrink-x': `${mediaProgress * 48}vw`,
+        '--media-shrink-y': `${mediaProgress * 38}vh`,
+        '--media-shrink-x-mobile': `${mediaProgress * 22}vw`,
+        '--media-shrink-y-mobile': `${mediaProgress * 56}vh`,
+      }"
+      aria-hidden="true"
+    >
       <div
         v-for="(layer, i) in layers"
         :key="i"
         class="ti-bg__layer"
         :class="{ 'is-visible': i === visibleLayer }"
       >
-        <!-- Quelle liegt unsichtbar darunter; sichtbar ist das ASCII-Canvas -->
         <video
           v-if="layer && layer.media.type === 'video'"
           :key="layer.key"
@@ -54,39 +58,73 @@
       </div>
     </div>
 
+    <h1 class="ti-visually-hidden">
+      Leon Albers – Creative Designer für Konzept, Storytelling und Umsetzung
+    </h1>
+
     <!-- Titelliste -->
-    <div ref="scrollRef" class="ti-scroll" @scroll.passive="onScroll">
-      <ul class="ti-list" :style="{ '--title-chars': String(maxTitleChars) }">
-        <li
-          v-for="(project, index) in projects"
-          :key="project.slug"
-          :ref="el => setItemRef(el, index)"
-          class="ti-item"
+    <div
+      ref="scrollRef"
+      class="ti-scroll"
+      @scroll.passive="onScroll"
+    >
+      <div class="ti-stage">
+        <ul
+          ref="listRef"
+          class="ti-list"
+          :class="{ 'is-visible': mediaProgress >= 0.96 }"
           :style="{
-            '--item-active-scale': String(activeScales[index] ?? 1),
-            '--scatter-x': scatterX[index] == null ? '50vw' : `${scatterX[index]}px`,
-            '--scatter-y': `${scatterY[index] ?? 50}%`,
-          }"
-          :class="{
-            'is-active': project.slug === activeSlug,
-            'is-dimmed': activeSlug !== null && project.slug !== activeSlug,
-            'is-compact-title': project.slug === 'Uebersee',
+            '--title-chars': String(maxTitleChars),
+            transform: `translate3d(${-trackOffset}px, -50%, 0)`,
           }"
         >
-          <a
-            :href="hrefFor(project.slug)"
-            class="ti-link"
-            :aria-label="project.title"
-            :data-project-slug="project.slug"
-            @mouseenter="handleHover(project.slug)"
-            @mouseleave="scheduleClearActive"
-            @focus="handleHover(project.slug)"
-            @click.prevent="handleProjectClick(project.slug)"
+          <li
+            v-for="(project, index) in projects"
+            :key="project.slug"
+            :ref="el => setItemRef(el, index)"
+            class="ti-item"
+            :style="{
+              '--item-active-scale': String(activeScales[index] ?? 1),
+            }"
+            :class="{
+              'is-active': project.slug === activeSlug,
+              'is-dimmed': activeSlug !== null && project.slug !== activeSlug,
+              'is-compact-title': project.slug === 'Uebersee',
+              'is-featured': project.featured,
+              'has-project-logo': !!project.logoSrc,
+              'is-logo-only': !!project.logoOnly,
+            }"
           >
-            <span class="ti-title" :class="project.fontClass">{{ project.title }}</span>
-          </a>
-        </li>
-      </ul>
+            <a
+              :href="hrefFor(project.slug)"
+              class="ti-link"
+              :aria-label="project.featured ? `Ausgewähltes Projekt: ${project.title}` : project.title"
+              :data-project-slug="project.slug"
+              @mouseenter="handleHover(project.slug)"
+              @mouseleave="scheduleClearActive"
+              @focus="handleHover(project.slug)"
+              @click.prevent="handleProjectClick(project.slug)"
+            >
+              <span class="ti-title" :class="project.fontClass">
+                <span class="ti-title__text">{{ project.title }}</span>
+                <img
+                  v-if="project.logoSrc"
+                  :src="toBase(project.logoSrc)"
+                  class="ti-project-logo"
+                  :class="`ti-project-logo--${project.slug.toLowerCase()}`"
+                  alt=""
+                  aria-hidden="true"
+                />
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="ti-scroll-space"
+        :style="{ height: `${scrollSpaceHeight}px` }"
+        aria-hidden="true"
+      />
     </div>
 
     <!-- Eigener roter Cursor: klein im Ruhezustand, gross mit Beschriftung
@@ -117,17 +155,17 @@ type Project = {
   slug: string
   title: string
   fontClass: string
+  featured: boolean
+  logoSrc?: string
+  logoOnly?: boolean
 }
 
 const props = defineProps<{
   projects: Project[]
 }>()
 
-const { isNight, isMobile, mediaFor, introMedia } = useCoverMedia()
+const { mediaFor, introMedia } = useCoverMedia()
 const { setSource, setCanvas, start: startFilter } = useBackgroundFilter()
-
-// Nur ohne Filter bleibt die Quelle selbst sichtbar. Der Subject-Modus zeigt
-// bewusst allein die technische Rastermaske auf dem hellen Seitengrund.
 const keepSourceVisible = BACKGROUND_FILTER.mode === 'none'
 
 function toBase(url?: string | null) {
@@ -137,21 +175,17 @@ function toBase(url?: string | null) {
 }
 
 /* ---------------------------------------------------------------
-   Aktives Projekt: Desktop per Hover, Mobil per Scrollposition.
-   Der gewählte Titel wird immer in die Bildschirmmitte gescrollt.
+   Aktives Projekt: Desktop per Hover, Mobil per horizontaler Scrollposition.
    --------------------------------------------------------------- */
 
 const activeSlug = ref<string | null>(null)
+const mediaProgress = ref(0)
 let hoverClearTimer: number | undefined
 
 /** Alle Titel gleich groß: die Größe richtet sich nach dem längsten */
 const maxTitleChars = computed(() =>
   props.projects.reduce((max, p) => Math.max(max, p.title.length), 1)
 )
-
-function setActive(slug: string | null) {
-  activeSlug.value = slug
-}
 
 function handleHover(slug: string) {
   if (hoverClearTimer) {
@@ -171,7 +205,7 @@ function clearActive() {
     window.clearTimeout(hoverClearTimer)
     hoverClearTimer = undefined
   }
-  activeSlug.value = null
+  updateActiveFromScroll()
 }
 
 function scheduleClearActive() {
@@ -180,7 +214,7 @@ function scheduleClearActive() {
   hoverClearTimer = window.setTimeout(() => {
     hoverClearTimer = undefined
     const hoveredTitle = document.querySelector('.title-index .ti-link:hover')
-    if (!hoveredTitle) activeSlug.value = null
+    if (!hoveredTitle) updateActiveFromScroll()
   }, 120)
 }
 
@@ -188,10 +222,7 @@ const activeMedia = computed<CoverMedia>(() =>
   activeSlug.value ? mediaFor(activeSlug.value) : introMedia()
 )
 
-/* ---------------------------------------------------------------
-   Crossfade: zwei Ebenen, die sich abwechseln
-   --------------------------------------------------------------- */
-
+/* Zwei Ebenen sorgen dafür, dass Bild und Video weich ineinander wechseln. */
 type Layer = { key: string; media: CoverMedia } | null
 
 const layers = ref<Layer[]>([null, null])
@@ -226,11 +257,8 @@ watch(
     if (pendingLayer !== null && pendingLayerKey === media.src) return
 
     const nextLayer = visibleLayer.value === 0 ? 1 : 0
-
-    // Liegt das gewünschte Motiv bereits fertig geladen in der inaktiven
-    // Ebene, kann es sofort wieder eingeblendet werden. Auf ein zweites
-    // load-/loadeddata-Ereignis zu warten würde hier dauerhaft hängen.
     const next = layers.value[nextLayer]
+
     if (
       next?.media.src === media.src &&
       readyLayerKeys.has(layerReadyKey(nextLayer, next.key))
@@ -249,48 +277,21 @@ watch(
 )
 
 /* ---------------------------------------------------------------
-   Mobil: der Titel in Viewport-Mitte ist aktiv
+   Vertikale Scroll-Erzählung mit horizontaler Titelbewegung
    --------------------------------------------------------------- */
 
 const scrollRef = ref<HTMLElement | null>(null)
+const listRef = ref<HTMLElement | null>(null)
 const itemRefs = ref<HTMLElement[]>([])
 const activeScales = ref<number[]>([])
-const scatterX = ref<number[]>([])
-const scatterY = ref<number[]>([])
+const trackOffset = ref(0)
+const scrollSpaceHeight = ref(1)
 let scrollFrame: number | null = null
 let titleScaleFrame: number | null = null
-let touchStartY: number | null = null
-let touchSelecting = false
-let touchDidSelect = false
-let suppressProjectClick = false
-let suppressClickTimer: number | undefined
 let componentMounted = false
-
-/* Abwechselnde Positionen entlang einer unsichtbaren Mittelachse. Lange Titel
-   werden anhand ihrer echten Breite automatisch näher zur Achse gezogen. */
-const SCATTER_DESKTOP = [
-  { x: 0.30, y: 16 },
-  { x: 0.70, y: 24.5 },
-  { x: 0.30, y: 33 },
-  { x: 0.70, y: 41.5 },
-  { x: 0.30, y: 50 },
-  { x: 0.70, y: 58.5 },
-  { x: 0.30, y: 67 },
-  { x: 0.70, y: 75.5 },
-  { x: 0.30, y: 84 },
-]
-
-const SCATTER_MOBILE = [
-  { x: 0.42, y: 15 },
-  { x: 0.58, y: 24 },
-  { x: 0.42, y: 33 },
-  { x: 0.58, y: 42 },
-  { x: 0.42, y: 51 },
-  { x: 0.58, y: 60 },
-  { x: 0.42, y: 69 },
-  { x: 0.58, y: 78 },
-  { x: 0.42, y: 87 },
-]
+let introScrollDistance = 1
+let trackStartOffset = 0
+let trackEndOffset = 0
 
 function setItemRef(el: unknown, index: number) {
   if (el instanceof HTMLElement) itemRefs.value[index] = el
@@ -303,50 +304,59 @@ function updateTitleScales() {
     titleScaleFrame = null
 
     const isSmallScreen = window.innerWidth < 768
-    const desiredScale = isSmallScreen ? 1.18 : 1.28
+    const desiredScale = isSmallScreen ? 1.12 : 1.18
     const sideInset = isSmallScreen ? 16 : 40
-    const positions = isSmallScreen ? SCATTER_MOBILE : SCATTER_DESKTOP
-    const nextX: number[] = []
-    const nextY: number[] = []
 
     activeScales.value = props.projects.map((_, index) => {
       const item = itemRefs.value[index]
       const link = item?.querySelector<HTMLElement>('.ti-link')
       const naturalWidth = link?.offsetWidth ?? 0
-      const position = positions[index % positions.length]
+      if (!item || !naturalWidth) return desiredScale
 
-      nextY[index] = position.y
-      if (!item || !naturalWidth) {
-        nextX[index] = window.innerWidth / 2
-        return desiredScale
-      }
-
-      const minCenter = sideInset + naturalWidth / 2
-      const maxCenter = window.innerWidth - sideInset - naturalWidth / 2
-      const desiredCenter = window.innerWidth * position.x
-      const center = maxCenter < minCenter
-        ? window.innerWidth / 2
-        : Math.max(minCenter, Math.min(maxCenter, desiredCenter))
-      const availableHalfWidth = Math.max(
-        1,
-        Math.min(center - sideInset, window.innerWidth - sideInset - center)
-      )
-
-      nextX[index] = center
-      return Math.max(0.5, Math.min(desiredScale, (availableHalfWidth * 2) / naturalWidth))
+      const availableWidth = Math.max(1, window.innerWidth - sideInset * 2)
+      return Math.max(0.5, Math.min(desiredScale, availableWidth / naturalWidth))
     })
 
-    scatterX.value = nextX
-    scatterY.value = nextY
+    measureScrollStory()
   })
+}
+
+function measureScrollStory() {
+  const first = itemRefs.value[0]
+  const last = itemRefs.value[props.projects.length - 1]
+  if (!listRef.value || !first || !last) return
+
+  const firstCenter = first.offsetLeft + first.offsetWidth / 2
+  const lastCenter = last.offsetLeft + last.offsetWidth / 2
+
+  introScrollDistance = Math.max(1, window.innerHeight * 0.9)
+  trackStartOffset = Math.max(0, firstCenter - window.innerWidth / 2)
+  trackEndOffset = Math.max(trackStartOffset, lastCenter - window.innerWidth / 2)
+
+  const horizontalDistance = trackEndOffset - trackStartOffset
+  scrollSpaceHeight.value = Math.ceil(introScrollDistance + horizontalDistance)
+  updateActiveFromScroll()
 }
 
 function updateActiveFromScroll() {
   const container = scrollRef.value
   if (!container) return
 
-  const rect = container.getBoundingClientRect()
-  const center = rect.top + rect.height / 2
+  const scrollPosition = container.scrollTop
+  mediaProgress.value = Math.max(0, Math.min(1, scrollPosition / introScrollDistance))
+
+  const horizontalDistance = Math.max(0, scrollPosition - introScrollDistance)
+  trackOffset.value = Math.min(trackEndOffset, trackStartOffset + horizontalDistance)
+  document.documentElement.classList.toggle('home-intro-active', mediaProgress.value < 0.98)
+
+  // Während sich das große Default-Video zum Fenster verkleinert, bleibt es
+  // sichtbar. Erst danach übernehmen die vorbeiziehenden Projekttitel.
+  if (mediaProgress.value < 0.98) {
+    activeSlug.value = null
+    return
+  }
+
+  const center = trackOffset.value + window.innerWidth / 2
 
   let bestIndex = -1
   let bestDistance = Number.POSITIVE_INFINITY
@@ -357,8 +367,8 @@ function updateActiveFromScroll() {
 
   itemRefs.value.forEach((el, index) => {
     if (!el) return
-    const itemRect = el.getBoundingClientRect()
-    const distance = Math.abs(itemRect.top + itemRect.height / 2 - center)
+    const itemCenter = el.offsetLeft + el.offsetWidth / 2
+    const distance = Math.abs(itemCenter - center)
     if (distance < bestDistance) {
       bestDistance = distance
       bestIndex = index
@@ -370,15 +380,11 @@ function updateActiveFromScroll() {
 }
 
 /**
- * Nur relevant, wenn die Liste überläuft (schmale Geräte, viele Projekte):
- * dann bestimmt die Scrollposition den aktiven Titel. Passt alles auf den
- * Schirm, feuert kein scroll-Ereignis und der Startzustand bleibt stehen.
+ * Eine einzige vertikale Scrollstrecke steuert zuerst die Verkleinerung des
+ * Videos und anschließend die horizontale Bewegung der Projekttitel.
  */
 function onScroll() {
   const container = scrollRef.value
-  // Passt alles auf den Schirm, gibt es nichts zu scrollen – dann darf ein
-  // beim Laden ausgelöstes scroll-Ereignis auch nicht die Startauswahl
-  // überschreiben (es würde sonst den mittleren statt den ersten Titel wählen)
   if (!container || container.scrollHeight <= container.clientHeight + 1) return
 
   if (scrollFrame !== null) return
@@ -428,96 +434,7 @@ function handlePointerLeave() {
   cursorVisible.value = false
 }
 
-/* Das Drehrad startet ausschließlich auf einem Titel. Während der Finger
-   vertikal wandert, wird nur dann gewechselt, wenn er die Höhe einer anderen
-   Titelzeile erreicht. Eine Geste auf dem freien Hintergrund bleibt wirkungslos. */
-function projectSlugAtY(y: number): string | null {
-  const tolerance = 8
-
-  for (let index = 0; index < itemRefs.value.length; index++) {
-    const item = itemRefs.value[index]
-    const project = props.projects[index]
-    if (!item || !project) continue
-
-    const rect = item.getBoundingClientRect()
-    if (y >= rect.top - tolerance && y <= rect.bottom + tolerance) {
-      return project.slug
-    }
-  }
-
-  return null
-}
-
-function onTouchStart(event: TouchEvent) {
-  if (hasFinePointer.value || event.touches.length !== 1) return
-
-  const target = event.target instanceof Element
-    ? event.target.closest<HTMLElement>('.ti-link')
-    : null
-  const slug = target?.dataset.projectSlug
-
-  if (!slug) {
-    touchSelecting = false
-    touchStartY = null
-    return
-  }
-
-  touchSelecting = true
-  touchStartY = event.touches[0].clientY
-  touchDidSelect = false
-  activeSlug.value = slug
-}
-
-function onTouchMove(event: TouchEvent) {
-  if (
-    hasFinePointer.value ||
-    !touchSelecting ||
-    touchStartY === null ||
-    event.touches.length !== 1
-  ) return
-
-  if (event.cancelable) event.preventDefault()
-
-  const currentY = event.touches[0].clientY
-  if (Math.abs(currentY - touchStartY) > 10) {
-    touchDidSelect = true
-  }
-
-  const slug = projectSlugAtY(currentY)
-  if (slug && slug !== activeSlug.value) {
-    activeSlug.value = slug
-  }
-}
-
-function onTouchEnd() {
-  if (!touchSelecting) return
-
-  touchSelecting = false
-  touchStartY = null
-
-  // Das abschließende Touch-Ereignis nach einer Auswahlgeste darf nicht
-  // versehentlich das Projekt öffnen. Ein späteres echtes Tippen bleibt frei.
-  if (touchDidSelect) {
-    suppressProjectClick = true
-    if (suppressClickTimer) window.clearTimeout(suppressClickTimer)
-    suppressClickTimer = window.setTimeout(() => {
-      suppressProjectClick = false
-    }, 450)
-  }
-}
-
-function onTouchCancel() {
-  touchSelecting = false
-  touchStartY = null
-  touchDidSelect = false
-}
-
 function handleProjectClick(slug: string) {
-  if (suppressProjectClick) {
-    suppressProjectClick = false
-    return
-  }
-
   openProject(slug)
 }
 
@@ -526,9 +443,13 @@ onMounted(() => {
   // Die Seite startet neutral. Mausgeräte reagieren auf Hover; auf Touch
   // beginnt die Auswahl erst mit der direkten Berührung eines Titels.
   hasFinePointer.value = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  document.documentElement.classList.add('home-intro-active')
   startFilter()
 
-  nextTick(updateTitleScales)
+  nextTick(() => {
+    updateTitleScales()
+    updateActiveFromScroll()
+  })
   document.fonts?.ready.then(() => {
     if (componentMounted) updateTitleScales()
   })
@@ -540,8 +461,8 @@ onBeforeUnmount(() => {
   if (scrollFrame !== null) cancelAnimationFrame(scrollFrame)
   if (titleScaleFrame !== null) cancelAnimationFrame(titleScaleFrame)
   if (hoverClearTimer) window.clearTimeout(hoverClearTimer)
-  if (suppressClickTimer) window.clearTimeout(suppressClickTimer)
   window.removeEventListener('resize', updateTitleScales)
+  document.documentElement.classList.remove('home-intro-active')
 })
 
 /* ---------------------------------------------------------------
@@ -549,12 +470,11 @@ onBeforeUnmount(() => {
    --------------------------------------------------------------- */
 
 function hrefFor(slug: string) {
-  return withBase(`/works/?id=${encodeURIComponent(slug)}`)
+  return withBase(`/works/${encodeURIComponent(slug)}/`)
 }
 
 function openProject(slug: string) {
-  // ohne play-Parameter: der startete auf der Projektseite das Uebergangsvideo
-  window.location.href = withBase(`/works/?id=${encodeURIComponent(slug)}`)
+  window.location.href = hrefFor(slug)
 }
 </script>
 
@@ -564,15 +484,16 @@ function openProject(slug: string) {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* Heller Grund – muss zum background des Filters passen, sonst blitzt beim
-     Crossfade und an den Rändern die alte Farbe durch */
   background: var(--page-bg, #f2efe9);
 }
 
-/* --- Hintergrund --- */
+/* --- Wechselnder Bild-/Videohintergrund --- */
 
-/* Geometrie kommt aus .page-crop (styles/layout.css), damit Startseite,
-   CV und Kontakt denselben Ausschnitt zeigen. */
+.ti-bg {
+  width: calc(100vw - var(--media-shrink-x, 0vw));
+  height: calc(100vh - var(--media-shrink-y, 0vh));
+  will-change: width, height;
+}
 
 .ti-bg__layer {
   position: absolute;
@@ -593,34 +514,31 @@ function openProject(slug: string) {
   object-fit: cover;
 }
 
-/* Quelle für den Filter – muss im Layout bleiben, damit das Video dekodiert
-   und weiterläuft. In den Rastermodi ersetzt das Canvas das Bild komplett,
-   deshalb ist die Quelle dort unsichtbar. */
 .ti-bg__source {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Ohne Rastermodus bleibt das Medium in seinen ursprünglichen Farben sichtbar. */
 .ti-bg__source.is-visible-source {
   opacity: 1;
 }
 
 .ti-bg__canvas {
   object-fit: fill;
-  /* Rastermodi sind nur rasterhoch aufgelöst und werden hier hochskaliert –
-     ohne das würden die Punkte verwaschen */
   image-rendering: pixelated;
 }
 
-/* Bewusst kein Schleier über dem Video – das Motiv soll im Fokus stehen.
-   Hintergrund dazu: mix-blend-mode: difference rechnet 255 − Hintergrund und
-   hat bei mittlerem Grau (128) einen blinden Fleck. Über alle neun Motive
-   gemessen liegen ohne Schleier 12,8 % der Titelfläche in diesem Bereich.
-   Wichtig beim Nachjustieren: ein halber Schleier macht es schlimmer, nicht
-   besser (15 % → 28 %, 25 % → 67 %), weil er helle Bildstellen erst in den
-   Mittelton zieht. Nur ein sehr kräftiger Schleier ab ~60 % wäre wieder
-   sauber – der nimmt aber dem Video die Bühne. */
+.ti-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* --- Liste --- */
 
@@ -632,8 +550,9 @@ function openProject(slug: string) {
      legt die Liste trotzdem über .ti-bg, weil sie später im DOM steht. */
   position: relative;
   height: 100%;
-  overflow: hidden;
-  overscroll-behavior: contain;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -642,38 +561,69 @@ function openProject(slug: string) {
   display: none;
 }
 
+.ti-stage {
+  position: sticky;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ti-scroll-space {
+  width: 1px;
+  pointer-events: none;
+}
+
 .ti-list {
   /* Vergrößerung des gewählten Titels. Steht hier, damit sie sowohl das
      transform auf .ti-link als auch die Schriftgrößen-Formel in .ti-title
      erreicht – Custom Properties vererben nur nach unten. */
-  --active-scale: 1.28;
-  position: relative;
+  --active-scale: 1.18;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(3rem, 8vw, 9rem);
   box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  min-height: 100%;
+  width: max-content;
+  min-width: 100%;
+  height: auto;
   margin: 0;
-  padding: 0;
+  padding: 0 clamp(2.5rem, 9vw, 9rem);
   list-style: none;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 260ms ease;
 }
 
-/* Alle Titel im selben Stil. Ihre abwechselnden Positionen folgen der
-   unsichtbaren vertikalen Mittelachse.
+.ti-list.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-   ACHTUNG: opacity und transform gehören hier auf .ti-link, also auf das
-   Element, das mix-blend-mode selbst trägt – NICHT auf .ti-item. Beide
-   Eigenschaften erzeugen auf einem Vorfahren einen Stacking-Context, der den
-   Blend in eine Isolationsgruppe sperrt; die Titel würden dann als flache
-   Farbe über dem Video liegen statt sich hineinzurechnen. Auf dem blendenden
-   Element selbst ist das unkritisch. */
+/* Unsichtbare Randflächen geben dem ersten und letzten Titel genug Weg,
+   um jeweils sauber durch die Mitte des Bildfensters zu laufen. */
+.ti-list::before {
+  content: "";
+  flex: 0 0 92vw;
+  pointer-events: none;
+}
+
+.ti-list::after {
+  content: "";
+  flex: 0 0 45vw;
+  pointer-events: none;
+}
+
+/* Die Titel bleiben horizontal, werden aber ausschließlich durch vertikales
+   Scrollen über das Bildfenster bewegt. */
 .ti-item {
-  position: absolute;
-  left: var(--scatter-x, 50vw);
-  top: var(--scatter-y, 50%);
-  width: max-content;
-  max-width: calc(100vw - 2rem);
-  padding: 0.14em 0;
-  transform: translate(-50%, -50%);
+  position: relative;
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0.35em 0;
+  text-align: center;
 }
 
 .ti-item.is-dimmed .ti-link {
@@ -695,26 +645,25 @@ function openProject(slug: string) {
 }
 
 .title-index.is-touch-mode .ti-item.is-active .ti-link {
-  transform:
-    translateY(-0.35rem)
-    scale(var(--item-active-scale, var(--active-scale, 1.18)));
+  transform: scale(var(--item-active-scale, var(--active-scale, 1.18)));
 }
 
 .title-index.is-touch-mode .ti-link {
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 /* Nur das Wort selbst ist Hover-Fläche, nicht die ganze Zeilenbreite */
 .ti-link {
   position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: baseline;
   width: fit-content;
+  margin-inline: auto;
   text-decoration: none;
   padding: 0.1em 0;
   /* Rote Schrift auf dem schwarzweißen ASCII-Hintergrund – kein Blend mehr */
   color: var(--title-color, var(--brand-red));
-  /* Freie Positionen bleiben beim Vergrößern an ihrem Mittelpunkt verankert. */
   transform-origin: center;
   will-change: transform;
   transition: opacity 400ms ease, transform 400ms ease;
@@ -734,8 +683,87 @@ function openProject(slug: string) {
     (100vw - 3rem) / var(--title-chars, 22) / 0.6 / var(--active-scale)
   );
   font-size: min(10vh, var(--title-fit), 8rem);
+  text-align: center;
   white-space: nowrap;
 }
+
+.ti-title__text {
+  display: block;
+  transition: opacity 220ms ease;
+}
+
+.ti-project-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: 1.55em;
+  max-width: min(160%, 72vw);
+  object-fit: contain;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.9);
+  transition: opacity 220ms ease, transform 320ms ease;
+}
+
+.ti-project-logo--klanggestalten {
+  height: 1.8em;
+}
+
+.ti-project-logo--uebergangsobjekte {
+  height: 1.35em;
+}
+
+.ti-project-logo--kilma {
+  height: 2.45em;
+}
+
+.ti-project-logo--reefresh {
+  height: 1.3em;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ti-item.has-project-logo:not(.is-logo-only).is-active .ti-title__text {
+    opacity: 0;
+  }
+
+  .ti-item.has-project-logo:not(.is-logo-only).is-active .ti-project-logo {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.ti-item.is-logo-only .ti-title__text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  opacity: 0;
+}
+
+.ti-item.is-logo-only .ti-project-logo {
+  position: relative;
+  top: auto;
+  left: auto;
+  display: block;
+  max-width: min(70vw, 34rem);
+  opacity: 1;
+  transform: none;
+}
+
+.ti-item.is-logo-only .ti-project-logo--klanggestalten {
+  height: 1.25em;
+}
+
+.ti-item.is-logo-only .ti-project-logo--kilma {
+  height: 1.4em;
+}
+
+.ti-item.is-logo-only .ti-project-logo--reefresh {
+  height: 0.82em;
+}
+
 
 /* Der normale schwarze Systemzeiger wird auf Geräten mit präziser Maus
    vollständig durch den roten Kreis ersetzt. Das transparente Cursorbild
@@ -796,11 +824,14 @@ function openProject(slug: string) {
   transform: scale(1);
 }
 
-/* Kein optischer Randausgleich: alle Titel teilen dieselbe linke Kante. */
-
 @media (max-width: 767px) {
+  .ti-bg {
+    width: calc(100vw - var(--media-shrink-x-mobile, 0vw));
+    height: calc(100vh - var(--media-shrink-y-mobile, 0vh));
+  }
+
   .ti-list {
-    --active-scale: 1.18;
+    --active-scale: 1.12;
   }
 
   .ti-title {
@@ -836,9 +867,10 @@ function openProject(slug: string) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ti-bg__layer,
   .ti-item,
   .ti-title,
+  .ti-title__text,
+  .ti-project-logo,
   .ti-link {
     transition: none;
   }

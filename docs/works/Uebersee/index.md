@@ -1,27 +1,40 @@
 ---
+title: Mit KI läufts bei uns!
+description: "Eine Kampagnenidee darüber, wie KI Wissen in Zukunft anders und zugänglicher erzählen kann."
+image: /images/Uebersee-cover.webp
+summary: "Mein erster intensiver Kontakt mit KI: eine Kampagnenidee für neue Formen der Wissensvermittlung im Museum."
+role: "Eigenständige Gesamtarbeit: Konzeption, Kampagnenidee, Storytelling und KI-gestützte Medienproduktion"
+format: "Konzepttrailer und Social-Media-Kampagne"
+tools:
+  - Generative AI
+  - Video
+  - Musik
+  - Voice
+  - Social Media
 videos:
   - url: https://www.youtube.com/embed/9Uwy1a1OipA
     title: Mit KI läufts bei uns – Übersee-Museum
 ---
 
 # Mit KI läufts bei uns!
-##### 2025
+##### 2024
 
-Wissen zum Leben erwecken mit KI
+## Ausgangspunkt
 
-In diesem Projekt habe ich die Möglichkeiten der künstlichen Intelligenz untersucht, um Museen in einem völlig neuen Licht zu präsentieren: als lebendige, moderne und zugängliche Wissenszentren. Das Ergebnis? Musik, Stimmen, Bilder und Videos, die das Lernen im Museum zum Leben erwecken.
+Das Projekt begann Ende 2023 und war mein erster intensiver Kontakt mit verschiedenen KI-Werkzeugen. Mich hat dabei nicht nur interessiert, welche Bilder oder Videos KI erzeugen kann, sondern wie sich damit Wissen in Zukunft anders erzählen lässt.
 
-Das Herzstück des Projekts ist ein Konzepttrailer, der für das Übersee-Museum entwickelt wurde. Dieser Trailer zeigt eindrucksvoll, wie dynamisch und spannend Wissensvermittlung sein kann – und beweist, dass Museen weit mehr sind als nur alte, verstaubte Hallen.
+## Idee und Geschichte
 
-KI trifft auf Social Media – „Mit KI – Läuft bei uns“ 
+Unter dem Motto „Mit KI läufts bei uns!“ habe ich eine Kampagnenidee für das Übersee-Museum Bremen entwickelt. Sie zeigt beispielhaft, wie sich Museumsinhalte überraschender, zugänglicher und interessanter vermitteln lassen könnten.
 
-Begleitend zum Trailer habe ich eine Social-Media-Kampagne unter dem Motto „Mit KI – Läuft bei uns“ entworfen. In dieser Kampagne werden in kurzen, spannenden Reels (je 30-35 Sekunden) Tiere aus dem Übersee-Museum vorgestellt.
+Ein längerer Film und mehrere kurze Formate verbinden Museumswissen mit der Bildsprache verschiedener KI-Werkzeuge. Das Projekt versteht sich dabei vor allem als Konzept und als Ausblick darauf, was in Zukunft möglich sein könnte.
 
-Jedes Reel liefert 3-4 faszinierende Fakten über ein Tier – präsentiert mit Humor, einem lockeren Voiceover und rasanten Schnitten, perfekt optimiert für das Social-Media-Publikum.
-Wissensvermittlung revolutionieren
+## Umsetzung
 
-Diese Filme zeigen, wie moderne Technologie die Art und Weise, wie wir lernen, umgestaltet. Wir brauchen keine Käfige – KI ermöglicht es uns, die natürliche Welt auf fesselnde, interaktive und völlig neue Weise zu erleben.
+Für die Kampagne habe ich Bilder, Videos, Musik und Stimmen mit KI erzeugt und anschließend ausgewählt, geschnitten und zu einer gemeinsamen Welt verbunden. Im Mittelpunkt stehen trotzdem die Geschichten und das Wissen aus dem Museum. Gezeigt wurde das Projekt bei den Hochschultagen 2024.
 
+## Mein Anteil
 
-##### Artificial intelligence, digital education, social media campaign
+Von der Kampagnenidee über die Texte und Bildwelten bis zu Trailer, Musik, Stimmen und Reels habe ich alles selbst entwickelt und umgesetzt.
 
+##### Artificial Intelligence, Campaign Concept, Storytelling, Social Media, Digital Education

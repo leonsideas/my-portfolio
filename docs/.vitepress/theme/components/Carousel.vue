@@ -259,13 +259,19 @@ for (const path in animatedVideoFiles) {
   animatedVideoMap[filename] = animatedVideoFiles[path]
 }
 
+// Diese Projekte sollen auf der Startseite ausschließlich Bilder verwenden.
+const staticCoverIds = new Set(['Klanggestalten', 'Uebergangsobjekte', 'Stottern'])
+
 function getAnimatedDesktop(id: string): string | null {
+  if (staticCoverIds.has(id)) return null
   return animatedVideoMap[`${id}-cover-animated.mp4`] ?? null
 }
 function getAnimatedMobile(id: string): string | null {
+  if (staticCoverIds.has(id)) return null
   return animatedVideoMap[`${id}-cover_mobile-animated.mp4`] ?? null
 }
 function getAnimatedNight(id: string): string | null {
+  if (staticCoverIds.has(id)) return null
   return animatedVideoMap[`${id}_cover-night-animated.mp4`] ?? null
 }
 

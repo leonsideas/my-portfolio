@@ -1,178 +1,68 @@
-import { defineConfig } from 'vitepress'
-import { fileURLToPath } from 'node:url'
-import { dirname, resolve } from 'node:path'
+import { defineConfig, type HeadConfig } from 'vitepress'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const siteUrl = 'https://www.leonalbers.de'
+const defaultImage = '/images/Kontakt.webp'
+
+function pageUrl(relativePath: string): string {
+  if (relativePath === 'index.md') return `${siteUrl}/`
+
+  const cleanPath = relativePath
+    .replace(/index\.md$/, '')
+    .replace(/\.md$/, '')
+
+  return `${siteUrl}/${cleanPath}`
+}
 
 export default defineConfig({
   base: '/',
-  cleanUrls: true,  // ← NEU
+  cleanUrls: true,
+  srcExclude: ['documentation/**'],
+  lang: 'de-DE',
+  title: 'Leon Albers',
+  titleTemplate: ':title | Leon Albers',
+  description:
+    'Leon Albers entwickelt Geschichten, Ideen und medienübergreifende Erlebnisse – von Film und KI bis zu Apps und interaktiven Installationen.',
 
-  // ✅ VitePress kennt jetzt /works/ als gültige Route
-  rewrites: {
-    'works/index.md': 'works/index.md',
+  appearance: false,
+
+  sitemap: {
+    hostname: siteUrl,
   },
 
-  title: 'Portfolio',
-  titleTemplate: ':title | Leon Albers',
-
-  // ✅ Preload Videos + GitHub Pages Redirect Restore
   head: [
-    // Desktop: normale Transition-Videos
-    [
-      'link',
-      {
-        rel: 'preload',
-        as: 'video',
-        href: '/videos/Transition.mp4',
-        type: 'video/mp4',
-        media: '(min-width: 768px)'
-      }
-    ],
-    [
-      'link',
-      {
-        rel: 'preload',
-        as: 'video',
-        href: '/videos/Transition_up.mp4',
-        type: 'video/mp4',
-        media: '(min-width: 768px)'
-      }
-    ],
-    // Mobile: kleinere Transition-Videos
-    [
-      'link',
-      {
-        rel: 'preload',
-        as: 'video',
-        href: '/videos/Transition_down-mobil.mp4',
-        type: 'video/mp4',
-        media: '(max-width: 767px)'
-      }
-    ],
-    [
-      'link',
-      {
-        rel: 'preload',
-        as: 'video',
-        href: '/videos/Transiton_up-mobil.mp4',
-        type: 'video/mp4',
-        media: '(max-width: 767px)'
-      }
-    ],
-
-    // ✅ GitHub Pages: stellt /Migration wieder her nach 404 redirect
-    [
-      'script',
-      {},
-      `
-      (function () {
-        var params = new URLSearchParams(location.search);
-        var r = params.get('redirect');
-        if (!r) return;
-
-        try {
-          var decoded = decodeURIComponent(r);
-          history.replaceState(null, '', decoded);
-        } catch (e) {}
-      })();
-      `
-    ]
+    ['meta', { name: 'author', content: 'Leon Albers' }],
+    ['meta', { name: 'robots', content: 'index, follow' }],
+    ['meta', { property: 'og:site_name', content: 'Leon Albers' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:locale', content: 'de_DE' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
   ],
 
-  themeConfig: {
-    // ...falls du etwas hast, bleibt das hier
-  },
+  transformHead({ pageData, title, description }) {
+    if (pageData.isNotFound) return
 
-  vite: {
-    resolve: {
-      alias: {
-        '@theme': resolve(__dirname, './theme'),
-      },
-    },
+    const canonical = pageUrl(pageData.relativePath)
+    const imagePath = pageData.frontmatter.image || defaultImage
+    const image = imagePath.startsWith('http') ? imagePath : `${siteUrl}${imagePath}`
+    const socialTitle = title || pageData.title || 'Leon Albers'
+    const socialDescription = description || pageData.description
 
-    // ✅ LOKALER Clean-URL Fallback
-    // erlaubt Reload / Direktaufruf von /Migration im dev server
-    plugins: [
-      {
-        name: 'local-clean-url-fallback-to-works',
-        // ✅ Abfangen von dynamischen .md Importen (VitePress intern)
-        resolveId(id) {
-          // z.B. /Moi/index.md oder /Moi.md → auf works/index.md umleiten
-          const mdMatch = id.match(/^\/([^/]+?)(\/index)?\.md$/)
-          if (mdMatch) {
-            const slug = mdMatch[1]
-            const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', '404', 'kontakt', 'rechtliches']
-            if (!knownRoutes.includes(slug)) {
-              return { id: '/works/index.md', moduleSideEffects: false }
-            }
-          }
-          return undefined
-        },
-        configureServer(server) {
-          // ✅ früher einbinden: vor VitePress's eigenem Middleware
-          server.middlewares.use((req, _res, next) => {
-            if (!req.url) return next()
-
-            const original = req.url
-            const path = original.split('?')[0]
-
-            // .md?import Requests abfangen die VitePress selbst generiert
-            if (path.endsWith('.md')) {
-              const mdSlugMatch = path.match(/^\/([^/]+?)(\/index)?\.md$/)
-              if (mdSlugMatch) {
-                const slug = mdSlugMatch[1]
-                const knownRoutes = ['works', 'about', 'uebermich', 'cv', 'index', 'kontakt', 'rechtliches']
-                if (!knownRoutes.includes(slug)) {
-                  const qs = new URLSearchParams(original.split('?')[1] || '')
-                  const play = qs.get('play') === '1' ? '&play=1' : ''
-                  req.url = `/works/index.md?id=${encodeURIComponent(slug)}${play}`
-                  return next()
-                }
-              }
-            }
-
-            const ignore =
-              path.startsWith('/@') ||
-              path.startsWith('/assets') ||
-              path.startsWith('/cv') ||
-              path.startsWith('/about') ||
-              path.startsWith('/uebermich') ||
-              path.startsWith('/kontakt') ||
-              path.startsWith('/rechtliches') ||
-              path.startsWith('/videos') ||
-              path.startsWith('/works') ||
-              path === '/' ||
-              path.endsWith('.html') ||
-              path.includes('.')
-
-            if (ignore) return next()
-
-            // /works/Klanggestalten -> /works/?id=Klanggestalten
-            const worksMatch = path.match(/^\/works\/(.+)$/)
-            if (worksMatch) {
-              const slug = worksMatch[1].replace(/\/$/, '')
-              const qs = new URLSearchParams(original.split('?')[1] || '')
-              const play = qs.get('play') === '1' ? '&play=1' : ''
-              req.url = `/works/?id=${encodeURIComponent(slug)}${play}`
-              return next()
-            }
-
-            // /Moi -> /works/?id=Moi
-            const slugMatch = path.match(/^\/([^/]+)\/?$/)
-            if (slugMatch) {
-              const slug = slugMatch[1]
-              const qs = new URLSearchParams(original.split('?')[1] || '')
-              const play = qs.get('play') === '1' ? '&play=1' : ''
-              req.url = `/works/?id=${encodeURIComponent(slug)}${play}`
-              return next()
-            }
-
-            req.url = `/works/?redirect=${encodeURIComponent(original)}`
-            next()
-          })
-        }
-      }
+    const head: HeadConfig[] = [
+      ['link', { rel: 'canonical', href: canonical }],
+      ['meta', { property: 'og:title', content: socialTitle }],
+      ['meta', { property: 'og:url', content: canonical }],
+      ['meta', { property: 'og:image', content: image }],
+      ['meta', { name: 'twitter:title', content: socialTitle }],
+      ['meta', { name: 'twitter:image', content: image }],
     ]
+
+    if (socialDescription) {
+      head.push(
+        ['meta', { property: 'og:description', content: socialDescription }],
+        ['meta', { name: 'twitter:description', content: socialDescription }],
+      )
+    }
+
+    return head
   },
 })

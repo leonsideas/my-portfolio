@@ -1,25 +1,39 @@
+---
+title: Migration
+description: "Eine interaktive Installation über Flucht, politische Entscheidungen und den Unterschied zwischen Spielfiguren und echten Menschenleben."
+image: /images/Migration-cover.webp
+summary: "Ein bewusst kindlich gebauter Tisch, der Erwachsene mit Fluchtrouten und der Verantwortung hinter politischen Entscheidungen konfrontiert."
+role: "Eigenständige Gesamtarbeit: Konzeption, Storytelling, Interaction und Exhibition Design sowie technische Umsetzung"
+format: "Interaktive Mixed-Media-Installation"
+tools:
+  - Arduino
+  - Processing
+  - Projection Mapping
+  - 3D-Druck
+  - CNC-Fräsen
+---
+
 # Migration
 ##### 2025
 
-In meinem Projekt habe ich analoge und digitale Elemente miteinander verbunden, um ein interaktives Erlebnis zu schaffen. Der zentrale Bestandteil ist ein Tisch mit Motorikschleifen – inspiriert von klassischen Kinderspieltischen. Um diese Assoziation weiter zu verstärken, stehen auf beiden Seiten kleine Kinderstühle, darunter liegt ein bunter Spielteppich. Doch dieser Tisch ist nicht für Kinder gedacht: Er dient als Lernplattform, die sich auf berührende Weise mit dem Thema Migration und den Herausforderungen von Vertriebenen auseinandersetzt.
+## Ausgangspunkt
 
-Die Motorikschleifen symbolisieren durch ihre taktile Interaktion Fluchtwege. Bewegliche Holzelemente stehen dabei stellvertretend für Menschen auf der Flucht. In der Mitte des Tisches ist der Projektname „Migration“ eingraviert – per CNC-Fräse gefertigt und anschließend von Hand geschliffen und verfeinert.
+Für mich wirkt es in politischen Debatten oft so, als würden Menschen einfach hin- und hergeschoben – fast wie Spielfiguren. Dabei geht es nicht um Figuren, sondern um echte Menschen und ihre Leben. Aus diesem Widerspruch ist Migration entstanden.
 
-Drei Wege – drei Zonen – drei Perspektiven
-Das Projekt fokussiert sich auf drei zentrale Regionen weltweiter 
+## Idee und Geschichte
 
-Vertreibung:
+Der Tisch ist bewusst kindlich aufgebaut, richtet sich aber an Erwachsene. Man setzt sich davor, bewegt Figuren entlang von Motorikschleifen und merkt dabei, wie schnell eine komplexe Flucht wie ein einfaches Spiel aussehen kann.
 
-– die Sahelzone
-– die Darién-Gap
-– das Mittelmeer
+Dieser Kontrast ist für mich der Kern der Arbeit. Auch Erwachsene müssen sich noch einmal hinsetzen und verstehen: Was passiert hier eigentlich? Wie sprechen wir über Menschen, und wie leicht werden politische Entscheidungen getroffen, wenn das einzelne Leben dahinter unsichtbar bleibt?
 
-Um die jeweiligen Fluchtrouten greifbarer zu machen, habe ich ergänzend 3D-gedruckte Figuren gestaltet. Sie eröffnen eine zusätzliche visuelle Ebene und ermöglichen den Besucher*innen, sich noch intensiver mit dem Thema auseinanderzusetzen.
-Technologie für ein immersives Erlebnis
+Drei Wege beschäftigen sich mit der Sahelzone, dem Darién Gap und dem Mittelmeer.
 
-Im Inneren des Tisches steckt ein interaktives System: Mithilfe von Arduino und lichtempfindlichen Sensoren (LDRs) können die Nutzer*innen Figuren auf bestimmte Zonen platzieren. Sobald ein Bereich aktiviert wird, reagiert ein Processing-Sketch und projiziert entsprechende Informationen per Beamer direkt auf die Tischplatte. Die Sensoren sind dabei mit verlängerten Kabeln versehen, um eine flexible Platzierung zu ermöglichen.
+## Umsetzung
 
-So entsteht eine Erfahrung, die zum Nachdenken anregt – spielerisch in der Form, aber tiefgründig im Inhalt.
+Die 3D-gedruckten Figuren werden auf markierte Bereiche des Tischs gestellt. Lichtsensoren erkennen ihre Position und geben das Signal über Arduino an einen Processing-Sketch weiter. Daraufhin projiziert ein Beamer passende Informationen direkt auf die Tischplatte. Den Schriftzug habe ich CNC-gefräst und anschließend von Hand bearbeitet.
 
-##### Installation, digital art, mixed media, 3D printing, projection mapping, exhibition design, CNC milling, migration
+## Mein Anteil
 
+Von der Idee, Recherche und Gestaltung bis zum Bau des Tischs, der Sensorik, Projektion, dem 3D-Druck und der Programmierung habe ich das gesamte Projekt selbst umgesetzt.
+
+##### Installation, Mixed Media, Interaction Design, Projection Mapping, Arduino, Migration

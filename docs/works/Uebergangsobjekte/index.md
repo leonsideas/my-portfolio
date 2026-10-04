@@ -1,11 +1,36 @@
+---
+title: Uebergangsobjekte
+description: "Vier Spielzeuge über die Frage, ob das Smartphone zum neuen Übergangsobjekt geworden ist."
+image: /images/Uebergangsobjekte-cover.webp
+summary: "Vier Spielzeuge mit eigenen Geschichten über den Konflikt zwischen Smartphone und klassischem Übergangsobjekt."
+role: "Eigenständige Gesamtarbeit: Konzeption, künstlerische Recherche, Storytelling und Objektgestaltung"
+format: "Critical Design / Speculative Design"
+tools:
+  - Character Design
+  - Objektgestaltung
+  - Artistic Research
+  - Storytelling
+---
+
 # Uebergangsobjekte
 ##### 2026
 
-In meinem Projekt untersuche ich das Smartphone als zeitgenössisches Übergangsobjekt und stelle die Frage, ob es klassische, analoge Übergangsobjekte (z. B. Stofftiere) zunehmend verdrängt oder lediglich neu interpretiert. Ausgangspunkt sind die Überlegungen von Donald Winnicott zum Übergangsobjekt sowie die gesellschafts- und medienkritischen Perspektiven von Byung-Chul Han.
+## Ausgangspunkt
 
-Im Zentrum steht die Diskussion, welche emotionale Funktion das Smartphone heute übernimmt: Dient es als Beruhigung, Nähe-Ersatz und Orientierung – oder verstärkt es narzisstische Selbstbezogenheit, Abhängigkeit und Empathieverlust? Das Projekt zielt darauf ab, diese Ambivalenz sichtbar zu machen und eine offene Debatte anzuregen: Schadet das Smartphone mehr, als es nutzt – oder liegt die Entscheidung in der Art, wie wir es verwenden?
+Ausgangspunkt war für mich Byung-Chul Hans Buch *Undinge* und die Frage, welche Beziehung wir heute zu Gegenständen haben. Aus meiner eigenen Kindheit kenne ich Kuscheltiere und Spielzeuge als Dinge, die Sicherheit geben und an denen Erinnerungen hängen. Heute ist dagegen das Smartphone ständig bei uns.
 
-Für die visuelle und erzählerische Umsetzung habe ich mich von alten McDonald’s-Toys sowie Figuren aus Kinderserien inspirieren lassen. Diese fungieren als Träger individueller und humorvoller Geschichten, die einen Zugang eröffnen und Diskussionen anregen sollen.
+## Idee und Geschichte
 
-##### Übergangsobjekt, smartphone culture, critical design, speculative design, toys
+Ist das Smartphone inzwischen selbst ein Übergangsobjekt geworden? Oder hat es die klassischen Übergangsobjekte bereits verdrängt? Die Arbeit soll diese Frage nicht eindeutig beantworten, sondern einen Diskurs darüber eröffnen.
 
+Dafür habe ich vier Spielzeuge entwickelt. Jede Figur besitzt eine eigene fiktive Hintergrundgeschichte und steht für einen anderen Teil des Konflikts zwischen Smartphone und klassischem Übergangsobjekt.
+
+## Umsetzung
+
+Der Look erinnert bewusst an Sammelfiguren und die Spielzeuge, die ich selbst aus meiner Kindheit kenne. So trifft ein vertrauter Konsumgegenstand auf eine Frage, die viel persönlicher ist, als es zuerst wirkt.
+
+## Mein Anteil
+
+Recherche, Figuren, Hintergrundgeschichten, Gestaltung, Verpackungen und Herstellung der Objekte habe ich selbst entwickelt und umgesetzt.
+
+##### Critical Design, Speculative Design, Smartphone Culture, Storytelling, Object Design

@@ -1,14 +1,33 @@
+---
+title: Kilma
+description: "Ein Mobile Game gegen das Wegschauen bei der Klimakrise – erzählt mit schwarzem Humor und vier Minispielen."
+image: /images/Kilma-cover.webp
+summary: "Vier Minispiele über eine Welt in der Klimakrise und unseren oft absurden Umgang damit."
+role: "Eigenständige Gesamtarbeit: Konzeption, Storytelling, Game Design, visuelle Gestaltung und Entwicklung"
+format: "Android-App / Serious Game"
+tools:
+  - Unity
+  - Interactive Media
+  - Digital Storytelling
+---
+
 # Kilma
 ##### 2024
 
-Mit Kilma habe ich eine Android-App in Unity entwickelt, die sich auf spielerische Weise mit dem Klimawandel auseinandersetzt und vier einzigartige Minispiele umfasst. Anstatt sich auf trockene Fakten oder beängstigende Erzählungen zu stützen, verfolgt Kilma einen anderen Ansatz – mit einem Hauch von schwarzem Humor. Das Ziel? Die Spieler mit einer unbeschwerten Einführung in ein ernstes Thema zu fesseln und gleichzeitig auf unterhaltsame Weise das Bewusstsein zu schärfen.
+## Ausgangspunkt
 
-Vier Minispiele, ein dringendes Problem.
+Die Klimakrise ist längst da und trotzdem wird sie oft verdrängt. Mit Kilma wollte ich zeigen, wie schlimm die Situation ist, ohne daraus ein klassisches Lernspiel oder eine weitere trockene Warnung zu machen.
 
-Jedes Minispiel repräsentiert einen anderen Aspekt des Klimawandels, verpackt mit Humor, aber verwurzelt in der Realität. Eine Möwe frisst fröhlich Plastik, Delfine tanzen durch Ölteppiche und Schafe versuchen (vergeblich), dem steigenden Wasserstand zu entkommen. Absurd? Auf jeden Fall. Aber hinter jedem lächerlichen Szenario verbirgt sich ein sehr reales Problem. Ein Timer, der die Dinge ins rechte Licht rückt
+## Idee und Geschichte
 
-Während der Nutzer aktiv spielt, läuft im Hintergrund ein Timer, der die in der App verbrachte Zeit aufzeichnet. Aber hier kommt der Clou: Kilma misst nicht nur die Spielzeit, sondern bietet auch eine Alternative. In einem speziellen Bereich können Nutzer sehen, was sie statt zu spielen für die Umwelt hätten tun können. Auch diese Funktion ist humorvoll – denn manchmal kann ein wenig Selbstironie der beste Weckruf sein.
+Kilma besteht aus vier Minispielen, die reale Folgen des Klimawandels überzeichnen. Eine Möwe frisst Plastik, Delfine bewegen sich durch Ölteppiche und Schafe versuchen, dem steigenden Wasser zu entkommen. Das wirkt erst einmal lustig, basiert aber auf Problemen, die längst Teil unserer Gegenwart sind.
 
+## Umsetzung
 
-##### Unity Engine, interactive media, digital storytelling, climate change
+Ich habe die Android-App in Unity entwickelt. Während des Spielens läuft ein Timer mit. Danach zeigt die App, was man in derselben Zeit für die Umwelt hätte tun können. So wird auch die eigene Spielzeit Teil der Idee.
 
+## Mein Anteil
+
+Kilma ist eine eigenständige Gesamtarbeit. Konzept, Storytelling, Game Design, Programmierung und Sound stammen von mir. Auch alle Grafiken, das Logo, sämtliche Texte und jede gestalterische Entscheidung habe ich selbst entwickelt und umgesetzt.
+
+##### Unity, Game Design, Interactive Media, Digital Storytelling, Climate Change

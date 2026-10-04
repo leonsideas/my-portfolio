@@ -6,7 +6,8 @@
   const { site } = useData()
   const phrases = [
     'Hallo, ich bin Leon Albers',
-    'Hello, I’m Leon Albers',
+    'Ich bin Creative Designer',
+    'Ich liebe es, Geschichten zu erzählen',
   ]
   const typedText = ref('')
 
@@ -81,6 +82,10 @@
     normalizedPath.value === '/kontakt' || normalizedPath.value.startsWith('/kontakt/')
   )
 
+  const isLegalPage = computed(() =>
+    normalizedPath.value === '/rechtliches' || normalizedPath.value.startsWith('/rechtliches/')
+  )
+
   const leftNavItem = computed(() =>
     isAboutPage.value
       ? { text: 'Projekte', link: '/', isAbout: false }
@@ -95,7 +100,7 @@
 </script>
 
 <template>
-  <header class="my-nav">
+  <header class="my-nav" :class="{ 'my-nav--black': isLegalPage }">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
           <li class="my-nav__item my-nav__item--left">
@@ -112,7 +117,9 @@
             <span
               class="nav-pill nav-link-font nav-typewriter"
             >
-              <span class="visually-hidden">Hallo, ich bin Leon Albers</span>
+              <span class="visually-hidden">
+                Hallo, ich bin Leon Albers. Ich bin Creative Designer. Ich liebe es, Geschichten zu erzählen.
+              </span>
               <span aria-hidden="true">{{ typedText }}</span>
               <span class="nav-typewriter__caret" aria-hidden="true" />
             </span>
@@ -136,7 +143,18 @@
     z-index: 30;
     width: 100%;
     pointer-events: auto;
+    background: var(--page-bg);
+    transition: background-color 260ms ease;
+  }
+
+  :global(html.home-intro-active .my-nav) {
     background: transparent;
+  }
+
+  :global(html.home-intro-active .my-nav .nav-pill),
+  :global(html.home-intro-active .my-nav .nav-pill:hover),
+  :global(html.home-intro-active .my-nav .nav-pill:focus-visible) {
+    color: var(--page-bg);
   }
 
   /* Auf Projektseiten: fest am oberen Rand, optisch unsichtbar
@@ -213,8 +231,18 @@
     color: var(--brand-red);
   }
 
+  .my-nav.my-nav--black {
+    background: #000;
+  }
+
+  .my-nav--black .nav-pill,
+  .my-nav--black .nav-pill:hover,
+  .my-nav--black .nav-pill:focus-visible {
+    color: var(--brand-red);
+  }
+
   .nav-typewriter {
-    width: clamp(9.5rem, 52vw, 17rem);
+    width: clamp(17rem, 48vw, 30rem);
     padding-inline: 0;
     overflow: hidden;
     font-size: 0.6rem;
@@ -288,11 +316,27 @@
     }
 
     .my-nav__list {
-      gap: 0.15rem;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "left center right";
+      gap: 0.25rem;
     }
 
     .my-nav__item {
       min-width: 0;
+    }
+
+    .my-nav__item--left {
+      grid-area: left;
+    }
+
+    .my-nav__item--center {
+      grid-area: center;
+      justify-self: stretch;
+      min-width: 0;
+    }
+
+    .my-nav__item--right {
+      grid-area: right;
     }
 
     .nav-pill {
@@ -302,9 +346,10 @@
     }
 
     .nav-typewriter {
-      width: clamp(6.5rem, 36vw, 8.5rem);
-      font-size: 0.52rem;
-      letter-spacing: 0.035em;
+      width: 100%;
+      min-height: 1.2rem;
+      font-size: clamp(0.42rem, 1.8vw, 0.56rem);
+      letter-spacing: 0.015em;
     }
   }
 

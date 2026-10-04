@@ -13,7 +13,18 @@ type Project = {
   title: string
   year: string | null
   fontClass: string
+  featured: boolean
+  logoSrc?: string
+  logoOnly?: boolean
 }
+
+const featuredOrder = [
+  'Klanggestalten',
+  'Migration',
+  'Uebergangsobjekte',
+  'Stottern',
+  'Portfolio',
+]
 
 const markdownFiles = import.meta.glob('../../../works/**/index.md', {
   query: '?raw',
@@ -30,9 +41,25 @@ const fontClassBySlug: Record<string, string> = {
   Migration: 'font-migration',
   Moi: 'font-moi',
   Portfolio: 'font-portfolio',
+  Reefresh: 'font-migration',
   Stottern: 'font-stottern',
   Uebergangsobjekte: 'font-uebergangsobjekte',
   Uebersee: 'font-uebersee',
+}
+
+const logoBySlug: Record<string, string> = {
+  Klanggestalten: '/images/project-logos/klanggestalten-logo.svg',
+  Uebergangsobjekte: '/images/project-logos/uebergangsobjekte-logo.svg',
+  Kilma: '/images/project-logos/kilma-logo-filled.png',
+  Reefresh: '/images/project-logos/corals-logo.svg',
+}
+
+const logoOnlySlugs = new Set(['Klanggestalten', 'Kilma', 'Reefresh'])
+
+// Abweichende Namen gelten nur für die Projektübersicht. Die Inhalte der
+// einzelnen Projektseiten bleiben davon unberührt.
+const titleBySlug: Record<string, string> = {
+  Reefresh: 'REEFRESH – MAYBE NEXT TIME',
 }
 
 const fallbackFontClasses = [
@@ -61,20 +88,31 @@ const projects = computed<Project[]>(() => {
 
     list.push({
       slug,
-      title: titleLine?.replace(/^# /, '').trim() || slug,
+      title: titleBySlug[slug] || titleLine?.replace(/^# /, '').trim() || slug,
       year: yearLine ? yearLine.replace(/^#+\s+/, '').trim() : null,
       fontClass:
         fontClassBySlug[slug] ||
         fallbackFontClasses[list.length % fallbackFontClasses.length],
+      featured: featuredOrder.includes(slug),
+      logoSrc: logoBySlug[slug],
+      logoOnly: logoOnlySlugs.has(slug),
     })
   }
 
-  // Neueste Projekte zuerst, Projekte ohne Jahr ans Ende
+  // Die fünf stärksten Fallstudien stehen zuerst; der Rest folgt chronologisch.
   return list.sort((a, b) => {
+    const featuredA = featuredOrder.indexOf(a.slug)
+    const featuredB = featuredOrder.indexOf(b.slug)
+    if (featuredA >= 0 || featuredB >= 0) {
+      if (featuredA < 0) return 1
+      if (featuredB < 0) return -1
+      return featuredA - featuredB
+    }
     if (a.year === b.year) return a.title.localeCompare(b.title)
     if (!a.year) return 1
     if (!b.year) return -1
     return Number(b.year) - Number(a.year)
   })
 })
+
 </script>

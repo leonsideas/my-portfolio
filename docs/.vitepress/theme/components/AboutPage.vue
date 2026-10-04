@@ -1,58 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { withBase, useData } from 'vitepress'
-import { useBackgroundFilter, BACKGROUND_FILTER } from '../composables/useBackgroundFilter'
-
-const bgCover = withBase('/images/Background-cover.webp')
-
-const nightBgDesktop = withBase('/images/bg-cover-night.webp')
-
-const { site } = useData()
-const { setSource, setCanvas, start: startFilter } = useBackgroundFilter()
-const keepSourceVisible = BACKGROUND_FILTER.mode === 'none'
-
-const isNight = ref(false)
-const isMobile = ref(false)
-
-const nightTextClass = computed(() => (isNight.value ? 'night-text' : 'day-text'))
-/* Motiv fuer den Bildausschnitt: ab 20 Uhr das Nachtbild.
-   Die Mobil-Varianten sind hier bewusst nicht im Spiel – der Ausschnitt ist
-   auf allen Groessen querformatig, die 9:16-Fassungen wuerden beschnitten. */
-const cropSrc = computed(() => (isNight.value ? nightBgDesktop : bgCover))
-
-const updateIsMobile = () => {
-  if (typeof window === 'undefined') return
-  isMobile.value = window.innerWidth < 768
-}
+import { onMounted } from 'vue'
 
 onMounted(() => {
-  if (typeof document !== 'undefined') {
-    document.title = 'Über mich | Leon Albers'
-
-    if (!document.getElementById('ld-person')) {
-      const script = document.createElement('script')
-      script.id = 'ld-person'
-      script.type = 'application/ld+json'
-      script.textContent = JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Person',
-        name: 'Leon Albers',
-        url: 'https://leonsideas.github.io/my-portfolio/',
-        jobTitle: 'Gestalter in Digitalen Medien',
-        worksFor: { '@type': 'Organization', name: 'manymany motion GmbH' },
-        alumniOf: { '@type': 'EducationalOrganization', name: 'Hochschule für Künste Bremen' },
-        sameAs: ['https://www.instagram.com/leonsideas'],
-      })
-      document.head.appendChild(script)
-    }
-  }
-
-  const hour = new Date().getHours()
-  isNight.value = hour >= 20 || hour < 6
-
-  startFilter()
-  updateIsMobile()
-  window.addEventListener('resize', updateIsMobile)
+  document.title = 'Über mich & CV | Leon Albers'
 })
 </script>
 
@@ -63,148 +13,153 @@ export default {
 </script>
 
 <template>
-  <div class="relative overflow-hidden aboutpage-root">
-    <div class="page-crop filtered-crop" aria-hidden="true">
-      <img
-        :ref="el => setSource(0, el)"
-        :src="cropSrc"
-        class="filtered-crop__source"
-        :class="{ 'is-visible-source': keepSourceVisible }"
-        alt=""
-      />
-      <canvas
-        :ref="el => setCanvas(0, el)"
-        class="filtered-crop__canvas"
-      />
-    </div>
+  <div class="aboutpage-root">
+    <div class="about-content">
+      <article class="about-card">
+        <header>
+          <div class="about-copy">
+            <p>
+              Ich bin Leon Albers und studiere Digitale Medien an der HfK Bremen.
+              Als Creative Designer entwickle ich Ideen und Geschichten und suche
+              für jede die passende Form – zum Beispiel als Film, interaktive Arbeit
+              oder mit Code und KI.
+            </p>
+          </div>
+        </header>
 
-    <div
-      class="relative z-10 isolate px-5 sm:px-6
-             h-[100dvh] overflow-hidden
-             flex items-center justify-center py-20"
-    >
-      <div class="w-full max-w-6xl">
-        <div class="flex justify-center">
-          <aside
-            class="cv-panel"
-            :class="nightTextClass"
-            aria-label="Lebenslauf"
-          >
-            <div class="space-y-3 sm:space-y-8">
-              <section>
-                <h2 class="about-heading text-left mb-3 sm:mb-6">CV</h2>
-              </section>
+        <section class="education" aria-labelledby="education-title">
+          <h2 id="education-title">Ausbildung</h2>
+          <div class="about-entry">
+            <h3>HfK Bremen — Digitale Medien (B.A.)</h3>
+            <p>Seit 2023</p>
+          </div>
+          <div class="about-entry">
+            <h3>Mediengestalter — Konzeption &amp; Visualisierung</h3>
+            <p>Ausbildung, 2018–2021</p>
+          </div>
+        </section>
 
-              <section class="space-y-2 sm:space-y-3">
-                <h3 class="text-sm sm:text-lg font-semibold">Ausbildung</h3>
-                <ul class="space-y-2 sm:space-y-3 text-[13px] sm:text-base leading-snug sm:leading-relaxed">
-                  <li>
-                    <div class="font-medium">
-                      HfK Bremen — Digitale Medien (B.A.)
-                    </div>
-                    <div class="opacity-80">Seit 2023 · 5. Semester</div>
-                  </li>
-                  <li>
-                    <div class="font-medium">
-                      Ausbildung — Mediengestalter (Konzeption &amp; Visualisierung)
-                    </div>
-                    <div class="opacity-80">2018–2021</div>
-                  </li>
-                </ul>
-              </section>
-
-              <section class="space-y-2 sm:space-y-3">
-                <h3 class="text-sm sm:text-lg font-semibold">Berufserfahrung</h3>
-                <ul class="space-y-2 sm:space-y-3 text-[13px] sm:text-base leading-snug sm:leading-relaxed">
-                  <li>
-                    <div class="font-medium">
-                      manymany motion GmbH — Motion Designer
-                    </div>
-                    <div class="opacity-80">Seit 2021</div>
-                  </li>
-                </ul>
-              </section>
-            </div>
-          </aside>
-        </div>
-      </div>
+        <section class="experience" aria-labelledby="experience-title">
+          <h2 id="experience-title">Berufserfahrung</h2>
+          <div class="about-entry">
+            <h3>manymany motion GmbH — Motion Designer</h3>
+            <p>Seit 2021</p>
+          </div>
+        </section>
+      </article>
     </div>
   </div>
 </template>
 
-<style>
-.about-heading {
-  font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
-  font-weight: 600;
-  font-style: italic;
-  font-size: clamp(2rem, 7vw, 3.75rem);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  padding-top: 0.1em;
+<style scoped>
+.aboutpage-root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--page-bg);
+  color: var(--brand-red);
 }
 
-.intro-panel,
-.cv-panel {
-  -webkit-overflow-scrolling: touch;
+.about-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: clamp(76px, 10vh, 100px) clamp(20px, 6vw, 48px) clamp(48px, 7vh, 72px);
+  overflow-y: auto;
 }
 
-@media (min-width: 768px) {
-  .intro-panel,
-  .cv-panel {
-    max-height: calc(100vh - 10rem);
-    overflow-y: auto;
-  }
+.about-card {
+  width: min(760px, 82vw);
+  text-align: left;
+}
 
-  .intro-panel {
-    padding-right: 0.75rem;
-  }
+.about-copy {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.about-copy p,
+.about-entry h3,
+.about-entry p {
+  font-size: clamp(0.8rem, 1.15vw, 0.95rem);
+  line-height: 1.35;
+}
+
+.about-copy p {
+  margin: 0;
+}
+
+.education,
+.experience {
+  margin-top: 0.8rem;
+  padding-top: 0.4rem;
+}
+
+.education h2,
+.experience h2 {
+  margin: 0 0 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.about-entry h3 {
+  margin: 0;
+  font-weight: 650;
+}
+
+.about-entry + .about-entry {
+  margin-top: 0.65rem;
+}
+
+.about-entry p {
+  margin: 0.1rem 0 0;
+  opacity: 0.78;
 }
 
 @media (max-width: 767px) {
-  .intro-panel,
-  .cv-panel {
-    max-height: none;
-    overflow: hidden;
+  .about-content {
+    padding-top: clamp(72px, 9vh, 88px);
+    padding-bottom: clamp(40px, 6vh, 56px);
   }
-}
 
-.aboutpage-root {
-  background: var(--page-bg);
-  color: var(--brand-red);
-  /* kein Body-Scroll auf der Über-mich-Seite – außerhalb des Layout-Wrappers fixieren */
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 100dvh;
-  overflow: hidden;
-}
-
-@media (min-width: 768px) {
-  .cv-panel {
-    padding-right: 0.75rem;
+  .about-card {
+    width: 90vw;
   }
-}
 
-.cv-panel::-webkit-scrollbar,
-.intro-panel::-webkit-scrollbar {
-  width: 10px;
-}
+  .about-copy {
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+  }
 
-.cv-panel::-webkit-scrollbar-thumb,
-.intro-panel::-webkit-scrollbar-thumb {
-  background: rgba(20, 16, 14, 0.2);
-  border-radius: 999px;
-  border: 3px solid rgba(0, 0, 0, 0);
-  background-clip: padding-box;
-}
+  .about-copy p,
+  .about-entry h3,
+  .about-entry p {
+    font-size: clamp(0.66rem, 2.8vw, 0.82rem);
+    line-height: 1.25;
+  }
 
-/* Wie auf der Startseite: heller Grund, rote Schrift, kein Blend.
-   Tag und Nacht sehen hier gleich aus – der Wechsel haengt am Motiv, und
-   das gibt es auf dieser Seite nicht mehr. */
-.day-text,
-.night-text {
-  color: var(--brand-red);
+  .education {
+    margin-top: 0.65rem;
+    padding-top: 0.4rem;
+  }
+
+  .experience {
+    margin-top: 0.55rem;
+    padding-top: 0;
+  }
+
+  .education h2,
+  .experience h2 {
+    margin-bottom: 0.65rem;
+    font-size: 0.62rem;
+  }
 }
 </style>

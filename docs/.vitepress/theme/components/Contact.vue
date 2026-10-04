@@ -1,17 +1,7 @@
 <template>
   <section class="contact-screen" aria-label="Kontakt">
-    <div class="page-crop filtered-crop" aria-hidden="true">
-      <img
-        :ref="el => setSource(0, el)"
-        :src="kontaktSrc"
-        class="filtered-crop__source"
-        :class="{ 'is-visible-source': keepSourceVisible }"
-        alt=""
-      />
-      <canvas
-        :ref="el => setCanvas(0, el)"
-        class="filtered-crop__canvas"
-      />
+    <div class="contact-cutout" aria-hidden="true">
+      <img :src="kontaktCutout" alt="" />
     </div>
 
     <div class="contact-content">
@@ -29,41 +19,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { onMounted, onBeforeUnmount } from 'vue'
 import { withBase } from 'vitepress'
-import { useBackgroundFilter, BACKGROUND_FILTER } from '../composables/useBackgroundFilter'
 
-/* Motiv fuer den Bildausschnitt: ab 20 Uhr das Nachtbild.
-   Die Mobil-Varianten sind hier bewusst nicht im Spiel – der Ausschnitt ist
-   auf allen Groessen querformatig, die 9:16-Fassungen wuerden beschnitten. */
-const kontaktDay = withBase('/images/Kontakt.webp')
-const kontaktNight = withBase('/images/background-night2.webp')
-
-const isNight = ref(false)
-const kontaktSrc = computed(() => (isNight.value ? kontaktNight : kontaktDay))
-const { setSource, setCanvas, start: startFilter } = useBackgroundFilter()
-const keepSourceVisible = BACKGROUND_FILTER.mode === 'none'
-
-const updateIsNight = () => {
-  if (typeof window === 'undefined') return
-  const hour = new Date().getHours()
-  isNight.value = hour >= 20 || hour < 6
-}
-
-let nightCheckInterval: number | undefined
+const kontaktCutout = withBase('/images/kontakt-leon-schafe-cutout-red.webp')
 
 const previousTitle = typeof document !== 'undefined' ? document.title : ''
 
 onMounted(() => {
   document.title = 'Kontakt'
-  updateIsNight()
-  startFilter()
-  nightCheckInterval = window.setInterval(updateIsNight, 60 * 1000)
 })
 
 onBeforeUnmount(() => {
   document.title = previousTitle
-  if (nightCheckInterval) window.clearInterval(nightCheckInterval)
 })
 </script>
 
@@ -88,9 +56,25 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: clamp(64px, 8vh, 96px) clamp(20px, 6vw, 48px);
+  justify-content: flex-start;
+  padding: clamp(150px, 23vh, 210px) clamp(20px, 6vw, 48px) 32vh;
   text-align: center;
+}
+
+.contact-cutout {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(72vw, 960px);
+  z-index: 1;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.contact-cutout img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .contact-heading {
@@ -116,5 +100,15 @@ onBeforeUnmount(() => {
   text-decoration: underline;
   text-underline-offset: 0.12em;
   text-decoration-thickness: 0.04em;
+}
+
+@media (max-width: 767px) {
+  .contact-content {
+    padding-top: clamp(132px, 20vh, 180px);
+  }
+
+  .contact-cutout {
+    width: 92vw;
+  }
 }
 </style>

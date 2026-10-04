@@ -28,6 +28,9 @@ for (const path in animatedVideoFiles) {
   animatedVideoMap[filename] = animatedVideoFiles[path]
 }
 
+// Diese Projekte verwenden bewusst statische Coverbilder.
+const staticCoverIds = new Set(['Klanggestalten', 'Uebergangsobjekte', 'Stottern'])
+
 function calcIsNight(): boolean {
   if (typeof window === 'undefined') return false
   const h = new Date().getHours()
@@ -67,8 +70,19 @@ export function useCoverMedia() {
 
   /** Cover-Medium eines Projekts für den aktuellen Kontext (Tag/Nacht, Mobil/Desktop) */
   function mediaFor(id: string): CoverMedia {
+    const useStaticCover = staticCoverIds.has(id)
+
+    if (id === 'Reefresh') {
+      return {
+        type: 'image',
+        src: isMobile.value
+          ? '/images/Reefresh-cover_mobile.webp'
+          : '/images/Reefresh-cover.webp',
+      }
+    }
+
     if (isNight.value) {
-      const nightVideo = !isMobile.value
+      const nightVideo = !isMobile.value && !useStaticCover
         ? animatedVideoMap[`${id}_cover-night-animated.mp4`]
         : null
 
@@ -83,12 +97,16 @@ export function useCoverMedia() {
     }
 
     if (isMobile.value) {
-      const mobileVideo = animatedVideoMap[`${id}-cover_mobile-animated.mp4`]
+      const mobileVideo = useStaticCover
+        ? null
+        : animatedVideoMap[`${id}-cover_mobile-animated.mp4`]
       if (mobileVideo) return { type: 'video', src: mobileVideo }
       return { type: 'image', src: `/images/${id}-cover_mobile.webp` }
     }
 
-    const desktopVideo = animatedVideoMap[`${id}-cover-animated.mp4`]
+    const desktopVideo = useStaticCover
+      ? null
+      : animatedVideoMap[`${id}-cover-animated.mp4`]
     if (desktopVideo) return { type: 'video', src: desktopVideo }
     return { type: 'image', src: `/images/${id}-cover.webp` }
   }

@@ -1,16 +1,40 @@
+---
+title: Portfolio 2026
+description: "Diese Website als Versuch, mich selbst in eine digitale Form zu übersetzen – entwickelt mit Vibe Coding und KI."
+image: /images/Portfolio-cover.webp
+summary: "Eine Website über meine Arbeit und gleichzeitig ein Lernprozess im Vibe Coding mit KI."
+role: "Eigenständige Gesamtarbeit: Konzeption, Art Direction, Storytelling, Vibe Coding und Webentwicklung"
+format: "Portfolio-Website"
+tools:
+  - Vibe Coding
+  - Vue 3
+  - TypeScript
+  - VitePress
+  - Tailwind CSS
+  - Motion Design
+---
+
 # Portfolio 2026
 ##### 2026
 
-Ich wollte mich selbst in eine Website verwandeln.
+## Ausgangspunkt
 
-Wie gestaltet man eine Website – oder vielleicht auch sich selbst? Was macht mich aus, und wie lässt sich meine Art, die Welt zu sehen, gestalterisch ausdrücken?
+Ich wollte mich selbst in eine Website verwandeln. Sie sollte nicht wie eine neutrale Sammlung fertiger Arbeiten aussehen, sondern meine Art zu denken, zu gestalten und Geschichten zu erzählen sichtbar machen.
 
-So ist meine Portfolio-Website entstanden: ein Ort für mich und über mich. Mit Feingefühl, viel Liebe zum Detail und einem Tageszyklus-Konzept, das meine persönliche Sicht auf die Welt widerspiegelt. Ab 20 Uhr wechselt das Carousel in einen eigenen Nacht-Look mit alternativen Motiven – so wie der Tag selbst kippt.
+## Idee und Geschichte
 
-Jedes Projekt bekommt eine eigene Schrift als Überschrift, ein eigenes Cover-Motiv und – wo es Sinn ergibt – ein kurzes animiertes Preview statt eines statischen Bildes. Auf Mobilgeräten laufen separat produzierte 9:16-Versionen der Intro- und Übergangsvideos, damit nichts beschnitten wirkt.
+Die Website ist ein digitales Selbstporträt. Jedes Projekt bekommt eine eigene Schrift, ein eigenes Cover und – wenn es passt – eine animierte Vorschau. Ab 20 Uhr wechselt die Seite in eine Nachtversion. So wird der Tageszyklus Teil der Gestaltung.
 
-Technisch läuft das Ganze auf **VitePress** mit einem komplett individuellen Theme in **Vue 3** und **TypeScript**, gestylt mit **Tailwind CSS v4**. Projekt-Inhalte liegen als Markdown in `docs/works/` und werden beim Build automatisch eingelesen – einen neuen Ordner anlegen reicht, der Rest passiert ohne Code-Änderung. Größere Mediendateien gehen über **Git LFS**, das Deployment läuft über **GitHub Pages**.
+## Umsetzung
 
-Designed & built by Leon Albers.
+Für Desktop und Smartphone habe ich eigene Medienformate gestaltet, damit die Motive und Übergänge nicht einfach abgeschnitten werden. Die Projektseiten werden automatisch aus den Projektdateien aufgebaut und lassen sich leicht erweitern.
 
-##### vitepress, vue 3, typescript, tailwind, motion design, web development
+Die Website ist mit Vibe Coding entstanden. Dabei habe ich viel darüber gelernt, wie ich mit KI Ideen beschreiben, Code schreiben, Ergebnisse prüfen und so lange verändern kann, bis sie wirklich zu mir passen. Technisch basiert die Seite auf VitePress, Vue 3, TypeScript und Tailwind CSS.
+
+Vibe Coding war für mich deshalb nicht nur eine Art, die Seite umzusetzen, sondern ein eigener Lernprozess. Die KI hat beim Entwickeln geholfen, aber Aufbau, Typografie, Farben, Animationen und alle gestalterischen Entscheidungen habe ich selbst getroffen.
+
+## Mein Anteil
+
+Konzept, Gestaltung, Texte, Bildauswahl, Nutzerführung und alle inhaltlichen Entscheidungen stammen von mir. Technisch habe ich die Website mit Vibe Coding umgesetzt und Schritt für Schritt weiterentwickelt.
+
+##### Concept, Storytelling, Art Direction, Vibe Coding, Vue 3, TypeScript, Web Development

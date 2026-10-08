@@ -1,12 +1,13 @@
 <template>
   <div class="fixed inset-0 overflow-hidden">
-    <TitleIndex v-if="projects.length" :projects="projects" />
+    <ExhibitionGallery v-if="projects.length" :projects="projects" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import TitleIndex from './TitleIndex.vue'
+import ExhibitionGallery from './ExhibitionGallery.vue'
+import { compareProjectsByYear } from '../data/projectOrder'
 
 type Project = {
   slug: string
@@ -99,20 +100,7 @@ const projects = computed<Project[]>(() => {
     })
   }
 
-  // Die fünf stärksten Fallstudien stehen zuerst; der Rest folgt chronologisch.
-  return list.sort((a, b) => {
-    const featuredA = featuredOrder.indexOf(a.slug)
-    const featuredB = featuredOrder.indexOf(b.slug)
-    if (featuredA >= 0 || featuredB >= 0) {
-      if (featuredA < 0) return 1
-      if (featuredB < 0) return -1
-      return featuredA - featuredB
-    }
-    if (a.year === b.year) return a.title.localeCompare(b.title)
-    if (!a.year) return 1
-    if (!b.year) return -1
-    return Number(b.year) - Number(a.year)
-  })
+  return list.sort(compareProjectsByYear)
 })
 
 </script>

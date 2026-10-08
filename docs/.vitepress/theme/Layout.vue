@@ -5,6 +5,7 @@ import WorkPage from './components/WorkPage.vue'
 import WorkStack from './components/WorkStack.vue'
 import AboutPage from './components/AboutPage.vue'
 import SiteFooter from './components/SiteFooter.vue'
+import ProjectOpeningTransition from './components/ProjectOpeningTransition.vue'
 import { computed, onMounted, ref } from 'vue'
 
 const { frontmatter, site } = useData()
@@ -96,6 +97,7 @@ const currentPageComponent = computed(() => {
       <SiteFooter v-if="!isWorkPage" />
     </div>
   </template>
+  <ProjectOpeningTransition />
 </template>
 
 <style scoped>

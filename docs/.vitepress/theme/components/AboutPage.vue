@@ -57,7 +57,7 @@ export default {
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: var(--page-bg);
+  background: #000;
   color: var(--brand-red);
 }
 

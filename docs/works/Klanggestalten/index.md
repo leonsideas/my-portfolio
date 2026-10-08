@@ -11,6 +11,8 @@ tools:
   - Bluetooth
   - 3D-Druck
   - LED-Steuerung
+imageCaptions:
+  - "Der Prototyp übersetzt Vogelstimmen in Licht und Vibration."
 videos:
   - url: https://www.youtube.com/embed/xenrVK3cvyA
     title: Klanggestalten

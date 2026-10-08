@@ -11,6 +11,21 @@ tools:
   - Projection Mapping
   - 3D-Druck
   - CNC-Fräsen
+imageCaptions:
+  - "Besucher:innen erkunden die Installation."
+  - ""
+  - ""
+  - ""
+  - "Technischer Aufbau aus Beamer, Arduino und Lichtsensoren."
+  - "Der fertige Tisch mit drei Fluchtrouten."
+  - "Projektion und Motorikschleifen in der Draufsicht."
+  - "Der CNC-gefräste Schriftzug wird von Hand nachbearbeitet."
+  - "Erster Prototyp mit Arduino und Lichtsensoren."
+  - "CNC-Fräsen der hölzernen Tischplatte."
+  - "Vorbereitung der Fräsdatei für den Schriftzug."
+  - "Eine der Figuren direkt nach dem 3D-Druck."
+  - "Bau und Montage des Holztischs."
+  - "Gebogene Motorikschleifen vor der Montage."
 ---
 
 # Migration

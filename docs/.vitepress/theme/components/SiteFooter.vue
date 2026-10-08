@@ -55,7 +55,7 @@ const year = new Date().getFullYear()
 }
 
 :global(html.home-intro-active .site-footer) {
-  color: var(--page-bg);
+  color: var(--cream);
 }
 
 @media (min-width: 1024px) {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { withBase, useRouter } from 'vitepress'
 import { ref, computed, markRaw, onMounted, watch, onBeforeUnmount } from 'vue'
+import { compareProjectsByYear } from '../data/projectOrder'
 
 type CardVideo = {
   url: string
@@ -24,6 +25,7 @@ type Card = {
   component: any
   images: string[]
   btsImages: string[]
+  imageCaptions: string[]
   videos: CardVideo[]
 }
 
@@ -244,30 +246,12 @@ for (const path in markdownFiles) {
     component: mod?.default ? markRaw(mod.default) : null,
     images,
     btsImages,
+    imageCaptions: Array.isArray(fm.imageCaptions) ? fm.imageCaptions.map(String) : [],
     videos: youtubeVideos
   })
 }
 
-const preferredProjectOrder = [
-  'Klanggestalten',
-  'Migration',
-  'Uebergangsobjekte',
-  'Stottern',
-  'Portfolio',
-  'Uebersee',
-  'Moi',
-  'Kilma',
-  'LightbyNight',
-  'Reefresh',
-]
-
-cards.value.sort((a, b) => {
-  const indexA = preferredProjectOrder.indexOf(a.slug)
-  const indexB = preferredProjectOrder.indexOf(b.slug)
-  if (indexA < 0) return 1
-  if (indexB < 0) return -1
-  return indexA - indexB
-})
+cards.value.sort(compareProjectsByYear)
 
 const router = useRouter()
 const currentSlug = ref<string | undefined>(cards.value[0]?.slug)
@@ -578,9 +562,8 @@ function handleOverlayError() {
 
 const currentCard = computed(() => cards.value.find(card => card.slug === currentSlug.value))
 
-// Die Projektbilder sind vorübergehend ausgeblendet. Die Bildlisten bleiben
-// vollständig erhalten und können über diesen Schalter wieder aktiviert werden.
-const showProjectImages = false
+// Projektbilder und Making-of-Aufnahmen auf Desktop und Mobil anzeigen.
+const showProjectImages = true
 
 // Hauptbilder und Making-of-Aufnahmen bilden gemeinsam die rechte Bildfolge.
 // Die Dateinamen halten die BTS-Bilder innerhalb ihrer Gruppe in Reihenfolge.
@@ -597,6 +580,8 @@ const hasMedia = computed(() => {
 })
 
 const mobileLeadImage = computed(() => displayImages.value[0] || null)
+const displayImageCaptions = computed(() => currentCard.value?.imageCaptions || [])
+const mobileLeadCaption = computed(() => displayImageCaptions.value[0] || '')
 const mobileLeadVideo = computed(() =>
   mobileLeadImage.value ? null : currentCard.value?.videos[0] || null
 )
@@ -767,7 +752,7 @@ function onContentTouchEnd(e: TouchEvent) {
   else if (dx > 0 && hasPrev.value) goToPrev()
 }
 
-/* Projektseiten liegen auf demselben hellen Grund wie die Startseite.
+/* Projektseiten liegen auf demselben schwarzen Grund wie die Startseite.
    Die Navigation blendet sich ueber --workpage-bg-image ein und braucht dort
    einen background-image-Wert, daher der Verlauf aus einer einzigen Farbe. */
 const WORKPAGE_BG = 'linear-gradient(var(--page-bg), var(--page-bg))'
@@ -922,10 +907,13 @@ onBeforeUnmount(() => {
                         <figure v-if="mobileLeadImage" class="workpage-media-frame">
                           <img
                             :src="mobileLeadImage"
-                            :alt="currentCard.title + ' – Projektansicht'"
+                            :alt="mobileLeadCaption || currentCard.title + ' – Projektansicht'"
                             loading="eager"
                             fetchpriority="high"
                           />
+                          <figcaption v-if="mobileLeadCaption" class="workpage-media-caption">
+                            {{ mobileLeadCaption }}
+                          </figcaption>
                         </figure>
                         <figure v-else-if="mobileLeadVideo" class="workpage-media-frame aspect-video">
                           <iframe
@@ -954,9 +942,12 @@ onBeforeUnmount(() => {
                         >
                           <img
                             :src="img"
-                            :alt="currentCard.title + ' – Bild ' + (idx + 2)"
+                            :alt="displayImageCaptions[idx + 1] || currentCard.title + ' – Bild ' + (idx + 2)"
                             loading="lazy"
                           />
+                          <figcaption v-if="displayImageCaptions[idx + 1]" class="workpage-media-caption">
+                            {{ displayImageCaptions[idx + 1] }}
+                          </figcaption>
                         </figure>
                         <figure
                           v-for="(vid, vIdx) in mobileRemainingVideos"
@@ -1000,9 +991,12 @@ onBeforeUnmount(() => {
                       >
                         <img
                           :src="img"
-                          :alt="currentCard.title + ' – Bild ' + (idx + 1)"
+                          :alt="displayImageCaptions[idx] || currentCard.title + ' – Bild ' + (idx + 1)"
                           :loading="idx === 0 ? 'eager' : 'lazy'"
                         />
+                        <figcaption v-if="displayImageCaptions[idx]" class="workpage-media-caption">
+                          {{ displayImageCaptions[idx] }}
+                        </figcaption>
                       </figure>
 
                       <figure
@@ -1214,8 +1208,12 @@ onBeforeUnmount(() => {
 .workpage-media-frame {
   width: 100%;
   overflow: hidden;
-  border-radius: 0.5rem;
-  background: #14100e;
+  box-sizing: border-box;
+  padding: clamp(5px, 0.55vw, 8px);
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
 }
 
 .workpage-media-frame img {
@@ -1223,6 +1221,18 @@ onBeforeUnmount(() => {
   width: 100%;
   height: auto;
   object-fit: contain;
+}
+
+.workpage-media-caption {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0 0.75rem;
+  background: var(--page-bg, #000);
+  color: var(--brand-red);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  letter-spacing: 0.035em;
+  text-align: left;
 }
 
 /* Keywords als einzelne Pills unter dem Text */

@@ -9,6 +9,12 @@ tools:
   - Unity
   - Interactive Media
   - Digital Storytelling
+imageCaptions:
+  - "Kilma als Android-App."
+  - "Startscreen mit dem selbst entwickelten Logo."
+  - "Vier Minispiele und der Timer der App."
+  - ""
+  - ""
 ---
 
 # Kilma

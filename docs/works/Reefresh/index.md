@@ -38,6 +38,8 @@ Aus den Zeichnungen werden dreidimensionale Korallen und eigene fiktive Geschich
 
 Die Beiträge werden in einem interaktiven Webarchiv gesammelt. Dort lassen sich die Korallen als 3D-Modelle entdecken und in einer gemeinsamen Zukunftsgeschichte einordnen. Die Website verbindet die ursprünglichen Zeichnungen, erfundene Arten, Umweltveränderungen und eine zeitliche Entwicklung miteinander.
 
+## Kontext und Präsentation
+
 Das Projekt entstand im Austausch mit dem MARUM und ist für die Präsentation im Umfeld eines internationalen Korallenkongresses in Barcelona gedacht. Das Archiv wächst mit jedem neuen Beitrag weiter.
 
 ## Mein Anteil und die Beiträge

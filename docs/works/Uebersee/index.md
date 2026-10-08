@@ -31,7 +31,11 @@ Ein längerer Film und mehrere kurze Formate verbinden Museumswissen mit der Bil
 
 ## Umsetzung
 
-Für die Kampagne habe ich Bilder, Videos, Musik und Stimmen mit KI erzeugt und anschließend ausgewählt, geschnitten und zu einer gemeinsamen Welt verbunden. Im Mittelpunkt stehen trotzdem die Geschichten und das Wissen aus dem Museum. Gezeigt wurde das Projekt bei den Hochschultagen 2024.
+Für die Kampagne habe ich Bilder, Videos, Musik und Stimmen mit KI erzeugt und anschließend ausgewählt, geschnitten und zu einer gemeinsamen Welt verbunden. Im Mittelpunkt stehen trotzdem die Geschichten und das Wissen aus dem Museum.
+
+## Präsentation
+
+Das Projekt wurde bei den Hochschultagen 2024 gezeigt.
 
 ## Mein Anteil
 

@@ -100,7 +100,7 @@
 </script>
 
 <template>
-  <header class="my-nav" :class="{ 'my-nav--black': isLegalPage }">
+  <header class="my-nav" :class="{ 'my-nav--black': isLegalPage || isAboutPage }">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
           <li class="my-nav__item my-nav__item--left">
@@ -154,7 +154,7 @@
   :global(html.home-intro-active .my-nav .nav-pill),
   :global(html.home-intro-active .my-nav .nav-pill:hover),
   :global(html.home-intro-active .my-nav .nav-pill:focus-visible) {
-    color: var(--page-bg);
+    color: var(--cream);
   }
 
   /* Auf Projektseiten: fest am oberen Rand, optisch unsichtbar

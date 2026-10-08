@@ -1,5 +1,5 @@
 ---
-title: Uebergangsobjekte
+title: Übergangsobjekte
 description: "Vier Spielzeuge über die Frage, ob das Smartphone zum neuen Übergangsobjekt geworden ist."
 image: /images/Uebergangsobjekte-cover.webp
 summary: "Vier Spielzeuge mit eigenen Geschichten über den Konflikt zwischen Smartphone und klassischem Übergangsobjekt."
@@ -10,9 +10,27 @@ tools:
   - Objektgestaltung
   - Artistic Research
   - Storytelling
+imageCaptions:
+  - ""
+  - ""
+  - ""
+  - "Buggy und Bluescreen Baloo als Sammelfiguren."
+  - "Bluescreen Baloo in seiner erzählten Welt."
+  - "Buffer Barney in der fertigen Blisterverpackung."
+  - "Bluescreen Baloo in der fertigen Blisterverpackung."
+  - "Buggy in der fertigen Blisterverpackung."
+  - ""
+  - "Die Rückseite erzählt Buffer Barneys Geschichte."
+  - "Illustration und Geschichte von Buggy."
+  - "Ausstellungsplakat für Return of the Gizmos."
+  - "Zuschneiden der tiefgezogenen Blister."
+  - "Die Tiefziehmaschine für die Verpackungen."
+  - "Fertige Verpackungen vor der Ausstellung."
+  - "Erste tiefgezogene Verpackungsformen."
+  - "Die Projektbroschüre in der Ausstellung."
 ---
 
-# Uebergangsobjekte
+# Übergangsobjekte
 ##### 2026
 
 ## Ausgangspunkt
@@ -28,6 +46,10 @@ Dafür habe ich vier Spielzeuge entwickelt. Jede Figur besitzt eine eigene fikti
 ## Umsetzung
 
 Der Look erinnert bewusst an Sammelfiguren und die Spielzeuge, die ich selbst aus meiner Kindheit kenne. So trifft ein vertrauter Konsumgegenstand auf eine Frage, die viel persönlicher ist, als es zuerst wirkt.
+
+## Ausstellung
+
+Die Übergangsobjekte wurden 2026 in der Ausstellung *Return of the Gizmos* am Güterbahnhof Bremen und bei den Hochschultagen 2026 gezeigt.
 
 ## Mein Anteil
 

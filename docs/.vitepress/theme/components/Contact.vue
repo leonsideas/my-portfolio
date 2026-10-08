@@ -41,7 +41,7 @@ onBeforeUnmount(() => {
   inset: 0;
   margin: 0;
   padding: 0;
-  /* Heller Grund wie auf der Startseite, rote Schrift, kein Motiv */
+  /* Schwarzer Grund auf der gesamten Website, rote Schrift, kein Motiv */
   background-color: var(--page-bg);
   z-index: 0;
   overflow: hidden;

@@ -2,6 +2,7 @@
 import { withBase, useRouter } from 'vitepress'
 import { ref, computed, markRaw, onMounted, watch, onBeforeUnmount } from 'vue'
 import { compareProjectsByYear } from '../data/projectOrder'
+import { fontClassBySlug } from '../data/projectTypography'
 
 type CardVideo = {
   url: string
@@ -892,7 +893,9 @@ onBeforeUnmount(() => {
                         {{ currentCard.year }}
                       </div>
 
-                      <h1 class="workpage-title">{{ currentCard.title }}</h1>
+                      <h1 class="workpage-title" :class="fontClassBySlug[currentCard.slug]">
+                        {{ currentCard.title }}
+                      </h1>
 
                       <p v-if="currentCard.summary" class="workpage-summary">
                         {{ currentCard.summary }}
@@ -1176,9 +1179,15 @@ onBeforeUnmount(() => {
   margin: 0;
   color: var(--brand-red);
   font-size: clamp(2.35rem, 5vw, 4.5rem);
-  font-weight: 700;
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+}
+
+.workpage-title.font-uebersee {
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .workpage-summary {

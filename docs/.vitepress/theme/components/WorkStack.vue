@@ -8,6 +8,7 @@
 import { computed } from 'vue'
 import ExhibitionGallery from './ExhibitionGallery.vue'
 import { compareProjectsByYear } from '../data/projectOrder'
+import { fontClassBySlug } from '../data/projectTypography'
 
 type Project = {
   slug: string
@@ -32,21 +33,6 @@ const markdownFiles = import.meta.glob('../../../works/**/index.md', {
   import: 'default',
   eager: true,
 })
-
-// Jedes Projekt bekommt seine eigene Schrift. Fehlt hier ein Eintrag,
-// greift die Reihenfolge in fallbackFontClasses.
-const fontClassBySlug: Record<string, string> = {
-  Kilma: 'font-kilma',
-  Klanggestalten: 'font-klanggestalten',
-  LightbyNight: 'font-lightbynight',
-  Migration: 'font-migration',
-  Moi: 'font-moi',
-  Portfolio: 'font-portfolio',
-  Reefresh: 'font-migration',
-  Stottern: 'font-stottern',
-  Uebergangsobjekte: 'font-uebergangsobjekte',
-  Uebersee: 'font-uebersee',
-}
 
 const logoBySlug: Record<string, string> = {
   Klanggestalten: '/images/project-logos/klanggestalten-logo.svg',

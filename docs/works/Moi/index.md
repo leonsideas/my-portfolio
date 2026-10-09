@@ -3,9 +3,10 @@ title: MOI
 description: "MOI ist eine KI-gestützte Videoperformance über das Zusammenspiel von Mensch, Natur, Bild und Klang."
 image: /images/Moi-cover.webp
 summary: "Eine Videoperformance, in der Tanz, bewegte Steine, KI-generierte Bilder und Klang aufeinandertreffen."
-role: "Konzeption, künstlerische Recherche, Dramaturgie und KI-gestützte visuelle Umsetzung; Musik: Laura Eimeranns"
+role: "Projektidee, Konzept, Steinaufnahmen, Python-Datenanalyse und KI-Bildprozess; gemeinsame Themenwahl, Recherche und Zusammenführung mit Laura Eimeranns (Performance, Performanceaufnahmen und Musik)"
 format: "Videoperformance"
 tools:
+  - Python
   - Stable Diffusion
   - Video
   - Field Recording
@@ -20,18 +21,22 @@ videos:
 
 ## Ausgangspunkt
 
-Bei MOI wollte ich Mensch und Natur nicht getrennt voneinander zeigen. Ausgangspunkt war Karen Barads Idee der Intra-Aktion: Dinge bestehen nicht einfach für sich, sondern verändern sich durch ihre Beziehungen zueinander.
+Laura und ich haben das Thema gemeinsam gewählt und beide Texte von Karen Barad gelesen. Ausgangspunkt war ihre Idee der Intra-Aktion: Dinge bestehen nicht einfach für sich, sondern verändern sich durch ihre Beziehungen zueinander. Daraus habe ich die Projektidee und das Konzept für MOI entwickelt, um Mensch und Natur nicht getrennt voneinander zu zeigen.
 
 ## Idee und Geschichte
 
-Ich habe zwei sehr unterschiedliche Bewegungen aufgenommen: Steine und einen tanzenden Körper. Mit Stable Diffusion habe ich beide Bildwelten miteinander verbunden. Dabei entstehen neue Bilder, in denen Körper, Material und Landschaft ineinander übergehen.
+In MOI treffen zwei sehr unterschiedliche Bewegungen aufeinander: Steine und ein tanzender Körper. Mit Stable Diffusion werden beide Bildwelten miteinander verbunden. Dabei entstehen neue Bilder, in denen Körper, Material und Landschaft ineinander übergehen.
 
 ## Umsetzung
+
+Ich habe die Daten aus beiden Aufnahmen mit einem Python-Programm analysiert und miteinander verknüpft. Anschließend habe ich diese Daten mit Stable Diffusion verbunden, um die beiden Bildwelten ineinander übergehen zu lassen.
 
 Zu den Videos kommen Field Recordings und eine Klavierkomposition von Laura Eimeranns, die sie selbst am Klavier eingespielt hat. Es gibt keine klassische Handlung. Die Geschichte entsteht durch Wiederholung, Veränderung und das Zusammenspiel von Bild und Klang.
 
 ## Zusammenarbeit
 
-MOI entstand gemeinsam mit Laura Eimeranns. Von mir stammen das Konzept, die Recherche, die Aufnahmen, der KI-Bildprozess, der Schnitt und das Zusammenspiel der Medien. Laura Eimeranns komponierte die Musik und spielte sie am Klavier ein.
+MOI entstand gemeinsam mit Laura Eimeranns. Laura hat die tänzerische Performance selbst entwickelt und aufgenommen. Außerdem komponierte sie die Musik und spielte sie am Klavier ein. Gemeinsam haben wir die Aufnahmen zusammengeführt.
 
-##### Video Performance, Stable Diffusion, Generative AI, Artistic Research, Karen Barad
+Von mir stammen die Projektidee und das Konzept, die Steinaufnahmen, die Analyse und Verknüpfung beider Datensätze mit Python sowie ihre Verbindung mit Stable Diffusion.
+
+##### Video Performance, Python, Stable Diffusion, Generative AI, Artistic Research, Karen Barad

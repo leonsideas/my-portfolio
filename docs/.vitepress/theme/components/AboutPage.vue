@@ -46,6 +46,23 @@ export default {
             <p>Seit 2021</p>
           </div>
         </section>
+
+        <section class="exhibitions" aria-labelledby="exhibitions-title">
+          <h2 id="exhibitions-title">Exhibitions</h2>
+          <div class="about-entry">
+            <h3>REEFRESH – MAYBE NEXT TIME</h3>
+            <p>November 2026 · Barcelona · bevorstehend</p>
+            <p>
+              <a href="https://www.9isdsc.csic.es/binomials/" target="_blank" rel="noopener noreferrer">BINOMIALS</a>
+              — Gruppenausstellung im Rahmen des 9th International Symposium on Deep-Sea Corals.
+            </p>
+          </div>
+          <div class="about-entry">
+            <h3>Local Dreamer</h3>
+            <p>2019 · Nordenham · Einzelausstellung</p>
+            <p>Gezeigt wurden vor allem Gemälde auf Leinwand, Fotografien und grafisch bearbeitete Arbeiten.</p>
+          </div>
+        </section>
       </article>
     </div>
   </div>
@@ -96,13 +113,15 @@ export default {
 }
 
 .education,
-.experience {
+.experience,
+.exhibitions {
   margin-top: 0.8rem;
   padding-top: 0.4rem;
 }
 
 .education h2,
-.experience h2 {
+.experience h2,
+.exhibitions h2 {
   margin: 0 0 0.65rem;
   font-size: 0.72rem;
   font-weight: 700;
@@ -122,6 +141,17 @@ export default {
 .about-entry p {
   margin: 0.1rem 0 0;
   opacity: 0.78;
+}
+
+.about-entry a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.about-entry a:hover,
+.about-entry a:focus-visible {
+  color: var(--cream, #f2efe9);
 }
 
 @media (max-width: 767px) {
@@ -151,13 +181,15 @@ export default {
     padding-top: 0.4rem;
   }
 
-  .experience {
+  .experience,
+  .exhibitions {
     margin-top: 0.55rem;
     padding-top: 0;
   }
 
   .education h2,
-  .experience h2 {
+  .experience h2,
+  .exhibitions h2 {
     margin-bottom: 0.65rem;
     font-size: 0.62rem;
   }

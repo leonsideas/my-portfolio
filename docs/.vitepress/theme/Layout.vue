@@ -2,7 +2,7 @@
 import { useData, useRoute } from 'vitepress'
 import NavBar from './components/NavBar.vue'
 import WorkPage from './components/WorkPage.vue'
-import WorkStack from './components/WorkStack.vue'
+import DeichHerde from './components/DeichHerde.vue'
 import AboutPage from './components/AboutPage.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ProjectOpeningTransition from './components/ProjectOpeningTransition.vue'
@@ -37,7 +37,8 @@ const isWorkPage = computed(() => {
 const isEmptyLayout = computed(() => frontmatter.value.layout === 'empty')
 
 const currentPageComponent = computed(() => {
-  if (frontmatter.value.layout === 'home') return WorkStack
+  // Startseite: die Projekt-Herde auf dem Deich (vorher: WorkStack mit der gerahmten Galerie)
+  if (frontmatter.value.layout === 'home') return DeichHerde
   if (isWorkPage.value) return WorkPage
   if (isAboutPage.value) return AboutPage
   return null
@@ -54,9 +55,9 @@ const currentPageComponent = computed(() => {
     </div>
   </template>
 
-  <!-- Standard-Layout -->
+  <!-- Standard-Layout (site-shell: auf der Startseite am Handy hochkant um 90° gedreht, siehe DeichHerde.vue) -->
   <template v-else>
-    <div class="min-h-screen font-plexsans text-black">
+    <div class="site-shell min-h-screen font-plexsans text-black">
       <NavBar :class="{ 'is-workpage': isWorkPage }" />
 
       <!-- Für WorkPage: full-bleed rendern, ohne Wrapper/Padding -->

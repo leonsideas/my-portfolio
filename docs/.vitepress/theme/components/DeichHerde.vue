@@ -12,8 +12,6 @@
       <p class="panel-text" />
       <a class="panel-link" href="#" @click="oeffneProjekt">Zum Projekt →</a><button class="panel-zurueck" type="button">Zurück zur Herde</button>
     </aside>
-
-    <p class="deich-hinweis">Tier anklicken: Projekt ansehen</p>
   </div>
 </template>
 
@@ -245,31 +243,6 @@ html.deich-aktiv .my-nav {
   text-underline-offset: 3px;
   text-shadow: inherit;
   cursor: pointer;
-}
-
-.deich-hinweis {
-  position: absolute;
-  top: 3.6rem;
-  left: 50%;
-  z-index: 2;
-  margin: 0;
-  transform: translateX(-50%);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-  transition: opacity 300ms ease;
-}
-
-.deich.fokus .deich-hinweis {
-  opacity: 0;
-}
-
-@media (max-width: 899px) {
-  .deich-hinweis {
-    display: none;
-  }
 }
 
 /* Schmale Fenster: Projekttext als Blatt unten */

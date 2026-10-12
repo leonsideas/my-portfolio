@@ -13,12 +13,7 @@
       <a class="panel-link" href="#" @click="oeffneProjekt">Zum Projekt →</a><button class="panel-zurueck" type="button">Zurück zur Herde</button>
     </aside>
 
-    <button ref="pfeifen" class="deich-pfeife deich-ui" type="button" aria-label="Pfeifen: alle Tiere stellen sich auf" title="Pfeifen: alle Tiere stellen sich auf">
-      <!-- Trillerpfeife -->
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="14.5" r="5.5" /><circle cx="9" cy="14.5" r="1.6" /><path d="M12.6 10.3 21 8.5v4.2l-6.4.9" /><path d="M5 9.6 3.4 8" /></svg>
-    </button>
-
-    <p class="deich-hinweis">Tier anklicken: Projekt ansehen · Pfeifen: alle stellen sich in eine Reihe</p>
+    <p class="deich-hinweis">Tier anklicken: Projekt ansehen</p>
   </div>
 </template>
 
@@ -37,7 +32,6 @@ type Deich = {
 
 const root = ref<HTMLElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
-const pfeifen = ref<HTMLButtonElement | null>(null)
 const bereit = ref(false)
 const fortschritt = ref(0)
 const { mediaFor, isMobile } = useCoverMedia()
@@ -62,7 +56,6 @@ onMounted(async () => {
   if (verlassen || !root.value) return
   deich = starteDeich(root.value, {
     panel: panel.value,
-    pfeifen: pfeifen.value,
     assets: withBase('/deich/'),
     logos: withBase('/images/project-logos/'),
     basis: withBase('/'),
@@ -106,7 +99,7 @@ function oeffneProjekt(event: MouseEvent) {
 </script>
 
 <style>
-/* Nicht scoped: Canvas und Titel erzeugt die Szene selbst. Alles hängt an .deich. */
+/* Nicht scoped: das Canvas erzeugt die Szene selbst. Alles hängt an .deich. */
 html.deich-aktiv .my-nav {
   background: transparent;
 }
@@ -172,38 +165,6 @@ html.deich-aktiv .my-nav {
   background: var(--brand-red);
   transform-origin: left;
   transition: transform 250ms ease;
-}
-
-/* Projekttitel über den Tieren */
-.deich .projekt-label {
-  pointer-events: auto;
-  cursor: pointer;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
-  transition: transform 220ms ease, opacity 300ms ease, filter 220ms ease;
-}
-
-.deich .projekt-label span {
-  display: block;
-  color: var(--brand-red);
-  font-size: 22px;
-  line-height: 1;
-  white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
-}
-
-.deich .projekt-label img {
-  display: block;
-  width: auto;
-}
-
-.deich .projekt-label:hover,
-.deich .projekt-label.aktiv {
-  transform: translateY(-6px) scale(1.15);
-}
-
-.deich.fokus .projekt-label {
-  opacity: 0;
-  pointer-events: none;
 }
 
 /* Fokus: Tier links, rechts Titel, Text und Link */
@@ -286,42 +247,6 @@ html.deich-aktiv .my-nav {
   cursor: pointer;
 }
 
-/* Pfeifen: rundes Symbol unten mittig, zwischen Impressum und Copyright */
-.deich-pfeife {
-  position: absolute;
-  left: 50%;
-  bottom: max(0.55rem, env(safe-area-inset-bottom));
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: #fff;
-  color: var(--brand-red);
-  cursor: pointer;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
-  transform: translateX(-50%);
-  transition: background-color 200ms ease, color 200ms ease, transform 200ms ease;
-}
-
-.deich-pfeife svg {
-  width: 28px;
-  height: 28px;
-}
-
-.deich-pfeife:hover,
-.deich-pfeife:focus-visible {
-  transform: translateX(-50%) scale(1.08);
-}
-
-.deich-pfeife.aktiv {
-  background: var(--brand-red);
-  color: #fff;
-}
-
 .deich-hinweis {
   position: absolute;
   top: 3.6rem;
@@ -347,11 +272,8 @@ html.deich-aktiv .my-nav {
   }
 }
 
-/* Handy: Knöpfe über der Fußzeile, Projekttext als Blatt darüber */
+/* Schmale Fenster: Projekttext als Blatt unten */
 @media (max-width: 700px) {
-  .deich-pfeife {
-    bottom: calc(2.7rem + env(safe-area-inset-bottom));
-  }
 
   .deich-panel {
     top: auto;
@@ -368,11 +290,6 @@ html.deich-aktiv .my-nav {
 
   .deich-panel .panel-titel {
     font-size: 34px;
-  }
-
-  /* Titel über den Tieren kleiner, sonst verdecken sie sich gegenseitig */
-  .deich .projekt-label > * {
-    zoom: 0.62;
   }
 }
 
@@ -423,17 +340,6 @@ html.deich-aktiv .my-nav {
   html.deich-aktiv .deich-panel .panel-text {
     margin: 6px 0 14px;
     font-size: 13px;
-  }
-
-  html.deich-aktiv .deich-pfeife {
-    bottom: 0.4rem;
-    width: 44px;
-    height: 44px;
-  }
-
-  html.deich-aktiv .deich-pfeife svg {
-    width: 24px;
-    height: 24px;
   }
 }
 </style>

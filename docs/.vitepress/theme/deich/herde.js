@@ -1,45 +1,46 @@
 // Die Herde: Ein geriggtes Grundschaf aus Blender dient allen lebenden Schafen; jedes Projekt bekommt
 // darauf seinen eigenen Look (Material/Shader) und sein eigenes Verhalten. Ein Tier bzw. Objekt pro Projekt.
 // Koordinaten wie in szene.js: Blender (x, y, z) -> Three (x, z, -y).
-// Hang (Blender-y): Reihe/Figuren bei 2,6 (oben), frei laufende Tiere zwischen 3,3 und 6,8.
+// Hang (Blender-y): Figuren bei 2,6 (oben), frei laufende Tiere zwischen 3,3 und 10 (bis über den Böschungsfuß bei 7,5 nach vorn).
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js'
-import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js'
 
 export const ROT = '#ff2d16' // Akzentrot der Seite (Projektlogos)
 
-// x/y: Startplatz (Blender), rot: Grad (0 = Blick nach Blender +X, null = zur Kamera), reihe: x-Platz beim Pfeifen.
-// Feste Figuren stehen schon auf der Reihe (y = 2,6) und wechseln sich mit den Lauftieren ab.
+// x/y: Startplatz (Blender), rot: Grad (0 = Blick nach Blender +X, null = zur Kamera). label: Titel im Projekt-Panel (Logo oder Schrift).
+// Feste Figuren stehen oben am Hang (y = 2,6) und wechseln sich mit den Lauftieren ab.
 // schlaf: Schlafpose (Standard 'sleep' = Kopf an der Flanke, 'sleep_b' = Kinn im Gras), damit nicht alle gleich schlafen.
 export const STATIONEN = [
   { slug: 'LightbyNight', titel: 'Light At Night', jahr: 2023, x: 7.2, y: 2.6, rot: 70, look: 'foto', verhalten: 'liegt', feuer: true, schlaf: 'sleep_b',
     label: { text: 'Light At Night', font: 'Light' }, text: 'Ein gemeinsames Tileset-Game, in dem Licht nicht nur Stimmung, sondern ein Teil der Spielmechanik ist.' },
-  { slug: 'Reefresh', titel: 'REEFRESH – Maybe Next Time', jahr: 2026, x: 4.9, y: 3.9, rot: 20, look: 'foto', verhalten: 'laeuft', schnorchel: true, schlaf: 'sleep_b', reihe: 5.6,
+  { slug: 'Reefresh', titel: 'REEFRESH – Maybe Next Time', jahr: 2026, x: 4.9, y: 3.9, rot: 20, look: 'foto', modell: 'taucher', verhalten: 'laeuft', schlaf: 'sleep_b',
     label: { logo: 'corals-logo.svg', h: 38 }, text: 'Aus vielen Zeichnungen entstehen spekulative Zukunftskorallen und ein interaktives Archiv ihrer möglichen Anpassungen.' },
   { slug: 'Moi', titel: 'MOI', jahr: 2025, x: 4.1, y: 2.6, rot: 200, look: 'modell', modell: 'steinschaf', verhalten: 'statisch',
     label: { text: 'MOI', font: 'MOI' }, text: 'Eine Videoperformance, in der Tanz, bewegte Steine, KI-generierte Bilder und Klang aufeinandertreffen.' },
-  { slug: 'Klanggestalten', titel: 'Klanggestalten', jahr: 2025, x: 2.0, y: 5.6, rot: 165, look: 'foto', verhalten: 'laeuft', voegel: true, reihe: 2.7,
+  { slug: 'Klanggestalten', titel: 'Klanggestalten', jahr: 2025, x: 2.0, y: 5.6, rot: 165, look: 'foto', verhalten: 'laeuft', voegel: true,
     label: { logo: 'klanggestalten-logo.svg', h: 52 }, text: 'Aus dem Gesang von Vögeln wird ein persönlicher Naturmoment für zu Hause – als Klang, Licht und Vibration.' },
   { slug: 'Uebergangsobjekte', titel: 'Übergangsobjekte', jahr: 2026, x: 1.2, y: 2.6, rot: null, look: 'plastik', verhalten: 'statisch', pose: ['idle', 0], blister: true,
     label: { text: 'Übergangsobjekte', font: 'Uebergangsobjekte' }, text: 'Vier Spielzeuge mit eigenen Geschichten über den Konflikt zwischen Smartphone und klassischem Übergangsobjekt.' },
-  { slug: 'Uebersee', titel: 'Mit KI läufts bei uns!', jahr: 2024, x: -0.2, y: 4.7, rot: 10, look: 'bison', verhalten: 'laeuft', reihe: -0.4,
+  { slug: 'Uebersee', titel: 'Mit KI läufts bei uns!', jahr: 2024, x: -0.2, y: 4.7, rot: 10, look: 'bison', verhalten: 'laeuft',
     label: { text: 'Mit KI läufts bei uns!', font: 'Montserrat' }, text: 'Mein erster intensiver Kontakt mit KI: eine Kampagnenidee für neue Formen der Wissensvermittlung im Museum.' },
-  { slug: 'Kilma', titel: 'Kilma', jahr: 2024, x: -2.0, y: 5.9, rot: 205, look: 'vektor', verhalten: 'laeuft', reihe: -1.75,
-    label: { logo: 'kilma-logo-red.png', h: 72 }, text: 'Vier Minispiele über eine Welt in der Klimakrise und unseren oft absurden Umgang damit.' },
+  { slug: 'Kilma', titel: 'Kilma', jahr: 2024, x: -2.0, y: 5.9, rot: null, look: 'sprite', verhalten: 'sprite', sprite: 'kilma',
+    label: { text: 'KILMA', font: 'Kilma' }, text: 'Vier Minispiele über eine Welt in der Klimakrise und unseren oft absurden Umgang damit.' },
   { slug: 'Migration', titel: 'Migration', jahr: 2025, x: -3.3, y: 2.6, rot: null, look: 'gips', verhalten: 'statisch', pose: ['idle', 1.0], motorik: true,
     label: { text: 'Migration', font: 'Migration' }, text: 'Ein bewusst kindlich gebauter Tisch, der Erwachsene mit Fluchtrouten und der Verantwortung hinter politischen Entscheidungen konfrontiert.' },
-  { slug: 'Stottern', titel: 'Stottern', jahr: 2024, x: -4.0, y: 4.1, rot: 25, look: 'hologramm', verhalten: 'stottert', reihe: -4.95,
+  { slug: 'Stottern', titel: 'Stottern', jahr: 2024, x: -4.0, y: 4.1, rot: 25, look: 'hologramm', verhalten: 'stottert',
     label: { text: 'Stottern', font: 'Futurist', spacing: '0.18em' }, text: 'Aus meiner eigenen Erfahrung mit dem Stottern entstand ein Film über Perfektionsdruck und das Nicht-perfekt-Sein.' },
-  { slug: 'Portfolio', titel: 'Portfolio 2026', jahr: 2026, x: -6.0, y: 4.6, rot: null, look: 'sprite', verhalten: 'sprite', reihe: -6.7,
+  { slug: 'Portfolio', titel: 'Portfolio 2026', jahr: 2026, x: -6.0, y: 4.6, rot: null, look: 'sprite', verhalten: 'sprite', sprite: 'portfolio',
     label: { text: 'Portfolio 2026', font: 'Georgia, serif' }, text: 'Eine Website über meine Arbeit und gleichzeitig ein Lernprozess im Vibe Coding mit KI.' },
 ]
 
+// Flache Figuren: Höhe in m am Tag und liegend (null = gleicher Maßstab wie das Tagesbild)
+const SPRITES = { portfolio: { tag: 1.15, nacht: 0.62 }, kilma: { tag: 1.0, nacht: null } }
 const GAIT = { schaf: { walk: 0.32, trot: 0.78 }, bison: { walk: 0.5, trot: 1.2 } } // m/s ohne Hufrutschen
-const HANG = [3.3, 6.8]
-const REIHE_Y = 2.6
+const HANG = [3.3, 10.0]
+const OBEN_Y = 2.6 // oben am Hang stehen die Figuren; höher läuft kein Tier
 const UP = new THREE.Vector3(0, 1, 0), X = new THREE.Vector3(1, 0, 0)
 const shaderTime = { value: 0 }
 
@@ -71,39 +72,6 @@ function hologramMaterial (color) {
   return mat
 }
 
-// Geglättete Normalen (Mittel über ein 6-cm-Raster): Die Kontur folgt der Silhouette, nicht der Wollstruktur
-function smoothNormals (geometry, cell = 0.06) {
-  if (geometry.attributes.smoothNormal) return
-  const pos = geometry.attributes.position, nor = geometry.attributes.normal
-  const sums = new Map()
-  const key = (i) => `${Math.round(pos.getX(i) / cell)},${Math.round(pos.getY(i) / cell)},${Math.round(pos.getZ(i) / cell)}`
-  for (let i = 0; i < pos.count; i++) {
-    const k = key(i)
-    const v = sums.get(k) ?? [0, 0, 0]
-    v[0] += nor.getX(i); v[1] += nor.getY(i); v[2] += nor.getZ(i)
-    sums.set(k, v)
-  }
-  const out = new Float32Array(pos.count * 3)
-  for (let i = 0; i < pos.count; i++) {
-    const v = sums.get(key(i))
-    const l = Math.hypot(v[0], v[1], v[2]) || 1
-    out.set([v[0] / l, v[1] / l, v[2] / l], i * 3)
-  }
-  geometry.setAttribute('smoothNormal', new THREE.BufferAttribute(out, 3))
-}
-
-function outlineHull (mesh, width) {
-  smoothNormals(mesh.geometry)
-  const mat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide })
-  mat.onBeforeCompile = (sh) => {
-    sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute vec3 smoothNormal;')
-      .replace('#include <beginnormal_vertex>', 'vec3 objectNormal = smoothNormal;')
-      .replace('#include <skinning_vertex>', `#include <skinning_vertex>\ntransformed += normalize(objectNormal) * ${width.toFixed(4)};`)
-  }
-  return skinnedCopy(mesh, mat)
-}
-
 function skinnedCopy (mesh, material) {
   const copy = new THREE.SkinnedMesh(mesh.geometry, material)
   copy.bind(mesh.skeleton, mesh.bindMatrix)
@@ -123,9 +91,6 @@ function applyLook (root, look) {
     } else if (look === 'plastik') {
       // glänzendes Spielzeug-Plastik wie auf dem Übergangsobjekte-Cover
       m.material = new THREE.MeshPhysicalMaterial({ color: 0xe8364f, roughness: 0.32, clearcoat: 0.9, clearcoatRoughness: 0.12, normalMap: orig.normalMap, normalScale: new THREE.Vector2(0.35, 0.35) })
-    } else if (look === 'vektor') {
-      m.material = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })
-      outlineHull(m, 0.03)
     } else if (look === 'hologramm') {
       m.material = hologramMaterial(0x45d4ff)
       m.renderOrder = 2
@@ -145,15 +110,6 @@ function applyLook (root, look) {
 // ---------------------------------------------------------------------------
 // Requisiten
 // ---------------------------------------------------------------------------
-function makeLabel (cfg, logos) {
-  const el = document.createElement('div')
-  el.className = 'projekt-label'
-  el.innerHTML = cfg.logo
-    ? `<img src="${logos}${cfg.logo}" alt="" style="height:${cfg.h}px">`
-    : `<span style="font-family:${cfg.font};letter-spacing:${cfg.spacing ?? '0.01em'}">${cfg.text}</span>`
-  return new CSS2DObject(el)
-}
-
 // Lagerfeuer: echtes simuliertes Feuer (Blender/Mantaflow) als Flipbook auf kamerazugewandten Ebenen,
 // dazu Funken, Glutschein, glühende Scheite, Steinring und flackerndes Licht.
 function fire (flipbook) {
@@ -330,12 +286,11 @@ class Tier {
       this.addHit(1.5, 1.1, 0.7)
       this.frozen = true
     } else {
-      const src = cfg.look === 'bison' ? assets.bison : assets.schaf
+      const src = cfg.look === 'bison' ? assets.bison : assets[cfg.modell ?? 'schaf'] // geriggte Schafe: Grundschaf oder eigenes Modell (Taucher)
       this.model = SkeletonUtils.clone(src.scene)
       this.model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false } })
       this.model.updateMatrixWorld(true)
       this.extras = applyLook(this.model, cfg.look)
-      if (cfg.schnorchel) this.model.getObjectByName('Anker_Schnorchel').add(assets.schnorchel.scene.clone())
       this.mixer = new THREE.AnimationMixer(this.model)
       this.actions = Object.fromEntries(src.animations.map(c => [c.name, this.mixer.clipAction(c)]))
       for (const n of ['lie_down', 'stand_up']) {
@@ -367,11 +322,6 @@ class Tier {
       world.scene.add(this.fire)
       this.placeFire()
     }
-    const label = makeLabel(cfg.label, world.ui.logos)
-    label.position.set(0, cfg.look === 'bison' ? 2.0 : cfg.blister ? 1.4 : cfg.motorik ? 1.85 : 1.55, 0)
-    this.group.add(label)
-    this.labelObj = label
-    this.label = label.element
     this.place()
   }
 
@@ -387,8 +337,9 @@ class Tier {
   }
 
   buildSprite (assets) {
-    this.spriteTex = { tag: assets.sprite, nacht: assets.spriteLiegend }
-    this.sprite = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: assets.sprite, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide }))
+    this.spriteTex = assets.sprites[this.cfg.sprite]
+    this.spriteMass = SPRITES[this.cfg.sprite]
+    this.sprite = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: this.spriteTex.tag, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide, toneMapped: false })) // ohne Tone Mapping bleibt Weiß wie im Logo
     this.setSpriteImage('tag')
     this.group.add(this.sprite)
     this.pickables.push(this.sprite)
@@ -397,7 +348,8 @@ class Tier {
 
   setSpriteImage (which) {
     const tex = this.spriteTex[which]
-    const h = which === 'tag' ? 1.15 : 0.62
+    const m = this.spriteMass
+    const h = which === 'tag' ? m.tag : m.nacht ?? m.tag * tex.image.height / this.spriteTex.tag.image.height
     const w = h * tex.image.width / tex.image.height
     this.sprite.material.map = tex
     this.sprite.scale.set(w, h, 1)
@@ -415,9 +367,9 @@ class Tier {
   clipDur (name) { return this.actions?.[name]?.getClip().duration ?? 0 }
 
   get walker () { return ['laeuft', 'stottert', 'sprite'].includes(this.cfg.verhalten) }
-  get busy () { return ['reihe', 'fokus', 'platz', 'schlaf', 'aufstehen'].includes(this.mode) }
+  get busy () { return ['fokus', 'platz', 'schlaf', 'aufstehen'].includes(this.mode) }
 
-  pickTarget (herd, radius = 3.2) {
+  pickTarget (herd, radius = 3.8) {
     for (let k = 0; k < 12; k++) {
       const a = Math.random() * Math.PI * 2, r = 0.3 + Math.random() * (radius - 0.3)
       const x = this.home.x + Math.cos(a) * r
@@ -434,7 +386,7 @@ class Tier {
     if (!this.walker) { this.mode = 'idle'; this.until = t + 1e9; return }
     const r = Math.random()
     if (this.cfg.verhalten === 'sprite') { // 2D-Figur: läuft hin und her, bleibt kurz stehen
-      if (r < 0.6) { this.mode = 'walk'; this.pickTarget(herd, 2.5); this.until = t + 10 } else { this.mode = 'idle'; this.until = t + 1.5 + Math.random() * 2 }
+      if (r < 0.6) { this.mode = 'walk'; this.pickTarget(herd, 3.0); this.until = t + 12 } else { this.mode = 'idle'; this.until = t + 1.5 + Math.random() * 2 }
       return
     }
     if (r < 0.45) { this.mode = 'graze'; this.until = t + 4 + Math.random() * 6; this.play('graze') }
@@ -464,18 +416,8 @@ class Tier {
     return true
   }
 
-  // --- Pfeifen: zum eigenen Platz in der Reihe laufen, zur Kamera drehen ------
-  lineUp (t) {
-    if (!this.walker) return
-    const delay = this.wake(t) ? this.clipDur('stand_up') : 0
-    this.mode = 'reihe'
-    this.target.set(this.cfg.reihe, REIHE_Y)
-    this.arrived = false
-    this.startAt = t + delay
-  }
-
   release (t, nacht) {
-    if (!['reihe', 'fokus', 'platz'].includes(this.mode)) return
+    if (!['fokus', 'platz'].includes(this.mode)) return
     this.mode = 'idle'
     this.until = t + 0.5 + Math.random() * 1.5
     if (this.walker) this.play('idle')
@@ -538,6 +480,8 @@ class Tier {
   update (t, dt, herd) {
     if (this.fire) this.fire.userData.tick(t, dt, this.world.camera, this.world.nacht)
     this.updateOpacity(dt)
+    // flache Figuren sind unbeleuchtet: mit dem Tageslicht abdunkeln (Dämmerung, Nacht, auch im Schlaf)
+    if (this.sprite) this.sprite.material.color.setScalar(0.3 + 0.7 * (this.world.tageslicht ?? 1))
     let speedScale = 1
     if (this.cfg.verhalten === 'stottert' && this.mode !== 'schlaf') speedScale = this.stutter(t)
     if (this.mixer && !this.frozen) this.mixer.update(dt * speedScale)
@@ -551,7 +495,7 @@ class Tier {
       this.place()
       return
     }
-    const travelling = (this.mode === 'reihe' || this.mode === 'platz') && !this.arrived && t >= (this.startAt ?? 0)
+    const travelling = this.mode === 'platz' && !this.arrived && t >= (this.startAt ?? 0)
     const moving = this.mode === 'walk' || this.mode === 'trot' || travelling
     if (moving && speedScale > 0) {
       const to = new THREE.Vector2().subVectors(this.target, this.pos)
@@ -577,12 +521,12 @@ class Tier {
       const speed = this.gait[gaitName] * (Math.abs(turn) > 1 ? 0.45 : 1) * (travelling ? Math.min(1, 0.3 + to.length()) : 1)
       if (this.actions) this.actions[gaitName].setEffectiveTimeScale(speed / this.gait[gaitName])
       this.pos.x += Math.cos(this.heading) * speed * dt * speedScale
-      this.pos.y = THREE.MathUtils.clamp(this.pos.y + Math.sin(this.heading) * speed * dt * speedScale, REIHE_Y - 0.2, HANG[1] + 0.2)
+      this.pos.y = THREE.MathUtils.clamp(this.pos.y + Math.sin(this.heading) * speed * dt * speedScale, OBEN_Y - 0.2, HANG[1] + 0.2)
       if (travelling && to.length() < 0.15) { this.arrived = true; this.play(this.mode === 'platz' ? 'graze' : 'idle', 0.5) }
       else if (!travelling && (to.length() < 0.25 || t > this.until)) this.decide(t, herd)
-    } else if (this.mode === 'reihe' || this.mode === 'fokus') {
-      // in der Reihe bzw. im Fokus: ruhig stehen, zur Kamera schauen (Fokus: leicht schräg, Profil bleibt sichtbar)
-      if (t >= (this.startAt ?? 0)) this.turnTo(Math.PI / 2 + (this.mode === 'fokus' ? 0.65 : 0), dt, 1.2)
+    } else if (this.mode === 'fokus') {
+      // im Fokus: ruhig stehen, leicht schräg zur Kamera schauen (Profil bleibt sichtbar)
+      this.turnTo(Math.PI / 2 + 0.65, dt, 1.2)
     } else if (!this.busy && t > this.until) this.decide(t, herd)
     if (this.sprite) this.updateSprite(t, moving)
     this.place()
@@ -744,28 +688,7 @@ class Vogel {
 }
 
 // ---------------------------------------------------------------------------
-// Pfiff (WebAudio, kein Sound-Asset nötig): zwei kurze, ansteigende Töne
-// ---------------------------------------------------------------------------
-function whistle () {
-  const ctx = whistle.ctx ?? (whistle.ctx = new (window.AudioContext || window.webkitAudioContext)())
-  const now = ctx.currentTime
-  for (const [start, dur, f0, f1] of [[0, 0.16, 1700, 2300], [0.24, 0.42, 1800, 2700]]) {
-    const osc = ctx.createOscillator(), gain = ctx.createGain()
-    osc.type = 'sine'
-    osc.frequency.setValueAtTime(f0, now + start)
-    osc.frequency.exponentialRampToValueAtTime(f1, now + start + dur * 0.7)
-    gain.gain.setValueAtTime(0, now + start)
-    gain.gain.linearRampToValueAtTime(0.18, now + start + 0.03)
-    gain.gain.setValueAtTime(0.18, now + start + dur - 0.06)
-    gain.gain.linearRampToValueAtTime(0, now + start + dur)
-    osc.connect(gain).connect(ctx.destination)
-    osc.start(now + start)
-    osc.stop(now + start + dur + 0.02)
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Herde aufbauen, Fokus-Ansicht, Pfeifen, Tag/Nacht
+// Herde aufbauen, Fokus-Ansicht, Tag/Nacht
 // ---------------------------------------------------------------------------
 export async function createHerd (world) {
   // Modelle sind Draco-komprimiert (Geometrie) mit WebP-Texturen
@@ -777,7 +700,7 @@ export async function createHerd (world) {
     if (nearest) t.magFilter = THREE.NearestFilter // harte Pixelkanten wie im Cover
     return t
   })
-  const [schaf, bPerch, bFly, rPerch, rFly, bison, steinschaf, schnorchel, sprite, spriteLiegend, blisterKarte, feuer] = await Promise.all([
+  const [schaf, bPerch, bFly, rPerch, rFly, bison, steinschaf, taucher, sprite, spriteLiegend, kilma, kilmaLiegend, blisterKarte, feuer] = await Promise.all([
     loader.loadAsync(A + D.schaf),
     loader.loadAsync(A + D.blaumeiseSitzend),
     loader.loadAsync(A + D.blaumeiseFlug),
@@ -785,14 +708,17 @@ export async function createHerd (world) {
     loader.loadAsync(A + D.rotkehlchenFlug),
     loader.loadAsync(A + D.bison),
     loader.loadAsync(A + D.steinschaf),
-    loader.loadAsync(A + D.schnorchel),
+    loader.loadAsync(A + D.taucher),
     tex(A + D.sprite, true),
     tex(A + D.spriteLiegend, true),
+    tex(A + D.kilma),
+    tex(A + D.kilmaLiegend),
     tex(A + D.blisterKarte),
     tex(A + D.feuer)
   ])
   feuer.colorSpace = THREE.NoColorSpace
-  const assets = { schaf, bison, steinschaf, schnorchel, sprite, spriteLiegend, blisterKarte, feuer }
+  const sprites = { portfolio: { tag: sprite, nacht: spriteLiegend }, kilma: { tag: kilma, nacht: kilmaLiegend } }
+  const assets = { schaf, bison, steinschaf, taucher, sprites, blisterKarte, feuer }
 
   const tiere = []
   for (const cfg of STATIONEN) {
@@ -863,35 +789,10 @@ export async function createHerd (world) {
     focused = null
     panel.classList.remove('offen')
     root.classList.remove('fokus')
-    const ziel = lined ? rowView : home()
-    flyTo(ziel.pos, ziel.target)
-    if (lined) tiere.forEach(s => s.lineUp(world.clock.elapsedTime))
+    flyTo(home().pos, home().target)
   }
   panel.querySelector('.panel-zurueck').addEventListener('click', (e) => { e.stopPropagation(); unfocus() }, { signal })
   addEventListener('keydown', (e) => { if (e.key === 'Escape') unfocus() }, { signal })
-
-  // --- Pfeifen: alle in eine Reihe ------------------------------------------
-  const rowView = { pos: world.b2t(0, 13.6, 4.0), target: world.b2t(0, REIHE_Y, 3.45) }
-  let lined = false
-  const whistleBtn = world.ui.pfeifen
-  whistleBtn.addEventListener('click', (e) => {
-    e.stopPropagation()
-    const t = world.clock.elapsedTime
-    if (focused) unfocus()
-    lined = !lined
-    if (lined) {
-      whistle()
-      tiere.forEach(s => s.lineUp(t))
-      flyTo(rowView.pos, rowView.target, 2.2)
-    } else {
-      tiere.forEach(s => s.release(t, world.nacht))
-      flyTo(home().pos, home().target, 1.8)
-    }
-    whistleBtn.classList.toggle('aktiv', lined)
-    const hinweis = lined ? 'Herde freilassen' : 'Pfeifen: alle Tiere stellen sich auf'
-    whistleBtn.setAttribute('aria-label', hinweis)
-    whistleBtn.title = hinweis
-  }, { signal })
 
   // --- Hover und Klick --------------------------------------------------------
   const ray = new THREE.Raycaster(), mouse = new THREE.Vector2()
@@ -914,21 +815,18 @@ export async function createHerd (world) {
     if (ev.target.closest?.('.deich-ui')) return
     const hit = pickAt(ev)
     if (hit !== hovered) {
-      hovered?.label.classList.remove('aktiv')
-      hit?.label.classList.add('aktiv')
       if (hit && !focused) { hit.stopAndLook(world.clock.elapsedTime); hit.voegel?.forEach(v => v.hop()) }
       hovered = hit
     }
     root.style.cursor = hovered ? 'pointer' : ''
   }, { signal })
-  // Klick auf ein Tier (oder seinen Titel): Fokus. Klick ins Leere: zurück.
+  // Klick auf ein Tier: Fokus. Klick ins Leere: zurück.
   let downAt = null
   root.addEventListener('pointerdown', (ev) => { downAt = [ev.clientX, ev.clientY] }, { signal })
   root.addEventListener('click', (ev) => {
     if (ev.target.closest?.('.deich-ui')) return
     if (downAt && Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) > 6) return // war ein Ziehen, kein Klick
-    const labelHit = tiere.find(s => s.label.contains(ev.target))
-    const hit = labelHit ?? pickAt(ev)
+    const hit = pickAt(ev)
     if (hit) { focus(hit); hit.voegel?.forEach((v, i) => setTimeout(() => v.takeOff(world.clock.elapsedTime), 300 + i * 260)) }
     else unfocus()
   }, { signal })
@@ -955,7 +853,7 @@ export async function createHerd (world) {
     setNacht (on) {
       const t = world.clock.elapsedTime
       for (const s of tiere) {
-        if (on) { if (!['reihe', 'fokus'].includes(s.mode)) s.sleep(t) } else s.wake(t)
+        if (on) { if (s.mode !== 'fokus') s.sleep(t) } else s.wake(t)
         s.voegel?.forEach(v => v.setNacht(on))
       }
     },
@@ -964,28 +862,6 @@ export async function createHerd (world) {
       updateTween(t)
       for (const s of tiere) s.update(t, dt, tiere)
       for (const s of tiere) s.voegel?.forEach(v => v.update(t, dt))
-    },
-    // Titel entzerren: überlappende Titel weichen nach oben aus; die vorderen behalten ihren Platz
-    declutter () {
-      const items = tiere.filter(s => s.opacity > 0.5).map((s) => {
-        const p = s.labelObj.getWorldPosition(new THREE.Vector3())
-        const d = p.distanceTo(cam.position)
-        p.project(cam)
-        return { el: s.label, d, x: (p.x + 1) / 2 * root.clientWidth, y: (1 - p.y) / 2 * root.clientHeight, w: s.label.offsetWidth, h: s.label.offsetHeight }
-      }).sort((a, b) => a.d - b.d)
-      const placed = []
-      for (const it of items) {
-        let lift = 0
-        for (let k = 0; k < 6; k++) {
-          const hit = placed.find(p => Math.abs(p.x - it.x) < (p.w + it.w) / 2 + 6 && Math.abs(p.y - (it.y - lift)) < (p.h + it.h) / 2 + 2)
-          if (!hit) break
-          lift = it.y - (hit.y - (hit.h + it.h) / 2 - 4)
-        }
-        it.y -= lift
-        placed.push(it)
-        it.el.style.marginTop = `${-lift}px`
-      }
-      for (const s of tiere) s.label.style.visibility = s.opacity > 0.5 ? '' : 'hidden'
     }
   }
 }

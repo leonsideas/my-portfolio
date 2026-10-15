@@ -4,19 +4,19 @@
       v-if="projectOpening"
       ref="overlay"
       class="project-opening"
-      :style="{ '--opening-filter': projectOpening.filter ?? 'grayscale(1)' }"
+      :style="{ '--opening-filter': mediaOpening?.filter ?? 'grayscale(1)' }"
       :aria-label="`${projectOpening.title} wird geöffnet`"
       aria-busy="true"
       @wheel.prevent
       @touchmove.prevent
     >
       <div ref="backdrop" class="project-opening__backdrop" />
-      <div ref="windowRef" class="project-opening__window" :style="boxStyle(projectOpening.openingBox)">
+      <div v-if="mediaOpening" ref="windowRef" class="project-opening__window" :style="boxStyle(mediaOpening.openingBox)">
         <div ref="picture" class="project-opening__picture" :style="pictureStyle">
           <video
-            v-if="projectOpening.media.type === 'video'"
+            v-if="mediaOpening.media.type === 'video'"
             ref="video"
-            :src="projectOpening.media.src"
+            :src="mediaOpening.media.src"
             class="project-opening__media"
             muted autoplay loop playsinline preload="auto"
             @loadedmetadata="syncVideo"
@@ -24,13 +24,13 @@
           />
           <img
             v-else
-            :src="projectOpening.media.src"
+            :src="mediaOpening.media.src"
             class="project-opening__media"
             alt=""
             @load="mediaReady = true"
           />
           <img
-            :src="projectOpening.poster"
+            :src="mediaOpening.poster"
             class="project-opening__media project-opening__poster"
             :class="{ 'is-hidden': mediaReady }"
             alt=""
@@ -54,6 +54,7 @@ const picture = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 const mediaReady = ref(false)
 const animations = new Set<Animation>()
+const mediaOpening = computed(() => projectOpening.value?.kind === 'scene' ? null : projectOpening.value)
 let runId = 0
 let navigating = false
 
@@ -62,13 +63,13 @@ function boxStyle(box: OpeningBox) {
 }
 
 const pictureStyle = computed(() => {
-  if (!projectOpening.value) return {}
-  const { sourceBox, openingBox } = projectOpening.value
+  if (!mediaOpening.value) return {}
+  const { sourceBox, openingBox } = mediaOpening.value
   return boxStyle({ ...sourceBox, left: sourceBox.left - openingBox.left, top: sourceBox.top - openingBox.top })
 })
 
 function syncVideo() {
-  const opening = projectOpening.value
+  const opening = mediaOpening.value
   if (!video.value || !opening) return
   if (opening.media.src === opening.previewSrc && opening.currentTime > 0) {
     video.value.currentTime = opening.currentTime
@@ -107,21 +108,29 @@ watch(projectOpening, async (opening) => {
   window.addEventListener('keydown', onKeyDown)
   await nextTick()
   await nextFrame()
-  if (id !== runId || !overlay.value || !windowRef.value || !picture.value || !backdrop.value) return
+  if (id !== runId || !overlay.value || !backdrop.value) return
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const duration = reducedMotion ? 0 : 950
   const easing = 'cubic-bezier(0.22, 0.75, 0.16, 1)'
-  const fullscreen = { left: '0px', top: '0px', width: `${window.innerWidth}px`, height: `${window.innerHeight}px` }
   try {
-    await Promise.all([
-      animate(backdrop.value, [{ opacity: 0 }, { opacity: 1 }], { duration: reducedMotion ? 0 : 600 }),
-      animate(windowRef.value, [boxStyle(opening.openingBox), fullscreen], { duration, easing }),
-      animate(picture.value, [pictureStyle.value, fullscreen], { duration, easing }),
-      animate(picture.value, [{ filter: opening.filter ?? 'grayscale(1)' }, { filter: 'none' }], { duration, easing }),
-    ])
-    if (id !== runId) return
-    if (!reducedMotion) await delay(500)
+    if (opening.kind === 'scene') {
+      const duration = reducedMotion ? 0 : 600
+      await Promise.all([
+        animate(backdrop.value, [{ opacity: 0 }, { opacity: 1 }], { duration, easing: 'ease-in-out' }),
+        animate(opening.source, [{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }], { duration, easing }),
+      ])
+    } else {
+      if (!windowRef.value || !picture.value) return
+      const duration = reducedMotion ? 0 : 950
+      const fullscreen = { left: '0px', top: '0px', width: `${window.innerWidth}px`, height: `${window.innerHeight}px` }
+      await Promise.all([
+        animate(backdrop.value, [{ opacity: 0 }, { opacity: 1 }], { duration: reducedMotion ? 0 : 600 }),
+        animate(windowRef.value, [boxStyle(opening.openingBox), fullscreen], { duration, easing }),
+        animate(picture.value, [pictureStyle.value, fullscreen], { duration, easing }),
+        animate(picture.value, [{ filter: opening.filter ?? 'grayscale(1)' }, { filter: 'none' }], { duration, easing }),
+      ])
+      if (!reducedMotion) await delay(500)
+    }
     if (id !== runId) return
     navigating = true
     await router.go(opening.href)

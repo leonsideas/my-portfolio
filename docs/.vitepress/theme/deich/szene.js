@@ -230,7 +230,7 @@ export function starteDeich (root, ui) {
     THREE.DefaultLoadingManager.onProgress = undefined
     if (aus) return
     herd = h
-    if (world.nacht) herd.setNacht(true)
+    if (world.nacht) herd.setNacht(true, true)
     // ?debug: Testzugriff; simulate(s) rechnet das Verhalten im Zeitraffer ohne Darstellung
     if (new URLSearchParams(location.search).has('debug')) {
       window.__debug = {

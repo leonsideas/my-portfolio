@@ -23,7 +23,7 @@ export function dateien (q) {
     rotkehlchenFlug: 'vogel_rotkehlchen_flug.glb',
     taucher: `schaf_taucher_rig${k1}.glb`, // Reefresh: Schaf mit Neoprenanzug und Taucherflasche
     sprite: 'portfolio_strichschaf.png',
-    spriteLiegend: 'portfolio_strichschaf_liegend.png',
+    spriteLiegend: 'portfolio_strichschaf_liegend-freigestellt.png',
     kilma: 'kilma_schaf.png',
     kilmaLiegend: 'kilma_schaf_liegend.png',
     blisterKarte: 'blister_karte.webp',

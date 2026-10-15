@@ -50,12 +50,12 @@ export default {
         <section class="exhibitions" aria-labelledby="exhibitions-title">
           <h2 id="exhibitions-title">Exhibitions</h2>
           <div class="about-entry">
-            <h3>REEFRESH – MAYBE NEXT TIME</h3>
-            <p>November 2026 · Barcelona · bevorstehend</p>
-            <p>
+            <h3>
               <a href="https://www.9isdsc.csic.es/binomials/" target="_blank" rel="noopener noreferrer">BINOMIALS</a>
-              — Gruppenausstellung im Rahmen des 9th International Symposium on Deep-Sea Corals.
-            </p>
+            </h3>
+            <p>November 2026 · Barcelona · bevorstehend</p>
+            <p>Gruppenausstellung im Rahmen des 9th International Symposium on Deep-Sea Corals.</p>
+            <p>Mein Beitrag: REEFRESH – MAYBE NEXT TIME.</p>
           </div>
           <div class="about-entry">
             <h3>Local Dreamer</h3>

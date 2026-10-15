@@ -10,7 +10,7 @@
       <div class="panel-titel" />
       <div class="panel-jahr" />
       <p class="panel-text" />
-      <a class="panel-link" href="#" @click="oeffneProjekt">Zum Projekt →</a><button class="panel-zurueck" type="button">Zurück zur Herde</button>
+      <a class="panel-link vp-raw" href="#" @click="oeffneProjekt">Zum Projekt →</a><button class="panel-zurueck" type="button">Zurück zur Herde</button>
     </aside>
   </div>
 </template>
@@ -18,8 +18,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
-import { beginProjectOpening } from '../composables/useProjectOpening'
-import { useCoverMedia } from '../composables/useCoverMedia'
+import { beginSceneProjectOpening } from '../composables/useProjectOpening'
 import { vorladen } from '../deich/dateien.js'
 
 type Deich = {
@@ -32,7 +31,6 @@ const root = ref<HTMLElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
 const bereit = ref(false)
 const fortschritt = ref(0)
-const { mediaFor, isMobile } = useCoverMedia()
 
 // Handy hochkant: die ganze Startseite um 90° gedreht zeigen, wie ein Video im Vollbild (CSS unten).
 // Die Drehung geht im Uhrzeigersinn um die linke obere Ecke; die Szene rechnet in Seitenkoordinaten.
@@ -73,25 +71,18 @@ onBeforeUnmount(() => {
   document.documentElement.classList.remove('deich-aktiv')
 })
 
-// „Zum Projekt“: das Cover wächst aus dem Tier auf den ganzen Schirm, dann öffnet die Projektseite
-// (derselbe Übergang wie in der Galerie). Mit Strg/Cmd/Umschalt bleibt es ein normaler Link.
+// Die Deich-Szene geht direkt in die Projektseite über.
+// vp-raw am Link verhindert VitePress' sofortigen Seitenwechsel im Capture-Handler.
+// Mit Strg/Cmd/Umschalt bleibt es ein normaler Link.
 function oeffneProjekt(event: MouseEvent) {
   const info = deich?.herd?.aktuell()
-  if (!info || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  if (!info || !root.value || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
   event.preventDefault()
-  const media = mediaFor(info.slug)
-  const poster = withBase(isMobile.value ? `/images/${info.slug}-cover_mobile.webp` : `/images/${info.slug}-cover.webp`)
-  beginProjectOpening({
+  beginSceneProjectOpening({
     slug: info.slug,
     title: info.titel,
     href: withBase(`/works/${encodeURIComponent(info.slug)}/`),
-    media,
-    poster,
-    previewSrc: media.src,
-    currentTime: 0,
-    openingBox: info.box,
-    sourceBox: info.box,
-    filter: 'none',
+    source: root.value,
   })
 }
 </script>

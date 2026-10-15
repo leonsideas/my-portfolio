@@ -353,6 +353,9 @@ class Tier {
     const w = h * tex.image.width / tex.image.height
     this.sprite.material.map = tex
     this.sprite.scale.set(w, h, 1)
+    // Auch beim direkten Nachtstart wird updateSprite nicht aufgerufen.
+    // Die neue Pose deshalb sofort mit ihrer Unterkante auf den Boden setzen.
+    this.sprite.position.y = h / 2
     this.spriteH = h
   }
 
@@ -397,10 +400,19 @@ class Tier {
   // --- Nacht: hinlegen und schlafen; Tag: aufstehen ------------------------
   get schlafClip () { return this.actions?.[this.cfg.schlaf] ? this.cfg.schlaf : 'sleep' }
 
-  sleep (t) {
+  sleep (t, sofort = false) {
     if (this.cfg.verhalten === 'statisch') return
     if (this.sprite) { this.mode = 'schlaf'; this.setSpriteImage('nacht'); return }
     this.mode = 'schlaf'
+    if (sofort) {
+      // Beim Nachtstart direkt die Schlafpose auswerten, bevor das erste Bild gerendert wird.
+      this.mixer.stopAllAction()
+      this.current = null
+      this.play(this.schlafClip, 0)
+      this.mixer.update(0)
+      this.sleepAt = null
+      return
+    }
     if (['lie', 'sleep', 'sleep_b'].includes(this.current)) { this.play(this.schlafClip, 1.2); this.sleepAt = null; return }
     this.play('lie_down', 0.35)
     this.sleepAt = t + this.clipDur('lie_down')
@@ -606,8 +618,15 @@ class Vogel {
 
   hop () { if (this.mode === 'sitzt' && !this.sleeping) this.pa.hop.reset().play() }
 
-  setNacht (on) {
+  setNacht (on, sofort = false) {
     this.sleeping = on
+    if (sofort) {
+      this.pm.stopAllAction()
+      const action = on ? this.pa.sleep : this.pa.idle
+      action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play()
+      this.pm.update(0)
+      return
+    }
     if (on) { this.pa.sleep.reset().play(); this.pa.idle.crossFadeTo(this.pa.sleep, 1.0, false) }
     else { this.pa.idle.reset().play(); this.pa.sleep.crossFadeTo(this.pa.idle, 1.0, false) }
   }
@@ -850,11 +869,11 @@ export async function createHerd (world) {
       return { slug: focused.cfg.slug, titel: focused.cfg.titel, box: { left: x0, top: y0, width: Math.max(1, x1 - x0), height: Math.max(1, y1 - y0) } }
     },
     // Tag/Nacht: nachts legen sich alle Tiere schlafen (Figuren bleiben, wie sie sind)
-    setNacht (on) {
+    setNacht (on, sofort = false) {
       const t = world.clock.elapsedTime
       for (const s of tiere) {
-        if (on) { if (s.mode !== 'fokus') s.sleep(t) } else s.wake(t)
-        s.voegel?.forEach(v => v.setNacht(on))
+        if (on) { if (s.mode !== 'fokus') s.sleep(t, sofort) } else s.wake(t)
+        s.voegel?.forEach(v => v.setNacht(on, sofort))
       }
     },
     update (t, dt) {

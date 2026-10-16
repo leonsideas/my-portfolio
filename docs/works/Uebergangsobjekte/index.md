@@ -3,7 +3,7 @@ title: Übergangsobjekte
 description: "Vier Spielzeuge über die Frage, ob das Smartphone zum neuen Übergangsobjekt geworden ist."
 image: /images/Uebergangsobjekte-cover.webp
 summary: "Vier Spielzeuge mit eigenen Geschichten über den Konflikt zwischen Smartphone und klassischem Übergangsobjekt."
-role: "Eigenständige Gesamtarbeit: Konzeption, künstlerische Recherche, Storytelling und Objektgestaltung"
+role: "Eigenständige Gesamtarbeit: Konzeption, künstlerische Recherche, Storytelling, Logoentwicklung und Objektgestaltung"
 format: "Critical Design / Speculative Design"
 tools:
   - Character Design
@@ -53,6 +53,6 @@ Die Übergangsobjekte wurden 2026 in der Ausstellung *Return of the Gizmos* am G
 
 ## Mein Anteil
 
-Recherche, Figuren, Hintergrundgeschichten, Gestaltung, Verpackungen und Herstellung der Objekte habe ich selbst entwickelt und umgesetzt.
+Recherche, Figuren, Hintergrundgeschichten, Gestaltung, Verpackungen und Herstellung der Objekte habe ich selbst entwickelt und umgesetzt. Auch das Logo für die Übergangsobjekte stammt von mir.
 
 ##### Critical Design, Speculative Design, Smartphone Culture, Storytelling, Object Design

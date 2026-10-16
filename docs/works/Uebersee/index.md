@@ -14,6 +14,18 @@ tools:
 videos:
   - url: https://www.youtube.com/embed/9Uwy1a1OipA
     title: Mit KI läufts bei uns – Übersee-Museum
+  - url: /videos/uebersee/bison.mp4
+    title: Bison
+    poster: /videos/uebersee/bison.webp
+    aspectRatio: "9 / 16"
+  - url: /videos/uebersee/pelikan.mp4
+    title: Pelikan
+    poster: /videos/uebersee/pelikan.webp
+    aspectRatio: "9 / 16"
+  - url: /videos/uebersee/ziege.mp4
+    title: Ziege
+    poster: /videos/uebersee/ziege.webp
+    aspectRatio: "9 / 16"
 ---
 
 # Mit KI läufts bei uns!

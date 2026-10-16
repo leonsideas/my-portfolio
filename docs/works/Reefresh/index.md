@@ -3,7 +3,7 @@ title: REEFRESH – MAYBE NEXT TIME
 description: "Ein partizipatives Zukunftsarchiv über Tiefwasserkorallen, Anpassung und das Weiterleben im Meer."
 image: /images/Reefresh-cover.webp
 summary: "Aus vielen Zeichnungen entstehen spekulative Zukunftskorallen und ein interaktives Archiv ihrer möglichen Anpassungen."
-role: "Konzeption, Storytelling, partizipatives Format, visuelle Gestaltung, 3D und Webentwicklung"
+role: "Konzeption, Storytelling, partizipatives Format, Logoentwicklung, visuelle Gestaltung, 3D und Webentwicklung"
 format: "Partizipatives Speculative-Design-Projekt / interaktives Webarchiv"
 tools:
   - Speculative Design
@@ -44,4 +44,4 @@ Das Projekt entstand im Austausch mit dem MARUM und ist für die Präsentation i
 
 ## Mein Anteil und die Beiträge
 
-Konzept, Zukunftsgeschichte, Mitmachformat, visuelle Gestaltung, Texte, 3D-Übersetzung und die interaktive Website habe ich entwickelt und umgesetzt. Die Ideen für die einzelnen Korallen stammen von den Menschen, die ihre eigenen Anpassungen in die Vorlage gezeichnet haben. Genau diese verschiedenen Vorstellungen bilden den Kern des Projekts.
+Konzept, Zukunftsgeschichte, Mitmachformat, visuelle Gestaltung, Texte, 3D-Übersetzung und die interaktive Website habe ich entwickelt und umgesetzt. Auch das Logo habe ich selbst entwickelt. Die Ideen für die einzelnen Korallen stammen von den Menschen, die ihre eigenen Anpassungen in die Vorlage gezeichnet haben. Genau diese verschiedenen Vorstellungen bilden den Kern des Projekts.

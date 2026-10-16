@@ -66,4 +66,8 @@ const year = new Date().getFullYear()
     letter-spacing: 0.25em;
   }
 }
+
+:global(html.deich-aktiv .site-footer) {
+  padding: 0 var(--home-inset-right) var(--home-inset-bottom) var(--home-inset-left);
+}
 </style>

@@ -156,7 +156,7 @@ html.deich-aktiv .my-nav {
 .deich-panel {
   position: absolute;
   top: 50%;
-  right: calc(7 * var(--site-vw));
+  right: var(--home-inset-right);
   z-index: 3;
   width: min(calc(36 * var(--site-vw)), 460px);
   transform: translate(24px, -50%);
@@ -260,9 +260,9 @@ html.deich-aktiv .my-nav {
 
   .deich-panel {
     top: auto;
-    right: 16px;
+    right: var(--home-inset-right);
     bottom: calc(6.4rem + env(safe-area-inset-bottom));
-    left: 16px;
+    left: var(--home-inset-left);
     width: auto;
     transform: translateY(24px);
   }

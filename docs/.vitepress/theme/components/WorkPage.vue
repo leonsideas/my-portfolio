@@ -4,10 +4,13 @@ import { ref, computed, markRaw, onMounted, watch, onBeforeUnmount } from 'vue'
 import { compareProjectsByYear } from '../data/projectOrder'
 import { fontClassBySlug } from '../data/projectTypography'
 import { sitePoint } from '../composables/siteViewport'
+import ProjectVideo from './ProjectVideo.vue'
 
 type CardVideo = {
   url: string
   title?: string
+  poster?: string
+  aspectRatio?: string
 }
 
 type Card = {
@@ -117,12 +120,7 @@ function parseRawFrontmatter(raw: string): Record<string, any> {
         // key-value in object
         const kv = val.match(/^(\w+):\s*(.*)$/)
         if (kv) {
-          const last = currentArray[currentArray.length - 1]
-          if (last && typeof last === 'object') {
-            last[kv[1]] = cleanScalar(kv[2])
-          } else {
-            currentArray.push({ [kv[1]]: cleanScalar(kv[2]) })
-          }
+          currentArray.push({ [kv[1]]: cleanScalar(kv[2]) })
         }
       } else {
         currentArray.push(val)
@@ -190,10 +188,12 @@ for (const path in markdownFiles) {
   }
 
   const fmVideos = Array.isArray(fm.videos) ? fm.videos : []
-  const youtubeVideos: CardVideo[] = fmVideos
+  const projectVideos: CardVideo[] = fmVideos
     .map((v: any) => {
       if (typeof v === 'string') return { url: v }
-      if (v && typeof v.url === 'string') return { url: v.url, title: v.title }
+      if (v && typeof v.url === 'string') {
+        return { url: v.url, title: v.title, poster: v.poster, aspectRatio: v.aspectRatio }
+      }
       return null
     })
     .filter(Boolean) as CardVideo[]
@@ -249,7 +249,7 @@ for (const path in markdownFiles) {
     images,
     btsImages,
     imageCaptions: Array.isArray(fm.imageCaptions) ? fm.imageCaptions.map(String) : [],
-    videos: youtubeVideos
+    videos: projectVideos
   })
 }
 
@@ -923,17 +923,11 @@ onBeforeUnmount(() => {
                             {{ mobileLeadCaption }}
                           </figcaption>
                         </figure>
-                        <figure v-else-if="mobileLeadVideo" class="workpage-media-frame aspect-video">
-                          <iframe
-                            class="w-full h-full"
-                            :src="mobileLeadVideo.url"
-                            :title="mobileLeadVideo.title || currentCard.title"
-                            frameborder="0"
-                            loading="lazy"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowfullscreen
-                          />
-                        </figure>
+                        <ProjectVideo
+                          v-else-if="mobileLeadVideo"
+                          :video="mobileLeadVideo"
+                          :project-title="currentCard.title"
+                        />
                       </div>
 
                       <component
@@ -957,21 +951,12 @@ onBeforeUnmount(() => {
                             {{ displayImageCaptions[idx + 1] }}
                           </figcaption>
                         </figure>
-                        <figure
+                        <ProjectVideo
                           v-for="(vid, vIdx) in mobileRemainingVideos"
                           :key="vid.url + '-mobile-' + vIdx"
-                          class="workpage-media-frame aspect-video"
-                        >
-                          <iframe
-                            class="w-full h-full"
-                            :src="vid.url"
-                            :title="vid.title || currentCard.title"
-                            frameborder="0"
-                            loading="lazy"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowfullscreen
-                          />
-                        </figure>
+                          :video="vid"
+                          :project-title="currentCard.title"
+                        />
 
                       </div>
 
@@ -1007,21 +992,12 @@ onBeforeUnmount(() => {
                         </figcaption>
                       </figure>
 
-                      <figure
+                      <ProjectVideo
                         v-for="(vid, vIdx) in currentCard.videos"
                         :key="vid.url + '-desktop-' + vIdx"
-                        class="workpage-media-frame aspect-video"
-                      >
-                        <iframe
-                          class="w-full h-full"
-                          :src="vid.url"
-                          :title="vid.title || currentCard.title"
-                          frameborder="0"
-                          loading="lazy"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowfullscreen
-                        />
-                      </figure>
+                        :video="vid"
+                        :project-title="currentCard.title"
+                      />
 
                     </div>
                   </div>
@@ -1231,7 +1207,7 @@ onBeforeUnmount(() => {
   border: 0;
   border-radius: 0;
   background: var(--page-bg);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+  box-shadow: none;
 }
 
 .workpage-media-frame img {

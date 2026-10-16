@@ -393,7 +393,7 @@
   }
 
   .my-nav--home .my-nav__inner {
-    padding: clamp(22px, calc(3.3 * var(--site-vw)), 44px);
+    padding: var(--home-inset-top) var(--home-inset-right) 0 var(--home-inset-left);
   }
 
   .my-nav--home .my-nav__list {
@@ -413,7 +413,7 @@
   .my-nav--home .my-nav__item--right { grid-area: right; }
 
   .my-nav--home .nav-pill {
-    padding-inline: 0;
+    padding: 0;
   }
 
   .nav-identity {
@@ -437,8 +437,7 @@
   }
 
   .my-nav--home .nav-identity > .nav-pill {
-    padding-block: 0.2rem;
-    block-size: calc(1.5em + 0.4rem);
+    block-size: 1.5em;
     line-height: 1.5;
   }
 
@@ -455,7 +454,6 @@
   }
 
   @media (max-width: 600px) {
-    .my-nav--home .my-nav__inner { padding: 22px 18px; }
     .my-nav--home .my-nav__list { gap: 14px; }
   }
 

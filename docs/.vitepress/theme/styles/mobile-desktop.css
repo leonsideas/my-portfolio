@@ -1,6 +1,11 @@
 :root {
   --site-vw: 1vw;
   --site-vh: 1dvh;
+  --home-edge-space: clamp(22px, calc(3.3 * var(--site-vw)), 44px);
+  --home-inset-top: max(var(--home-edge-space), env(safe-area-inset-top));
+  --home-inset-right: max(var(--home-edge-space), env(safe-area-inset-right));
+  --home-inset-bottom: max(var(--home-edge-space), env(safe-area-inset-bottom));
+  --home-inset-left: max(var(--home-edge-space), env(safe-area-inset-left));
 }
 
 /* Querformat-Raum nur auf der Startseite. Fixed-Elemente bleiben darin. */
@@ -22,6 +27,10 @@ html.mobile-desktop .site-shell {
 html.site-rotated {
   --site-vw: 1dvh;
   --site-vh: 1vw;
+  --home-inset-top: max(var(--home-edge-space), env(safe-area-inset-right));
+  --home-inset-right: max(var(--home-edge-space), env(safe-area-inset-bottom));
+  --home-inset-bottom: max(var(--home-edge-space), env(safe-area-inset-left));
+  --home-inset-left: max(var(--home-edge-space), env(safe-area-inset-top));
 }
 
 html.site-rotated .site-shell {
@@ -40,11 +49,13 @@ html.mobile-desktop .my-nav .nav-pill {
   letter-spacing: 0.18em;
   padding: 0.4rem 0.5rem;
 }
-html.mobile-desktop .my-nav--home .my-nav__inner { padding: 22px 26px; }
-html.mobile-desktop .my-nav--home .nav-pill { padding-inline: 0; }
+html.mobile-desktop .my-nav--home .my-nav__inner {
+  padding: var(--home-inset-top) var(--home-inset-right) 0 var(--home-inset-left);
+}
+html.mobile-desktop .my-nav--home .nav-pill { padding: 0; }
 html.site-rotated.deich-aktiv .deich-panel {
   top: 50%;
-  right: calc(5 * var(--site-vw));
+  right: var(--home-inset-right);
   bottom: auto;
   left: auto;
   width: calc(42 * var(--site-vw));

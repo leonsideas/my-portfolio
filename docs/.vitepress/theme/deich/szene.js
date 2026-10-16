@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { createHerd } from './herde.js'
 import { dateien, qualitaet } from './dateien.js'
 import { erzeugeHimmel } from './himmel.js'
+import { erzeugeTiefenschaerfe } from './tiefenschaerfe.js'
 
 const QUALITAET = qualitaet() // Leistungsstufe (dateien.js)
 const D = dateien(QUALITAET)
@@ -87,6 +88,10 @@ export function starteDeich (root, ui) {
     update () { camera.lookAt(this.target) }
   }
   controls.update()
+
+  const tiefenschaerfe = erzeugeTiefenschaerfe(renderer, scene, camera, QUALITAET)
+  tiefenschaerfe.setSize(breite(), hoehe())
+  const render = () => tiefenschaerfe.render(camera.position.distanceTo(controls.target))
 
   // ---------------------------------------------------------------------------
   // Himmel und Licht nach echtem Sonnenstand (himmel.js). Nachts (Sonne tiefer als 6° unter dem Horizont)
@@ -189,7 +194,7 @@ export function starteDeich (root, ui) {
     if (herd && istNacht(zustand) !== world.nacht) { world.nacht = istNacht(zustand); herd.setNacht(world.nacht) }
     herd?.update(t, dt)
     controls.update()
-    renderer.render(scene, camera)
+    render()
     rafId = requestAnimationFrame(animate)
   }
 
@@ -197,6 +202,7 @@ export function starteDeich (root, ui) {
     camera.aspect = breite() / hoehe()
     setFov()
     renderer.setSize(breite(), hoehe())
+    tiefenschaerfe.setSize(breite(), hoehe())
   }, { signal })
 
   // Gemeinsame Welt für die Herde
@@ -207,14 +213,14 @@ export function starteDeich (root, ui) {
     imBild: (() => {
       const pruef = new THREE.PerspectiveCamera()
       const p = new THREE.Vector3()
-      return (x, y) => {
+      return (x, y, vordergrund = false) => {
         const s = startKamera()
         pruef.copy(camera)
         pruef.position.copy(s.pos)
         pruef.lookAt(s.target)
         pruef.updateMatrixWorld()
         p.copy(b2t(x, y, profile(y) + 0.9)).project(pruef)
-        return Math.abs(p.x) < 0.8 && p.y > -0.8 && p.y < 0.75
+        return Math.abs(p.x) < (vordergrund ? 1.1 : 0.8) && p.y > (vordergrund ? -1.05 : -0.8) && p.y < 0.75 && p.z < 1
       }
     })(),
     // Yaw (Blender-Winkel = Three-Drehung um +Y), bei dem die Vorderseite (+Z lokal) zur Startkamera zeigt
@@ -235,7 +241,7 @@ export function starteDeich (root, ui) {
     if (new URLSearchParams(location.search).has('debug')) {
       window.__debug = {
         herd, renderer, scene, camera,
-        render () { controls.update(); renderer.render(scene, camera) },
+        render () { controls.update(); render() },
         simulate (seconds, step = 1 / 60) {
           let t = clock.elapsedTime
           for (let i = 0; i < seconds / step; i++) { t += step; herd.update(t, step) }
@@ -255,6 +261,7 @@ export function starteDeich (root, ui) {
       ab.abort()
       cancelAnimationFrame(rafId)
       himmel.dispose()
+      tiefenschaerfe.dispose()
       renderer.dispose()
       renderer.forceContextLoss() // GPU-Speicher sofort freigeben, nicht erst bei der Garbage Collection
       renderer.domElement.remove()

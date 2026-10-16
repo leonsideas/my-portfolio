@@ -5,16 +5,30 @@
   const route = useRoute()
   const { site } = useData()
   const phrases = [
-    'Hallo, ich bin Leon Albers',
-    'Ich bin Creative Designer',
-    'Ich liebe es, Geschichten zu erzählen',
+    'Creative Designer',
+    'Ich erzähle Geschichten',
+    'Mit Film, Code und KI',
   ]
   const typedText = ref('')
+  const localTime = ref('')
+  const clockDateTime = ref('')
+  const clockFormatter = new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hourCycle: 'h23', timeZoneName: 'short',
+  })
 
   let phraseIndex = 0
   let characterIndex = 0
   let isDeleting = false
   let typeTimer: number | undefined
+  let clockTimer: number | undefined
+
+  function updateClock() {
+    const now = new Date()
+    localTime.value = clockFormatter.format(now)
+    clockDateTime.value = now.toISOString()
+  }
 
   function queueTypeStep(delay: number) {
     typeTimer = window.setTimeout(typeStep, delay)
@@ -49,6 +63,8 @@
   }
 
   onMounted(() => {
+    updateClock()
+    clockTimer = window.setInterval(updateClock, 1000)
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       typedText.value = phrases[0]
       return
@@ -59,6 +75,7 @@
 
   onBeforeUnmount(() => {
     if (typeTimer) window.clearTimeout(typeTimer)
+    if (clockTimer) window.clearInterval(clockTimer)
   })
 
   const normalizedPath = computed(() => {
@@ -77,6 +94,8 @@
       normalizedPath.value === path || normalizedPath.value.startsWith(`${path}/`)
     )
   )
+
+  const isHomePage = computed(() => normalizedPath.value === '/')
 
   const isContactPage = computed(() =>
     normalizedPath.value === '/kontakt' || normalizedPath.value.startsWith('/kontakt/')
@@ -100,7 +119,7 @@
 </script>
 
 <template>
-  <header class="my-nav" :class="{ 'my-nav--black': isLegalPage || isAboutPage }">
+  <header class="my-nav" :class="{ 'my-nav--black': isLegalPage || isAboutPage, 'my-nav--home': isHomePage }">
       <nav class="my-nav__inner">
         <ul class="my-nav__list">
           <li class="my-nav__item my-nav__item--left">
@@ -114,11 +133,24 @@
           </li>
 
           <li class="my-nav__item my-nav__item--center">
+            <div v-if="isHomePage" class="nav-identity">
+              <h1 class="nav-identity__name">Leon Albers</h1>
+              <span class="nav-pill nav-typewriter nav-identity__statement">
+                <span class="visually-hidden">Creative Designer. Ich erzähle Geschichten mit Film, Code und KI.</span>
+                <span aria-hidden="true">{{ typedText }}</span>
+                <span class="nav-typewriter__caret" aria-hidden="true" />
+              </span>
+              <div class="nav-identity__clock" title="Meine Ortszeit · Europe/Berlin">
+                <span>Ortszeit</span>
+                <time :datetime="clockDateTime">{{ localTime || '–' }}</time>
+              </div>
+            </div>
             <span
+              v-else
               class="nav-pill nav-link-font nav-typewriter"
             >
               <span class="visually-hidden">
-                Hallo, ich bin Leon Albers. Ich bin Creative Designer. Ich liebe es, Geschichten zu erzählen.
+                Creative Designer. Ich erzähle Geschichten mit Film, Code und KI.
               </span>
               <span aria-hidden="true">{{ typedText }}</span>
               <span class="nav-typewriter__caret" aria-hidden="true" />
@@ -357,6 +389,81 @@
     .nav-typewriter__caret {
       display: none;
     }
+  }
+
+  .my-nav--home .my-nav__inner {
+    padding: clamp(22px, 3.3vw, 44px);
+  }
+
+  .my-nav--home .my-nav__list {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: 'identity left right';
+    align-items: start;
+    gap: clamp(12px, 2.5vw, 34px);
+  }
+
+  .my-nav--home .my-nav__item--center {
+    grid-area: identity;
+    justify-self: start;
+    min-width: 0;
+  }
+
+  .my-nav--home .my-nav__item--left { grid-area: left; }
+  .my-nav--home .my-nav__item--right { grid-area: right; }
+
+  .my-nav--home .nav-pill {
+    padding-inline: 0;
+  }
+
+  .nav-identity {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    min-width: 0;
+    text-align: left;
+    color: var(--brand-red);
+  }
+
+  .nav-identity__name {
+    margin: 0;
+    font-size: clamp(24px, 2.5vw, 36px);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+  }
+
+  .my-nav--home .nav-identity__statement {
+    justify-content: flex-start;
+    width: auto;
+    min-height: 1.4em;
+    padding: 0;
+    font-size: clamp(12px, 1.3vw, 17px);
+    line-height: 1.4;
+    letter-spacing: 0;
+    overflow: visible;
+  }
+
+  .nav-identity__clock {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 10px;
+    row-gap: 3px;
+    font-size: clamp(10px, 0.9vw, 12px);
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-identity__clock > span {
+    opacity: 0.65;
+  }
+
+  @media (max-width: 600px) {
+    .my-nav--home .my-nav__inner { padding: 22px 18px; }
+    .my-nav--home .my-nav__list { gap: 14px; }
+    .nav-identity { gap: 7px; }
+    .nav-identity__clock { flex-direction: column; gap: 2px; }
   }
 
   /* Überschriften global weiß setzen (trotz scoped) */

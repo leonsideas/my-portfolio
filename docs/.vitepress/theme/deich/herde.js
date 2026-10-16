@@ -1,7 +1,7 @@
 // Die Herde: Ein geriggtes Grundschaf aus Blender dient allen lebenden Schafen; jedes Projekt bekommt
 // darauf seinen eigenen Look (Material/Shader) und sein eigenes Verhalten. Ein Tier bzw. Objekt pro Projekt.
 // Koordinaten wie in szene.js: Blender (x, y, z) -> Three (x, z, -y).
-// Hang (Blender-y): Figuren bei 2,6 (oben), frei laufende Tiere zwischen 3,3 und 10 (bis über den Böschungsfuß bei 7,5 nach vorn).
+// Hang (Blender-y): Figuren bei 2,6 (oben), Lauftiere bis 13,3 im Vordergrund; die Kamera steht bei 16.
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
@@ -39,7 +39,7 @@ export const STATIONEN = [
 // Flache Figuren: Höhe in m am Tag und liegend (null = gleicher Maßstab wie das Tagesbild)
 const SPRITES = { portfolio: { tag: 1.15, nacht: 0.62 }, kilma: { tag: 1.0, nacht: null } }
 const GAIT = { schaf: { walk: 0.32, trot: 0.78 }, bison: { walk: 0.5, trot: 1.2 } } // m/s ohne Hufrutschen
-const HANG = [3.3, 10.0]
+const HANG = [3.3, 13.3]
 const OBEN_Y = 2.6 // oben am Hang stehen die Figuren; höher läuft kein Tier
 const UP = new THREE.Vector3(0, 1, 0), X = new THREE.Vector3(1, 0, 0)
 const shaderTime = { value: 0 }
@@ -372,13 +372,14 @@ class Tier {
   get walker () { return ['laeuft', 'stottert', 'sprite'].includes(this.cfg.verhalten) }
   get busy () { return ['fokus', 'platz', 'schlaf', 'aufstehen'].includes(this.mode) }
 
-  pickTarget (herd, radius = 3.8) {
+  pickTarget (herd, radius = 5.8) {
     for (let k = 0; k < 12; k++) {
       const a = Math.random() * Math.PI * 2, r = 0.3 + Math.random() * (radius - 0.3)
-      const x = this.home.x + Math.cos(a) * r
-      const y = THREE.MathUtils.clamp(this.home.y + Math.sin(a) * r, HANG[0], HANG[1])
-      // im Bild der festen Kamera bleiben (mit Rand für den Titel)
-      if (!this.world.imBild(x, y)) continue
+      const vorne = radius > 4 && k < 6 && Math.random() < 0.38
+      const x = vorne ? (Math.random() - 0.5) * 6.6 : this.home.x + Math.cos(a) * r
+      const y = vorne ? 11.2 + Math.random() * 2 : THREE.MathUtils.clamp(this.home.y + Math.sin(a) * r, HANG[0], HANG[1])
+      // Vorbeilaufende Tiere dürfen am unteren Bildrand angeschnitten werden.
+      if (!this.world.imBild(x, y, vorne)) continue
       if (herd.every(o => o === this || o.pos.distanceTo(new THREE.Vector2(x, y)) > this.radius + o.radius + 0.4)) { this.target.set(x, y); return }
     }
     this.target.copy(this.pos) // kein freier Platz im Bild: stehen bleiben
@@ -394,7 +395,7 @@ class Tier {
     }
     if (r < 0.45) { this.mode = 'graze'; this.until = t + 4 + Math.random() * 6; this.play('graze') }
     else if (r < 0.7) { this.mode = 'idle'; this.until = t + 2 + Math.random() * 3; this.play('idle') }
-    else { this.mode = 'walk'; this.pickTarget(herd); this.until = t + 14; this.play('walk') }
+    else { this.mode = 'walk'; this.pickTarget(herd); this.until = t + Math.max(14, this.pos.distanceTo(this.target) / this.gait.walk + 3); this.play('walk') }
   }
 
   // --- Nacht: hinlegen und schlafen; Tag: aufstehen ------------------------

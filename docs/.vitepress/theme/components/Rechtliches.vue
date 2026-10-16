@@ -138,7 +138,7 @@ onBeforeUnmount(() => {
   inset: 0;
   background: #000;
   color: var(--brand-red);
-  padding: clamp(96px, 14vh, 160px) clamp(20px, 6vw, 48px) clamp(40px, 8vh, 80px);
+  padding: clamp(96px, calc(14 * var(--site-vh)), 160px) clamp(20px, calc(6 * var(--site-vw)), 48px) clamp(40px, calc(8 * var(--site-vh)), 80px);
   font-family: var(--font-sans, system-ui, sans-serif);
   overflow-y: auto;
   overflow-x: hidden;
@@ -154,7 +154,7 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   right: 0;
-  height: clamp(72px, 11vh, 120px);
+  height: clamp(72px, calc(11 * var(--site-vh)), 120px);
   background: #000;
   z-index: 2;
   pointer-events: none;
@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
   font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
   font-style: italic;
   font-weight: 600;
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: clamp(2rem, calc(6 * var(--site-vw)), 3rem);
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--brand-red);

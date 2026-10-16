@@ -3,6 +3,7 @@ import { withBase, useRouter } from 'vitepress'
 import { ref, computed, markRaw, onMounted, watch, onBeforeUnmount } from 'vue'
 import { compareProjectsByYear } from '../data/projectOrder'
 import { fontClassBySlug } from '../data/projectTypography'
+import { sitePoint } from '../composables/siteViewport'
 
 type CardVideo = {
   url: string
@@ -299,10 +300,10 @@ function isNightTime(): boolean {
   return hour >= 20 || hour < 6
 }
 
-// Mobile erkennen, damit mobile Transition-Videos benutzt werden
+// Im gedrehten Desktop-Layout werden auch am Handy die Querformat-Videos benutzt.
 function isMobileViewport(): boolean {
   if (typeof window === 'undefined') return false
-  return window.matchMedia('(max-width: 767px)').matches
+  return !window.matchMedia('(pointer: coarse)').matches && window.matchMedia('(max-width: 767px)').matches
 }
 
 // Richtige Transition-Video-Quelle auswählen
@@ -690,14 +691,16 @@ const swipeStartY = ref<number | null>(null)
 
 function onImagesTouchStart(e: TouchEvent) {
   const t = e.touches[0]
-  swipeStartX.value = t.clientX
-  swipeStartY.value = t.clientY
+  const point = sitePoint(t.clientX, t.clientY)
+  swipeStartX.value = point.x
+  swipeStartY.value = point.y
 }
 function onImagesTouchEnd(e: TouchEvent) {
   if (swipeStartX.value == null || swipeStartY.value == null) return
   const t = e.changedTouches[0]
-  const dx = t.clientX - swipeStartX.value
-  const dy = t.clientY - swipeStartY.value
+  const point = sitePoint(t.clientX, t.clientY)
+  const dx = point.x - swipeStartX.value
+  const dy = point.y - swipeStartY.value
 
   swipeStartX.value = null
   swipeStartY.value = null
@@ -728,8 +731,9 @@ function onContentTouchStart(e: TouchEvent) {
   }
   const t = e.touches[0]
   if (!t) return
-  contentSwipeStartX.value = t.clientX
-  contentSwipeStartY.value = t.clientY
+  const point = sitePoint(t.clientX, t.clientY)
+  contentSwipeStartX.value = point.x
+  contentSwipeStartY.value = point.y
 }
 
 function onContentTouchEnd(e: TouchEvent) {
@@ -740,8 +744,9 @@ function onContentTouchEnd(e: TouchEvent) {
     contentSwipeStartY.value = null
     return
   }
-  const dx = t.clientX - contentSwipeStartX.value
-  const dy = t.clientY - contentSwipeStartY.value
+  const point = sitePoint(t.clientX, t.clientY)
+  const dx = point.x - contentSwipeStartX.value
+  const dy = point.y - contentSwipeStartY.value
 
   contentSwipeStartX.value = null
   contentSwipeStartY.value = null
@@ -822,12 +827,12 @@ onBeforeUnmount(() => {
     <div class="flex flex-col h-full min-h-0">
       <!-- Hauptinhalt -->
       <section v-if="contentVisible" class="flex-1 min-h-0 w-full workpage-content">
-        <div class="pt-28 lg:pt-32 px-6 sm:px-8 lg:px-12 pb-8 h-full flex flex-col lg:min-h-0">
+        <div class="workpage-layout pt-28 lg:pt-32 px-6 sm:px-8 lg:px-12 pb-8 h-full flex flex-col lg:min-h-0">
           <Transition name="content-fade" mode="out-in" appear>
             <div
               v-if="currentCard"
               :key="contentKey"
-              class="flex flex-col lg:flex-1 lg:min-h-0"
+              class="workpage-card flex flex-col lg:flex-1 lg:min-h-0"
               @touchstart.passive="onContentTouchStart"
               @touchend.passive="onContentTouchEnd"
             >
@@ -882,12 +887,12 @@ onBeforeUnmount(() => {
                   aria-hidden="true"
                 />
               </div>
-              <div class="lg:flex-1 lg:min-h-0">
+              <div class="workpage-body lg:flex-1 lg:min-h-0">
                 <div
-                  class="grid grid-cols-1 gap-10 items-start lg:h-full lg:min-h-0"
-                  :class="hasMedia ? 'lg:grid-cols-2' : 'lg:grid-cols-1 lg:max-w-3xl lg:mx-auto'"
+                  class="workpage-grid grid grid-cols-1 gap-10 items-start lg:h-full lg:min-h-0"
+                  :class="hasMedia ? 'lg:grid-cols-2' : 'workpage-grid--text lg:grid-cols-1 lg:max-w-3xl lg:mx-auto'"
                 >
-                  <article class="text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-6">
+                  <article class="workpage-article text-left lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pr-6">
                     <div class="max-w-[65ch] mx-auto lg:mx-0">
                       <div v-if="currentCard.year" class="workpage-year">
                         {{ currentCard.year }}
@@ -984,7 +989,7 @@ onBeforeUnmount(() => {
 
                   <div
                     v-if="hasMedia"
-                    class="hidden lg:block lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pl-6 relative"
+                    class="workpage-media-column hidden lg:block lg:min-h-0 lg:h-full lg:overflow-y-auto lg:pl-6 relative"
                   >
                     <div class="space-y-6">
                       <figure
@@ -1029,7 +1034,7 @@ onBeforeUnmount(() => {
             </div>
           </Transition>
 
-          <footer class="mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-[#ff2d16] shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <footer class="workpage-footer mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-[#ff2d16] shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <span>© {{ new Date().getFullYear() }} Leon Albers</span>
             <a :href="withBase('/rechtliches')" class="workpage-footer-link">Impressum &amp; Datenschutz</a>
           </footer>
@@ -1178,7 +1183,7 @@ onBeforeUnmount(() => {
 .workpage-title {
   margin: 0;
   color: var(--brand-red);
-  font-size: clamp(2.35rem, 5vw, 4.5rem);
+  font-size: clamp(2.35rem, calc(5 * var(--site-vw)), 4.5rem);
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: normal;
@@ -1193,7 +1198,7 @@ onBeforeUnmount(() => {
 .workpage-summary {
   margin: 1.2rem 0 0;
   color: var(--brand-red);
-  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  font-size: clamp(1.05rem, calc(1.8 * var(--site-vw)), 1.3rem);
   font-weight: 500;
   line-height: 1.5;
 }
@@ -1218,7 +1223,7 @@ onBeforeUnmount(() => {
   width: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  padding: clamp(5px, 0.55vw, 8px);
+  padding: clamp(5px, calc(0.55 * var(--site-vw)), 8px);
   border: 0;
   border-radius: 0;
   background: #000;

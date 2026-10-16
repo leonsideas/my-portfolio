@@ -6,7 +6,12 @@ import DeichHerde from './components/DeichHerde.vue'
 import AboutPage from './components/AboutPage.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ProjectOpeningTransition from './components/ProjectOpeningTransition.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { setupSiteViewport } from './composables/siteViewport'
+
+let cleanupViewport: (() => void) | undefined
+onMounted(() => { cleanupViewport = setupSiteViewport() })
+onBeforeUnmount(() => cleanupViewport?.())
 
 const { frontmatter, site } = useData()
 const route = useRoute()
@@ -48,14 +53,14 @@ const currentPageComponent = computed(() => {
 <template>
   <!-- Spezialfall: Seiten mit layout: empty (z.B. contact) -->
   <template v-if="isEmptyLayout">
-    <div class="min-h-screen font-plexsans text-black">
+    <div class="site-shell min-h-screen font-plexsans text-black">
       <NavBar :class="{ 'is-workpage': isWorkPage }" />
       <Content class="empty-layout-content" />
       <SiteFooter />
     </div>
   </template>
 
-  <!-- Standard-Layout (site-shell: auf der Startseite am Handy hochkant um 90° gedreht, siehe DeichHerde.vue) -->
+  <!-- Einheitlicher Seitenraum: am Handy hochkant auf allen Seiten gedreht. -->
   <template v-else>
     <div class="site-shell min-h-screen font-plexsans text-black">
       <NavBar :class="{ 'is-workpage': isWorkPage }" />

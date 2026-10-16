@@ -20,6 +20,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
 import { beginSceneProjectOpening } from '../composables/useProjectOpening'
 import { vorladen } from '../deich/dateien.js'
+import { isSiteRotated, sitePoint, screenPoint } from '../composables/siteViewport'
 
 type Deich = {
   bereit: Promise<void>
@@ -32,19 +33,11 @@ const panel = ref<HTMLElement | null>(null)
 const bereit = ref(false)
 const fortschritt = ref(0)
 
-// Handy hochkant: die ganze Startseite um 90° gedreht zeigen, wie ein Video im Vollbild (CSS unten).
-// Die Drehung geht im Uhrzeigersinn um die linke obere Ecke; die Szene rechnet in Seitenkoordinaten.
-const GEDREHT = '(orientation: portrait) and (max-width: 900px) and (pointer: coarse)'
-let gedrehtMq: MediaQueryList | null = null
-const gedreht = () => !!gedrehtMq?.matches
-const zuLokal = (x: number, y: number) => gedreht() ? { x: y, y: innerWidth - x } : { x, y }
-const zuBildschirm = (x: number, y: number) => gedreht() ? { x: innerWidth - y, y: x } : { x, y }
 let deich: Deich | null = null
 let verlassen = false
 
 onMounted(async () => {
   document.documentElement.classList.add('deich-aktiv')
-  gedrehtMq = matchMedia(GEDREHT)
   // Modelle und Texturen sofort anfordern, parallel zu Three.js (spart die Wartezeit auf das Skript)
   vorladen(withBase('/deich/'))
   // Three.js erst im Browser laden (nicht beim Vorrendern der Seite)
@@ -55,9 +48,9 @@ onMounted(async () => {
     assets: withBase('/deich/'),
     logos: withBase('/images/project-logos/'),
     basis: withBase('/'),
-    gedreht,
-    zuLokal,
-    zuBildschirm,
+    gedreht: isSiteRotated,
+    zuLokal: sitePoint,
+    zuBildschirm: screenPoint,
     fortschritt: (anteil: number) => { fortschritt.value = Math.max(fortschritt.value, anteil) },
   }) as Deich
   await deich.bereit
@@ -160,9 +153,9 @@ html.deich-aktiv .my-nav {
 .deich-panel {
   position: absolute;
   top: 50%;
-  right: 7vw;
+  right: calc(7 * var(--site-vw));
   z-index: 3;
-  width: min(36vw, 460px);
+  width: min(calc(36 * var(--site-vw)), 460px);
   transform: translate(24px, -50%);
   opacity: 0;
   pointer-events: none;
@@ -178,7 +171,7 @@ html.deich-aktiv .my-nav {
 
 .deich-panel .panel-titel {
   color: var(--brand-red);
-  font-size: clamp(34px, 4.4vw, 64px);
+  font-size: clamp(34px, calc(4.4 * var(--site-vw)), 64px);
   line-height: 1.02;
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.25));
 }
@@ -257,53 +250,4 @@ html.deich-aktiv .my-nav {
   }
 }
 
-/* Handy hochkant: Navigation, Herde und Fußzeile um 90° drehen – wie ein Video im Vollbild.
-   Wer das Handy quer hält (ohne Drehsperre), bekommt das Querformat direkt und nichts wird gedreht.
-   Innerhalb der gedrehten Fläche gilt: Breite = Bildschirmhöhe (vh), Höhe = Bildschirmbreite (vw). */
-@media (orientation: portrait) and (max-width: 900px) and (pointer: coarse) {
-  html.deich-aktiv,
-  html.deich-aktiv body {
-    height: 100%;
-    overflow: hidden;
-  }
-
-  html.deich-aktiv .site-shell {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vh;
-    width: 100dvh;
-    height: 100vw;
-    min-height: 0;
-    overflow: hidden;
-    transform-origin: top left;
-    transform: rotate(90deg) translateY(-100%);
-  }
-
-  html.deich-aktiv .deich-panel {
-    top: 50%;
-    right: 5vh;
-    bottom: auto;
-    left: auto;
-    width: 42vh;
-    transform: translate(16px, -50%);
-  }
-
-  html.deich-aktiv .deich-panel.offen {
-    transform: translate(0, -50%);
-  }
-
-  html.deich-aktiv .deich-panel .panel-titel {
-    font-size: 30px;
-  }
-
-  html.deich-aktiv .deich-panel .panel-titel img {
-    max-height: 80px;
-  }
-
-  html.deich-aktiv .deich-panel .panel-text {
-    margin: 6px 0 14px;
-    font-size: 13px;
-  }
-}
 </style>

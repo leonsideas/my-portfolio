@@ -86,12 +86,12 @@ export default {
   justify-content: center;
   width: 100%;
   height: 100%;
-  padding: clamp(76px, 10vh, 100px) clamp(20px, 6vw, 48px) clamp(48px, 7vh, 72px);
+  padding: clamp(76px, calc(10 * var(--site-vh)), 100px) clamp(20px, calc(6 * var(--site-vw)), 48px) clamp(48px, calc(7 * var(--site-vh)), 72px);
   overflow-y: auto;
 }
 
 .about-card {
-  width: min(760px, 82vw);
+  width: min(760px, calc(82 * var(--site-vw)));
   text-align: left;
 }
 
@@ -104,7 +104,7 @@ export default {
 .about-copy p,
 .about-entry h3,
 .about-entry p {
-  font-size: clamp(0.8rem, 1.15vw, 0.95rem);
+  font-size: clamp(0.8rem, calc(1.15 * var(--site-vw)), 0.95rem);
   line-height: 1.35;
 }
 
@@ -156,12 +156,12 @@ export default {
 
 @media (max-width: 767px) {
   .about-content {
-    padding-top: clamp(72px, 9vh, 88px);
-    padding-bottom: clamp(40px, 6vh, 56px);
+    padding-top: clamp(72px, calc(9 * var(--site-vh)), 88px);
+    padding-bottom: clamp(40px, calc(6 * var(--site-vh)), 56px);
   }
 
   .about-card {
-    width: 90vw;
+    width: calc(90 * var(--site-vw));
   }
 
   .about-copy {
@@ -172,7 +172,7 @@ export default {
   .about-copy p,
   .about-entry h3,
   .about-entry p {
-    font-size: clamp(0.66rem, 2.8vw, 0.82rem);
+    font-size: clamp(0.66rem, calc(2.8 * var(--site-vw)), 0.82rem);
     line-height: 1.25;
   }
 

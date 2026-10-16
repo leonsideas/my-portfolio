@@ -57,7 +57,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: clamp(178px, 28vh, 250px) clamp(20px, 6vw, 48px) 32vh;
+  padding: clamp(178px, calc(28 * var(--site-vh)), 250px) clamp(20px, calc(6 * var(--site-vw)), 48px) calc(32 * var(--site-vh));
   text-align: center;
 }
 
@@ -65,7 +65,7 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: min(72vw, 960px);
+  width: min(calc(72 * var(--site-vw)), 960px);
   z-index: 1;
   pointer-events: none;
   transform: translateX(-50%);
@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
   font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
   font-weight: 600;
   font-style: italic;
-  font-size: clamp(3.25rem, 13vw, 6.25rem);
+  font-size: clamp(3.25rem, calc(13 * var(--site-vw)), 6.25rem);
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--brand-red);
@@ -104,11 +104,11 @@ onBeforeUnmount(() => {
 
 @media (max-width: 767px) {
   .contact-content {
-    padding-top: clamp(158px, 24vh, 210px);
+    padding-top: clamp(158px, calc(24 * var(--site-vh)), 210px);
   }
 
   .contact-cutout {
-    width: 92vw;
+    width: calc(92 * var(--site-vw));
   }
 }
 </style>

@@ -6,7 +6,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { createHerd } from './herde.js'
 import { dateien, qualitaet } from './dateien.js'
 import { erzeugeHimmel } from './himmel.js'
-import { erzeugeTiefenschaerfe } from './tiefenschaerfe.js'
 
 const QUALITAET = qualitaet() // Leistungsstufe (dateien.js)
 const D = dateien(QUALITAET)
@@ -88,10 +87,6 @@ export function starteDeich (root, ui) {
     update () { camera.lookAt(this.target) }
   }
   controls.update()
-
-  const tiefenschaerfe = erzeugeTiefenschaerfe(renderer, scene, camera, QUALITAET)
-  tiefenschaerfe.setSize(breite(), hoehe())
-  const render = () => tiefenschaerfe.render(camera.position.distanceTo(controls.target))
 
   // ---------------------------------------------------------------------------
   // Himmel und Licht nach echtem Sonnenstand (himmel.js). Nachts (Sonne tiefer als 6° unter dem Horizont)
@@ -194,16 +189,17 @@ export function starteDeich (root, ui) {
     if (herd && istNacht(zustand) !== world.nacht) { world.nacht = istNacht(zustand); herd.setNacht(world.nacht) }
     herd?.update(t, dt)
     controls.update()
-    render()
+    renderer.render(scene, camera)
     rafId = requestAnimationFrame(animate)
   }
 
-  addEventListener('resize', () => {
+  // Auch die zentral gedrehte Seitenfläche kann ihre Maße nach dem Resize ändern.
+  const groessenBeobachter = new ResizeObserver(() => {
     camera.aspect = breite() / hoehe()
     setFov()
     renderer.setSize(breite(), hoehe())
-    tiefenschaerfe.setSize(breite(), hoehe())
-  }, { signal })
+  })
+  groessenBeobachter.observe(root)
 
   // Gemeinsame Welt für die Herde
   const world = {
@@ -241,7 +237,7 @@ export function starteDeich (root, ui) {
     if (new URLSearchParams(location.search).has('debug')) {
       window.__debug = {
         herd, renderer, scene, camera,
-        render () { controls.update(); render() },
+        render () { controls.update(); renderer.render(scene, camera) },
         simulate (seconds, step = 1 / 60) {
           let t = clock.elapsedTime
           for (let i = 0; i < seconds / step; i++) { t += step; herd.update(t, step) }
@@ -260,8 +256,8 @@ export function starteDeich (root, ui) {
       aus = true
       ab.abort()
       cancelAnimationFrame(rafId)
+      groessenBeobachter.disconnect()
       himmel.dispose()
-      tiefenschaerfe.dispose()
       renderer.dispose()
       renderer.forceContextLoss() // GPU-Speicher sofort freigeben, nicht erst bei der Garbage Collection
       renderer.domElement.remove()

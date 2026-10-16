@@ -6,6 +6,7 @@ import './styles/vars.css'
 import './styles/landing.css'
 import './styles/layout.css'
 import "./tailwind.css";
+import './styles/mobile-desktop.css'
 import './styles/fonts.css'
 import type { Theme } from "vitepress";
 import Layout from './Layout.vue'

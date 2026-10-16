@@ -6,9 +6,12 @@
   const { site } = useData()
   const phrases = [
     'Creative Designer',
-    'Ich erzähle Geschichten',
-    'Mit Film, Code und KI',
+    'Ich mache aus Ideen Geschichten',
+    'Motion Designer',
+    'Creative Coder',
+    'Interaction Designer',
   ]
+  const identityDescription = `${phrases.join('. ')}.`
   const typedText = ref('')
   const localTime = ref('')
   const clockDateTime = ref('')
@@ -134,14 +137,13 @@
 
           <li class="my-nav__item my-nav__item--center">
             <div v-if="isHomePage" class="nav-identity">
-              <h1 class="nav-identity__name">Leon Albers</h1>
-              <span class="nav-pill nav-typewriter nav-identity__statement">
-                <span class="visually-hidden">Creative Designer. Ich erzähle Geschichten mit Film, Code und KI.</span>
+              <h1 class="nav-pill nav-link-font nav-identity__name">Leon Albers</h1>
+              <span class="nav-pill nav-link-font nav-identity__statement">
+                <span class="visually-hidden">{{ identityDescription }}</span>
                 <span aria-hidden="true">{{ typedText }}</span>
                 <span class="nav-typewriter__caret" aria-hidden="true" />
               </span>
-              <div class="nav-identity__clock" title="Meine Ortszeit · Europe/Berlin">
-                <span>Ortszeit</span>
+              <div class="nav-pill nav-link-font nav-identity__clock" title="Europe/Berlin">
                 <time :datetime="clockDateTime">{{ localTime || '–' }}</time>
               </div>
             </div>
@@ -150,7 +152,7 @@
               class="nav-pill nav-link-font nav-typewriter"
             >
               <span class="visually-hidden">
-                Creative Designer. Ich erzähle Geschichten mit Film, Code und KI.
+                {{ identityDescription }}
               </span>
               <span aria-hidden="true">{{ typedText }}</span>
               <span class="nav-typewriter__caret" aria-hidden="true" />
@@ -274,7 +276,7 @@
   }
 
   .nav-typewriter {
-    width: clamp(17rem, 48vw, 30rem);
+    width: clamp(17rem, calc(48 * var(--site-vw)), 30rem);
     padding-inline: 0;
     overflow: hidden;
     font-size: 0.6rem;
@@ -380,7 +382,7 @@
     .nav-typewriter {
       width: 100%;
       min-height: 1.2rem;
-      font-size: clamp(0.42rem, 1.8vw, 0.56rem);
+      font-size: clamp(0.42rem, calc(1.8 * var(--site-vw)), 0.56rem);
       letter-spacing: 0.015em;
     }
   }
@@ -392,14 +394,14 @@
   }
 
   .my-nav--home .my-nav__inner {
-    padding: clamp(22px, 3.3vw, 44px);
+    padding: clamp(22px, calc(3.3 * var(--site-vw)), 44px);
   }
 
   .my-nav--home .my-nav__list {
     grid-template-columns: minmax(0, 1fr) auto auto;
     grid-template-areas: 'identity left right';
     align-items: start;
-    gap: clamp(12px, 2.5vw, 34px);
+    gap: clamp(12px, calc(2.5 * var(--site-vw)), 34px);
   }
 
   .my-nav--home .my-nav__item--center {
@@ -418,52 +420,44 @@
   .nav-identity {
     display: grid;
     justify-items: start;
-    gap: 8px;
+    gap: 2px;
     min-width: 0;
     text-align: left;
     color: var(--brand-red);
   }
 
-  .nav-identity__name {
+  .my-nav--home .nav-identity .nav-identity__name {
     margin: 0;
-    font-size: clamp(24px, 2.5vw, 36px);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.035em;
+    font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
+    font-size: clamp(16px, calc(1.5 * var(--site-vw)), 22px);
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-transform: none;
     white-space: nowrap;
+  }
+
+  .my-nav--home .nav-identity > .nav-pill {
+    padding-block: 0.2rem;
+    block-size: calc(1.5em + 0.4rem);
+    line-height: 1.5;
   }
 
   .my-nav--home .nav-identity__statement {
     justify-content: flex-start;
+    text-transform: none;
     width: auto;
-    min-height: 1.4em;
-    padding: 0;
-    font-size: clamp(12px, 1.3vw, 17px);
-    line-height: 1.4;
-    letter-spacing: 0;
+    min-height: 1.5em;
     overflow: visible;
   }
 
   .nav-identity__clock {
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: 10px;
-    row-gap: 3px;
-    font-size: clamp(10px, 0.9vw, 12px);
-    line-height: 1.4;
-    letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
-  }
-
-  .nav-identity__clock > span {
-    opacity: 0.65;
   }
 
   @media (max-width: 600px) {
     .my-nav--home .my-nav__inner { padding: 22px 18px; }
     .my-nav--home .my-nav__list { gap: 14px; }
-    .nav-identity { gap: 7px; }
-    .nav-identity__clock { flex-direction: column; gap: 2px; }
   }
 
   /* Überschriften global weiß setzen (trotz scoped) */

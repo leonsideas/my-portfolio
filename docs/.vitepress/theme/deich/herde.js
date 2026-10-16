@@ -1,7 +1,7 @@
 // Die Herde: Ein geriggtes Grundschaf aus Blender dient allen lebenden Schafen; jedes Projekt bekommt
 // darauf seinen eigenen Look (Material/Shader) und sein eigenes Verhalten. Ein Tier bzw. Objekt pro Projekt.
 // Koordinaten wie in szene.js: Blender (x, y, z) -> Three (x, z, -y).
-// Hang (Blender-y): Figuren bei 2,6 (oben), Lauftiere bis 13,3 im Vordergrund; die Kamera steht bei 16.
+// Hang (Blender-y): Figuren über die Fläche verteilt, Lauftiere bis 13,3 im Vordergrund; Kamera bei 16.
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
@@ -11,24 +11,24 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js'
 export const ROT = '#ff2d16' // Akzentrot der Seite (Projektlogos)
 
 // x/y: Startplatz (Blender), rot: Grad (0 = Blick nach Blender +X, null = zur Kamera). label: Titel im Projekt-Panel (Logo oder Schrift).
-// Feste Figuren stehen oben am Hang (y = 2,6) und wechseln sich mit den Lauftieren ab.
+// Feste Figuren stehen in unterschiedlichen Tiefen zwischen den Lauftieren.
 // schlaf: Schlafpose (Standard 'sleep' = Kopf an der Flanke, 'sleep_b' = Kinn im Gras), damit nicht alle gleich schlafen.
 export const STATIONEN = [
-  { slug: 'LightbyNight', titel: 'Light At Night', jahr: 2023, x: 7.2, y: 2.6, rot: 70, look: 'foto', verhalten: 'liegt', feuer: true, schlaf: 'sleep_b',
+  { slug: 'LightbyNight', titel: 'Light At Night', jahr: 2023, x: 6.7, y: 3.6, rot: 70, look: 'foto', verhalten: 'liegt', feuer: true, schlaf: 'sleep_b',
     label: { text: 'Light At Night', font: 'Light' }, text: 'Ein gemeinsames Tileset-Game, in dem Licht nicht nur Stimmung, sondern ein Teil der Spielmechanik ist.' },
   { slug: 'Reefresh', titel: 'REEFRESH – Maybe Next Time', jahr: 2026, x: 4.9, y: 3.9, rot: 20, look: 'foto', modell: 'taucher', verhalten: 'laeuft', schlaf: 'sleep_b',
     label: { logo: 'corals-logo.svg', h: 38 }, text: 'Aus vielen Zeichnungen entstehen spekulative Zukunftskorallen und ein interaktives Archiv ihrer möglichen Anpassungen.' },
-  { slug: 'Moi', titel: 'MOI', jahr: 2025, x: 4.1, y: 2.6, rot: 200, look: 'modell', modell: 'steinschaf', verhalten: 'statisch',
+  { slug: 'Moi', titel: 'MOI', jahr: 2025, x: 3.8, y: 6.3, rot: 200, look: 'modell', modell: 'steinschaf', verhalten: 'statisch',
     label: { text: 'MOI', font: 'MOI' }, text: 'Eine Videoperformance, in der Tanz, bewegte Steine, KI-generierte Bilder und Klang aufeinandertreffen.' },
   { slug: 'Klanggestalten', titel: 'Klanggestalten', jahr: 2025, x: 2.0, y: 5.6, rot: 165, look: 'foto', verhalten: 'laeuft', voegel: true,
     label: { logo: 'klanggestalten-logo.svg', h: 52 }, text: 'Aus dem Gesang von Vögeln wird ein persönlicher Naturmoment für zu Hause – als Klang, Licht und Vibration.' },
-  { slug: 'Uebergangsobjekte', titel: 'Übergangsobjekte', jahr: 2026, x: 1.2, y: 2.6, rot: null, look: 'plastik', verhalten: 'statisch', pose: ['idle', 0], blister: true,
+  { slug: 'Uebergangsobjekte', titel: 'Übergangsobjekte', jahr: 2026, x: -0.4, y: 8.7, rot: null, look: 'plastik', verhalten: 'statisch', pose: ['idle', 0], blister: true,
     label: { text: 'Übergangsobjekte', font: 'Uebergangsobjekte' }, text: 'Vier Spielzeuge mit eigenen Geschichten über den Konflikt zwischen Smartphone und klassischem Übergangsobjekt.' },
   { slug: 'Uebersee', titel: 'Mit KI läufts bei uns!', jahr: 2024, x: -0.2, y: 4.7, rot: 10, look: 'bison', verhalten: 'laeuft',
     label: { text: 'Mit KI läufts bei uns!', font: 'Montserrat' }, text: 'Mein erster intensiver Kontakt mit KI: eine Kampagnenidee für neue Formen der Wissensvermittlung im Museum.' },
   { slug: 'Kilma', titel: 'Kilma', jahr: 2024, x: -2.0, y: 5.9, rot: null, look: 'sprite', verhalten: 'sprite', sprite: 'kilma',
     label: { text: 'KILMA', font: 'Kilma' }, text: 'Vier Minispiele über eine Welt in der Klimakrise und unseren oft absurden Umgang damit.' },
-  { slug: 'Migration', titel: 'Migration', jahr: 2025, x: -3.3, y: 2.6, rot: null, look: 'gips', verhalten: 'statisch', pose: ['idle', 1.0], motorik: true,
+  { slug: 'Migration', titel: 'Migration', jahr: 2025, x: -4.3, y: 7.1, rot: null, look: 'gips', verhalten: 'statisch', pose: ['idle', 1.0], motorik: true,
     label: { text: 'Migration', font: 'Migration' }, text: 'Ein bewusst kindlich gebauter Tisch, der Erwachsene mit Fluchtrouten und der Verantwortung hinter politischen Entscheidungen konfrontiert.' },
   { slug: 'Stottern', titel: 'Stottern', jahr: 2024, x: -4.0, y: 4.1, rot: 25, look: 'hologramm', verhalten: 'stottert',
     label: { text: 'Stottern', font: 'Futurist', spacing: '0.18em' }, text: 'Aus meiner eigenen Erfahrung mit dem Stottern entstand ein Film über Perfektionsdruck und das Nicht-perfekt-Sein.' },
@@ -40,7 +40,7 @@ export const STATIONEN = [
 const SPRITES = { portfolio: { tag: 1.15, nacht: 0.62 }, kilma: { tag: 1.0, nacht: null } }
 const GAIT = { schaf: { walk: 0.32, trot: 0.78 }, bison: { walk: 0.5, trot: 1.2 } } // m/s ohne Hufrutschen
 const HANG = [3.3, 13.3]
-const OBEN_Y = 2.6 // oben am Hang stehen die Figuren; höher läuft kein Tier
+const OBEN_Y = 2.6 // hintere Grenze für Lauftiere am Deichkamm
 const UP = new THREE.Vector3(0, 1, 0), X = new THREE.Vector3(1, 0, 0)
 const shaderTime = { value: 0 }
 

@@ -6,7 +6,7 @@
   const { site } = useData()
   const phrases = [
     'Creative Designer',
-    'Ich mache aus Ideen Geschichten',
+    'Storyteller',
     'Motion Designer',
     'Creative Coder',
     'Interaction Designer',

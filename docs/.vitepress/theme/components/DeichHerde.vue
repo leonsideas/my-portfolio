@@ -20,7 +20,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
 import { beginSceneProjectOpening } from '../composables/useProjectOpening'
 import { vorladen } from '../deich/dateien.js'
-import { isSiteRotated, sitePoint, screenPoint } from '../composables/siteViewport'
+import { isSiteRotated, sitePoint, screenPoint, setupSiteViewport } from '../composables/siteViewport'
 
 type Deich = {
   bereit: Promise<void>
@@ -35,9 +35,11 @@ const fortschritt = ref(0)
 
 let deich: Deich | null = null
 let verlassen = false
+let cleanupViewport: (() => void) | undefined
 
 onMounted(async () => {
   document.documentElement.classList.add('deich-aktiv')
+  cleanupViewport = setupSiteViewport()
   // Modelle und Texturen sofort anfordern, parallel zu Three.js (spart die Wartezeit auf das Skript)
   vorladen(withBase('/deich/'))
   // Three.js erst im Browser laden (nicht beim Vorrendern der Seite)
@@ -62,6 +64,7 @@ onBeforeUnmount(() => {
   deich?.stop()
   deich = null
   document.documentElement.classList.remove('deich-aktiv')
+  cleanupViewport?.()
 })
 
 // Die Deich-Szene geht direkt in die Projektseite über.
@@ -138,7 +141,7 @@ html.deich-aktiv .my-nav {
   width: 160px;
   height: 2px;
   overflow: hidden;
-  background: rgba(255, 45, 22, 0.25);
+  background: color-mix(in srgb, var(--brand-red) 25%, transparent);
 }
 
 .deich-laden__balken span {
@@ -183,6 +186,29 @@ html.deich-aktiv .my-nav {
   width: auto;
 }
 
+/* Projektlogos in der Schriftfarbe der Seite: das Bild gibt nur die Größe vor, die Farbe kommt über eine Maske */
+.deich-panel .panel-logo {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.deich-panel .panel-logo img {
+  width: 100%;
+  height: auto;
+  visibility: hidden;
+}
+
+.deich-panel .panel-logo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: var(--logo) left center / contain no-repeat;
+  mask: var(--logo) left center / contain no-repeat;
+}
+
 .deich-panel .panel-jahr {
   margin-top: 14px;
   font-size: 13px;
@@ -201,8 +227,8 @@ html.deich-aktiv .my-nav {
   display: inline-block;
   padding: 10px 18px;
   border-radius: 999px;
-  background: #fff;
-  color: var(--brand-red);
+  background: var(--brand-red);
+  color: var(--farbe-violett);
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
@@ -212,8 +238,8 @@ html.deich-aktiv .my-nav {
 
 .deich-panel .panel-link:hover,
 .deich-panel .panel-link:focus-visible {
-  background: var(--brand-red);
-  color: #fff;
+  background: #fff;
+  color: var(--farbe-violett);
 }
 
 .deich-panel .panel-zurueck {

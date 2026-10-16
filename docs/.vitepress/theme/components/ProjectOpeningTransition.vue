@@ -152,8 +152,8 @@ onBeforeUnmount(clearOpening)
 
 <style scoped>
 .project-opening { position: fixed; inset: 0; z-index: 200; cursor: progress; touch-action: none; }
-.project-opening__backdrop { position: absolute; inset: 0; background: #000; opacity: 0; }
-.project-opening__window { position: absolute; overflow: hidden; background: #000; }
+.project-opening__backdrop { position: absolute; inset: 0; background: var(--page-bg); opacity: 0; }
+.project-opening__window { position: absolute; overflow: hidden; background: var(--page-bg); }
 .project-opening__picture { position: absolute; filter: var(--opening-filter, grayscale(1)); }
 .project-opening__media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .project-opening__poster { opacity: 1; transition: opacity 240ms ease; }

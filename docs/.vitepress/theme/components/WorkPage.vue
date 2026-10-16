@@ -300,10 +300,10 @@ function isNightTime(): boolean {
   return hour >= 20 || hour < 6
 }
 
-// Im gedrehten Desktop-Layout werden auch am Handy die Querformat-Videos benutzt.
+// Auf Projektseiten richtet sich die Videoquelle wieder nach der normalen Bildschirmbreite.
 function isMobileViewport(): boolean {
   if (typeof window === 'undefined') return false
-  return !window.matchMedia('(pointer: coarse)').matches && window.matchMedia('(max-width: 767px)').matches
+  return window.matchMedia('(max-width: 767px)').matches
 }
 
 // Richtige Transition-Video-Quelle auswählen
@@ -758,7 +758,7 @@ function onContentTouchEnd(e: TouchEvent) {
   else if (dx > 0 && hasPrev.value) goToPrev()
 }
 
-/* Projektseiten liegen auf demselben schwarzen Grund wie die Startseite.
+/* Projektseiten übernehmen die aktuelle Seitenfarbe.
    Die Navigation blendet sich ueber --workpage-bg-image ein und braucht dort
    einen background-image-Wert, daher der Verlauf aus einer einzigen Farbe. */
 const WORKPAGE_BG = 'linear-gradient(var(--page-bg), var(--page-bg))'
@@ -1034,7 +1034,7 @@ onBeforeUnmount(() => {
             </div>
           </Transition>
 
-          <footer class="workpage-footer mt-8 pt-6 text-center text-[11px] tracking-widest uppercase text-[#ff2d16] shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <footer class="workpage-footer mt-8 pt-6 text-center text-[11px] tracking-widest uppercase shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <span>© {{ new Date().getFullYear() }} Leon Albers</span>
             <a :href="withBase('/rechtliches')" class="workpage-footer-link">Impressum &amp; Datenschutz</a>
           </footer>
@@ -1048,6 +1048,10 @@ onBeforeUnmount(() => {
 .workpage-root {
   -webkit-overflow-scrolling: touch;
   background: var(--page-bg);
+}
+
+.workpage-footer {
+  color: var(--brand-red);
 }
 
 .workpage-footer-link {
@@ -1084,7 +1088,7 @@ onBeforeUnmount(() => {
 }
 
 .workpage-nav-pill:hover {
-  color: rgba(255, 45, 22, 1);
+  color: var(--brand-red);
 }
 
 /* Platzhalter, damit die Dots beim ersten/letzten Projekt zentriert bleiben */
@@ -1134,14 +1138,14 @@ onBeforeUnmount(() => {
   height: 24px;
   padding: 0;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(255, 45, 22, 0.38) 0 3px, transparent 3.5px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--brand-red) 38%, transparent) 0 3px, transparent 3.5px);
   border: 0;
   cursor: pointer;
   transition: background 200ms ease, transform 200ms ease, border-color 200ms ease;
 }
 
 .workpage-dot:hover {
-  background: radial-gradient(circle, rgba(255, 45, 22, 0.72) 0 3.5px, transparent 4px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--brand-red) 72%, transparent) 0 3.5px, transparent 4px);
 }
 
 .workpage-dot.is-active {
@@ -1226,7 +1230,7 @@ onBeforeUnmount(() => {
   padding: clamp(5px, calc(0.55 * var(--site-vw)), 8px);
   border: 0;
   border-radius: 0;
-  background: #000;
+  background: var(--page-bg);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
 }
 
@@ -1253,7 +1257,7 @@ onBeforeUnmount(() => {
 .workpage-keywords {
   margin-top: 2rem;
   padding-top: 1.25rem;
-  border-top: 1px solid rgba(255, 45, 22, 0.1);
+  border-top: 1px solid color-mix(in srgb, var(--brand-red) 10%, transparent);
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;

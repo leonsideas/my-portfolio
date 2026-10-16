@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
 .rechtliches-page {
   position: fixed;
   inset: 0;
-  background: #000;
+  background: var(--page-bg);
   color: var(--brand-red);
   padding: clamp(96px, calc(14 * var(--site-vh)), 160px) clamp(20px, calc(6 * var(--site-vw)), 48px) clamp(40px, calc(8 * var(--site-vh)), 80px);
   font-family: var(--font-sans, system-ui, sans-serif);
@@ -146,7 +146,7 @@ onBeforeUnmount(() => {
   z-index: 0;
 }
 
-/* Solider schwarzer Streifen hinter der NavBar, damit Scroll-Text dahinter
+/* Solider Streifen in der Seitenfarbe hinter der NavBar, damit Scroll-Text dahinter
    verschwindet (NavBar selbst ist transparent). z-index < NavBar (30), > Text. */
 .rechtliches-page::before {
   content: '';
@@ -155,7 +155,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   height: clamp(72px, calc(11 * var(--site-vh)), 120px);
-  background: #000;
+  background: var(--page-bg);
   z-index: 2;
   pointer-events: none;
 }
@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
 .rechtliches-inner a {
   color: var(--brand-red);
   text-decoration: underline;
-  text-decoration-color: rgba(255, 45, 22, 0.5);
+  text-decoration-color: color-mix(in srgb, var(--brand-red) 50%, transparent);
   text-underline-offset: 3px;
   transition: text-decoration-color 200ms ease;
 }
@@ -220,7 +220,7 @@ onBeforeUnmount(() => {
 
 .rechtliches-inner hr {
   border: 0;
-  border-top: 1px solid rgba(255, 45, 22, 0.25);
+  border-top: 1px solid color-mix(in srgb, var(--brand-red) 25%, transparent);
   margin: 2.5rem 0;
 }
 

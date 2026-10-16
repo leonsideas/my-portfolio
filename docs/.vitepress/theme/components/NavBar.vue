@@ -265,7 +265,7 @@
   }
 
   .my-nav.my-nav--black {
-    background: #000;
+    background: var(--page-bg);
   }
 
   .my-nav--black .nav-pill,

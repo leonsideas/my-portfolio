@@ -8,7 +8,6 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js'
 
-export const ROT = '#ff2d16' // Akzentrot der Seite (Projektlogos)
 
 // x/y: Startplatz (Blender), rot: Grad (0 = Blick nach Blender +X, null = zur Kamera). label: Titel im Projekt-Panel (Logo oder Schrift).
 // Feste Figuren stehen in unterschiedlichen Tiefen zwischen den Lauftieren.
@@ -792,7 +791,7 @@ export async function createHerd (world) {
     flyTo(new THREE.Vector3(p.x - shift, p.y + h + 0.5, p.z - dist), new THREE.Vector3(p.x - shift, p.y + h, p.z))
     const c = tier.cfg
     panel.querySelector('.panel-titel').innerHTML = c.label.logo
-      ? `<img src="${world.ui.logos}${c.label.logo}" alt="${c.titel}">`
+      ? `<span class="panel-logo" role="img" aria-label="${c.titel}" style="--logo:url('${world.ui.logos}${c.label.logo}')"><img src="${world.ui.logos}${c.label.logo}" alt=""></span>`
       : `<span style="font-family:${c.label.font};letter-spacing:${c.label.spacing ?? '0.01em'}">${c.titel}</span>`
     panel.querySelector('.panel-jahr').textContent = c.jahr
     panel.querySelector('.panel-text').textContent = c.text

@@ -39,8 +39,7 @@ body {
   padding: 0;
   overflow-x: hidden;
   max-width: 100%;
-  /* Hintergrund für die gesamte Site schwarz wie Carousel */
-  background: #000000;
+  background: var(--page-bg);
 }
 
 /* Home, Über mich, Kontakt, Carousel: kein Body-Scroll – alles soll auf einen Blick sichtbar sein.
@@ -76,5 +75,4 @@ a {
   text-decoration-style: solid;
   transition: text-decoration-color 0.3s ease;
 }
-
 

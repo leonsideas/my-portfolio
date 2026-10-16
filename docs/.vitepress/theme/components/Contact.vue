@@ -1,5 +1,18 @@
 <template>
   <section class="contact-screen" aria-label="Kontakt">
+    <svg class="contact-color-filter" aria-hidden="true" focusable="false">
+      <defs>
+        <!-- Royal Purple (19-3642 TCX, #603f83) als Mittelton; Schatten dunkler, helle Wolle als heller Lavendelton -->
+        <filter id="contact-royal-purple" color-interpolation-filters="sRGB">
+          <feColorMatrix in="SourceGraphic" type="saturate" values="0" result="gray" />
+          <feComponentTransfer in="gray">
+            <feFuncR type="table" tableValues="0.208 0.376 0.718" />
+            <feFuncG type="table" tableValues="0.137 0.247 0.663" />
+            <feFuncB type="table" tableValues="0.282 0.514 0.780" />
+          </feComponentTransfer>
+        </filter>
+      </defs>
+    </svg>
     <div class="contact-cutout" aria-hidden="true">
       <img :src="kontaktCutout" alt="" />
     </div>
@@ -41,11 +54,18 @@ onBeforeUnmount(() => {
   inset: 0;
   margin: 0;
   padding: 0;
-  /* Schwarzer Grund auf der gesamten Website, rote Schrift, kein Motiv */
   background-color: var(--page-bg);
   z-index: 0;
   overflow: hidden;
   color: var(--brand-red);
+}
+
+.contact-color-filter {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .contact-content {
@@ -75,6 +95,7 @@ onBeforeUnmount(() => {
   display: block;
   width: 100%;
   height: auto;
+  filter: url(#contact-royal-purple);
 }
 
 .contact-heading {

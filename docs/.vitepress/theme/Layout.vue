@@ -6,12 +6,7 @@ import DeichHerde from './components/DeichHerde.vue'
 import AboutPage from './components/AboutPage.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ProjectOpeningTransition from './components/ProjectOpeningTransition.vue'
-import { computed, onBeforeUnmount, onMounted } from 'vue'
-import { setupSiteViewport } from './composables/siteViewport'
-
-let cleanupViewport: (() => void) | undefined
-onMounted(() => { cleanupViewport = setupSiteViewport() })
-onBeforeUnmount(() => cleanupViewport?.())
+import { computed } from 'vue'
 
 const { frontmatter, site } = useData()
 const route = useRoute()
@@ -60,7 +55,7 @@ const currentPageComponent = computed(() => {
     </div>
   </template>
 
-  <!-- Einheitlicher Seitenraum: am Handy hochkant auf allen Seiten gedreht. -->
+  <!-- Nur die Startseite dreht ihren Seitenraum am Handy (DeichHerde.vue). -->
   <template v-else>
     <div class="site-shell min-h-screen font-plexsans text-black">
       <NavBar :class="{ 'is-workpage': isWorkPage }" />
@@ -76,7 +71,7 @@ const currentPageComponent = computed(() => {
       <div
         v-else
         :class="[
-          'bg-black',
+          'page-content',
           'min-h-[calc(100vh-4rem)]'
         ]"
       >
@@ -107,6 +102,10 @@ const currentPageComponent = computed(() => {
 </template>
 
 <style scoped>
+.page-content {
+  background: var(--page-bg);
+}
+
 .empty-layout-content {
   margin: 0;
   padding: 0;

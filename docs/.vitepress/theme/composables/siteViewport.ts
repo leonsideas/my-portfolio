@@ -1,9 +1,9 @@
-// Alle Seiten benutzen am Handy denselben Querformat-Raum wie die Herde.
+// Der Querformat-Raum gilt nur, solange die Startseite mit der Herde geöffnet ist.
 const MOBILE_DESKTOP = '(max-width: 1023px) and (pointer: coarse)'
 const ROTATED_SITE = '(orientation: portrait) and (max-width: 900px) and (pointer: coarse)'
 
 export function isSiteRotated() {
-  return typeof window !== 'undefined' && window.matchMedia(ROTATED_SITE).matches
+  return typeof document !== 'undefined' && document.documentElement.classList.contains('site-rotated')
 }
 
 export function sitePoint(x: number, y: number) {

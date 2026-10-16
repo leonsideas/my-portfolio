@@ -2,18 +2,30 @@
  * Colors
  * -------------------------------------------------------------------------- */
 
-/* Signalrot der Seite – Navigation, Fließtext auf Über mich und Kontakt
-   sowie das Punktraster des Hintergrundfilters. */
+/* Farben der Seite: violette Schrift auf Gelb (Kontakt, Impressum und weitere Seiten),
+   Ausnahmen für Startseite und CV unten. --brand-red heißt aus Gewohnheit noch so: die Schriftfarbe. */
 :root {
-  --brand-red: #ff2d16;
-  /* Durchgängiger Seitenhintergrund. Der helle Ton bleibt separat für Text
-     auf dem Intro-Video erhalten. */
-  --page-bg: #000000;
+  /* exakte sRGB-Werte von display-p3(0.779 0.876 0.422) und display-p3(0.383 0.07 0.573) */
+  --farbe-gelb: rgb(75.489% 87.978% 33.893%);
+  --farbe-violett: rgb(41.983% 1.4633% 59.555%);
+  --pantone-royal-purple: #603f83; /* 19-3642 TCX, Kontaktbild (Filter in Contact.vue) */
+  --brand-red: var(--farbe-violett);
+  --page-bg: var(--farbe-gelb);
   --cream: #f2efe9;
-  /* Tiefschwarz des Punktrasters. Bewusst nicht dieselbe Farbe wie die
-     Schrift: Rot auf Rot traegt nur 1,5:1, Rot auf Schwarz dagegen 5,6:1
-     und Rot auf Creme 3,2:1 – Bild und Text bleiben so immer trennbar. */
   --raster-black: #14100e;
+}
+
+/* Startseite: gelbe Schrift über der Deich-Szene, schwarzer Ladebildschirm */
+html:has(.deich) {
+  --page-bg: #000000;
+  --brand-red: var(--farbe-gelb);
+}
+
+/* CV und Projektseiten: gelbgrüne Schrift auf Violett */
+html:has(.aboutpage-root),
+html:has(.workpage-root) {
+  --page-bg: var(--farbe-violett);
+  --brand-red: var(--farbe-gelb);
 }
 
 :root {

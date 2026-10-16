@@ -7,9 +7,8 @@
   const phrases = [
     'Creative Designer',
     'Storyteller',
-    'Motion Designer',
     'Creative Coder',
-    'Interaction Designer',
+    'Ich liebe es, Geschichten zu erzählen',
   ]
   const identityDescription = `${phrases.join('. ')}.`
   const typedText = ref('')

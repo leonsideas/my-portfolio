@@ -134,27 +134,19 @@
           </li>
 
           <li class="my-nav__item my-nav__item--center">
-            <div v-if="isHomePage" class="nav-identity">
-              <h1 class="nav-pill nav-link-font nav-identity__name">Leon Albers</h1>
+            <div class="nav-identity">
+              <!-- Auf der Startseite die Hauptüberschrift, sonst der Weg zurück zur Herde -->
+              <h1 v-if="isHomePage" class="nav-pill nav-link-font nav-identity__name">Leon Albers</h1>
+              <a v-else :href="localizedPath('/')" class="nav-pill nav-link-font nav-identity__name">Leon Albers</a>
               <span class="nav-pill nav-link-font nav-identity__statement">
                 <span class="visually-hidden">{{ identityDescription }}</span>
                 <span aria-hidden="true">{{ typedText }}</span>
                 <span class="nav-typewriter__caret" aria-hidden="true" />
               </span>
-              <div class="nav-pill nav-link-font nav-identity__clock" title="Europe/Berlin">
+              <div v-if="isHomePage" class="nav-pill nav-link-font nav-identity__clock" title="Europe/Berlin">
                 <time :datetime="clockDateTime">{{ localTime || '–' }}</time>
               </div>
             </div>
-            <span
-              v-else
-              class="nav-pill nav-link-font nav-typewriter"
-            >
-              <span class="visually-hidden">
-                {{ identityDescription }}
-              </span>
-              <span aria-hidden="true">{{ typedText }}</span>
-              <span class="nav-typewriter__caret" aria-hidden="true" />
-            </span>
           </li>
 
           <li class="my-nav__item my-nav__item--right">
@@ -217,20 +209,27 @@
     background-repeat: no-repeat;
   }
   
+  /* Auf allen Seiten wie auf der Startseite:
+     links Name, Selbstbeschreibung und Uhr, rechts die Buttons */
   .my-nav__inner {
     display: flex;
     width: 100%;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: var(--home-inset-top) var(--home-inset-right) 0.75rem var(--home-inset-left);
     background: transparent;
+  }
+
+  .my-nav--home .my-nav__inner {
+    padding-bottom: 0;
   }
 
   .my-nav__list {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: 'identity left right';
+    align-items: start;
     width: 100%;
-    gap: 0.5rem;
+    gap: clamp(12px, calc(2.5 * var(--site-vw)), 34px);
     font-size: 0.875rem;
     font-weight: 500;
   }
@@ -239,16 +238,21 @@
     display: flex;
   }
 
-  .my-nav__item--left {
+  .my-nav__item--center {
+    grid-area: identity;
     justify-self: start;
+    min-width: 0;
   }
 
-  .my-nav__item--center {
-    justify-self: center;
+  /* Gleiche Höhe wie die Sprachwahl, damit CV und Kontakt auf einer Linie stehen */
+  .my-nav__item--left {
+    grid-area: left;
+    align-items: center;
+    min-height: 1.5rem;
   }
 
   .my-nav__item--right {
-    justify-self: end;
+    grid-area: right;
     display: flex;
     align-items: center;
     gap: clamp(18px, calc(2 * var(--site-vw)), 30px);
@@ -278,7 +282,7 @@
     align-items: center;
     justify-content: center;
 
-    padding: 0.4rem 0.5rem;
+    padding: 0;
 
     background: transparent;
     color: var(--brand-red);
@@ -306,15 +310,6 @@
   .my-nav--black .nav-pill:hover,
   .my-nav--black .nav-pill:focus-visible {
     color: var(--brand-red);
-  }
-
-  .nav-typewriter {
-    width: clamp(17rem, calc(48 * var(--site-vw)), 30rem);
-    padding-inline: 0;
-    overflow: hidden;
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
-    text-transform: none;
   }
 
   .nav-typewriter__caret {
@@ -352,11 +347,6 @@
 
   /* Desktop ONLY */
   @media (min-width: 1024px) {
-    .my-nav__inner {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
-
     .my-nav__item {
       display: block;
     }
@@ -364,93 +354,29 @@
     .nav-pill {
       width: auto;
       white-space: nowrap;
-      padding: 0.4rem 0.9rem;
       font-size: 0.875rem;
       letter-spacing: 0.25em;
     }
 
-    .nav-typewriter {
-      font-size: 0.8rem;
-      letter-spacing: 0.12em;
-    }
+    .my-nav__item--left,
     .my-nav__item--right { display: flex; }
   }
 
   @media (max-width: 767px) {
-    .my-nav__inner {
-      padding-inline:
-        max(0.5rem, env(safe-area-inset-left))
-        max(0.5rem, env(safe-area-inset-right));
-    }
-
-    .my-nav__list {
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      grid-template-areas: "left center right";
-      gap: 0.25rem;
-    }
-
     .my-nav__item {
       min-width: 0;
     }
 
-    .my-nav__item--left {
-      grid-area: left;
-    }
-
-    .my-nav__item--center {
-      grid-area: center;
-      justify-self: stretch;
-      min-width: 0;
-    }
-
-    .my-nav__item--right {
-      grid-area: right;
-    }
-
     .nav-pill {
-      padding-inline: 0.2rem;
       font-size: 0.62rem;
       letter-spacing: 0.1em;
     }
-
-    .nav-typewriter {
-      width: 100%;
-      min-height: 1.2rem;
-      font-size: clamp(0.42rem, calc(1.8 * var(--site-vw)), 0.56rem);
-      letter-spacing: 0.015em;
-    }
-    .my-nav:not(.my-nav--home) .my-nav__list { grid-template-columns: auto 1fr; grid-template-areas: 'left right' 'center center'; }
-    .my-nav:not(.my-nav--home) .nav-typewriter { font-size: 0.62rem; letter-spacing: 0.08em; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .nav-typewriter__caret {
       display: none;
     }
-  }
-
-  .my-nav--home .my-nav__inner {
-    padding: var(--home-inset-top) var(--home-inset-right) 0 var(--home-inset-left);
-  }
-
-  .my-nav--home .my-nav__list {
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas: 'identity left right';
-    align-items: start;
-    gap: clamp(12px, calc(2.5 * var(--site-vw)), 34px);
-  }
-
-  .my-nav--home .my-nav__item--center {
-    grid-area: identity;
-    justify-self: start;
-    min-width: 0;
-  }
-
-  .my-nav--home .my-nav__item--left { grid-area: left; }
-  .my-nav--home .my-nav__item--right { grid-area: right; }
-
-  .my-nav--home .nav-pill {
-    padding: 0;
   }
 
   .nav-identity {
@@ -462,7 +388,7 @@
     color: var(--brand-red);
   }
 
-  .my-nav--home .nav-identity .nav-identity__name {
+  .my-nav .nav-identity .nav-identity__name {
     margin: 0;
     font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
     font-size: clamp(16px, calc(1.5 * var(--site-vw)), 22px);
@@ -473,12 +399,12 @@
     white-space: nowrap;
   }
 
-  .my-nav--home .nav-identity > .nav-pill {
+  .nav-identity > .nav-pill {
     block-size: 1.5em;
     line-height: 1.5;
   }
 
-  .my-nav--home .nav-identity__statement {
+  .nav-identity__statement {
     justify-content: flex-start;
     text-transform: none;
     width: auto;
@@ -486,16 +412,25 @@
     overflow: visible;
   }
 
+  /* Startseite: Uhr oben mittig, auf einer Linie mit CV und Kontakt */
   .nav-identity__clock {
+    position: absolute;
+    top: calc(var(--home-inset-top) + (1.5rem - 1.5em) / 2);
+    left: 50%;
+    transform: translateX(-50%);
     font-variant-numeric: tabular-nums;
   }
 
   @media (max-width: 600px) {
-    .my-nav--home .my-nav__list { gap: 14px; }
-    .my-nav--home .my-nav__list { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'identity right' 'identity left'; row-gap: 8px; }
-    .my-nav--home .my-nav__item--left { justify-self: end; }
-    .my-nav--home .my-nav__item--right { gap: 18px; }
-    .my-nav--home .nav-identity__statement { max-width: calc(100 * var(--site-vw) - var(--home-inset-left) - var(--home-inset-right)); overflow: hidden; }
+    .my-nav__list { gap: 14px; }
+    .my-nav__list { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'identity right' 'identity left'; row-gap: 8px; }
+    .my-nav__item--left { justify-self: end; }
+    .my-nav__item--right { gap: 18px; }
+    .nav-identity__statement { max-width: calc(100 * var(--site-vw) - var(--home-inset-left) - var(--home-inset-right)); overflow: hidden; }
+    /* Schmale, nicht gedrehte Fenster: zu wenig Platz in der Mitte, Uhr bleibt unter dem Namen */
+    html:not(.mobile-desktop) .nav-identity__clock { position: static; transform: none; }
+    /* Unterseiten: alle Buttons in einer Reihe rechts neben dem Namen */
+    .my-nav:not(.my-nav--home) .my-nav__list { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: 'identity left right'; }
   }
 
   /* Überschriften global weiß setzen (trotz scoped) */

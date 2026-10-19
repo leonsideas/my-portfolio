@@ -5,7 +5,7 @@
       ref="overlay"
       class="project-opening"
       :style="{ '--opening-filter': mediaOpening?.filter ?? 'grayscale(1)' }"
-      :aria-label="`${projectOpening.title} wird geöffnet`"
+      :aria-label="text(`${projectOpening.title} wird geöffnet`, `Opening ${projectOpening.title}`)"
       aria-busy="true"
       @wheel.prevent
       @touchmove.prevent
@@ -45,6 +45,9 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRouter } from 'vitepress'
 import { projectOpening, type OpeningBox } from '../composables/useProjectOpening'
+import { useSiteLanguage } from '../composables/useSiteLanguage'
+
+const { text } = useSiteLanguage()
 
 const router = useRouter()
 const overlay = ref<HTMLElement | null>(null)

@@ -1,6 +1,6 @@
 <template>
-  <section class="rechtliches-page" aria-label="Impressum und Datenschutz">
-    <div class="rechtliches-inner">
+  <section class="rechtliches-page" :aria-label="text('Impressum und Datenschutz', 'Legal notice and privacy')">
+    <div v-if="!isEnglish" class="rechtliches-inner">
       <h1>Impressum</h1>
 
       <p><strong>Angaben gemäß § 5 TMG</strong></p>
@@ -42,6 +42,12 @@
         Die durch mich erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen
         Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung
         außerhalb der Grenzen des Urheberrechtes bedürfen meiner schriftlichen Zustimmung.
+      </p>
+
+      <p>
+        Schafaufnahme: „Sheep bleating“ von earthcalling, bearbeiteter Ausschnitt von Dcoetzee,
+        gemeinfrei. <a href="https://commons.wikimedia.org/wiki/File:Sheep_bleating.ogg" target="_blank" rel="noopener noreferrer">Quelle und Lizenz</a>.
+        Der optionale Deichklang wird erst nach dem Einschalten geladen und lokal abgespielt.
       </p>
 
       <hr />
@@ -108,20 +114,54 @@
         <a :href="homeHref">← Zurück zur Startseite</a>
       </p>
     </div>
+    <div v-else class="rechtliches-inner">
+      <h1>Legal notice</h1>
+      <p><strong>Information pursuant to section 5 TMG</strong></p>
+      <p>Leon Albers</p>
+      <p><strong>Contact</strong><br />Email: <a href="mailto:leon-albers@web.de">leon-albers@web.de</a></p>
+      <p><strong>Responsible for content pursuant to section 55(2) RStV</strong><br />Leon Albers</p>
+      <p>This website is a private presentation of my design work and projects. It has no commercial purpose and does not constitute an offer to enter into contracts or provide services.</p>
+      <h2>Liability for content</h2>
+      <p>As a service provider, I am responsible for my own content on these pages under general law in accordance with section 7(1) TMG. Under sections 8 to 10 TMG, however, I am not obliged to monitor third-party information that is transmitted or stored, or to investigate circumstances indicating unlawful activity.</p>
+      <h2>Liability for links</h2>
+      <p>This website contains links to external third-party websites over whose content I have no control. I therefore cannot accept responsibility for that content. The respective provider or operator is responsible for the content of linked pages.</p>
+      <h2>Copyright</h2>
+      <p>The content and works I have created on this website are subject to German copyright law. Reproduction, editing, distribution or use beyond the limits of copyright law requires my written permission.</p>
+      <p>Sheep recording: “Sheep bleating” by earthcalling, excerpted by Dcoetzee, released into the public domain. <a href="https://commons.wikimedia.org/wiki/File:Sheep_bleating.ogg" target="_blank" rel="noopener noreferrer">Source and licence</a>. The optional dike sound is loaded and played locally only after it is enabled.</p>
+      <hr />
+      <h1>Privacy policy</h1>
+      <h2>1. General information</h2>
+      <p>This website is a private portfolio. It sets no cookies and uses no tracking or analytics tools. You can use it without providing personal information.</p>
+      <h2>2. Hosting</h2>
+      <p>This website is hosted on <strong>GitHub Pages</strong>, provided by GitHub Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA.</p>
+      <p>When you visit the website, GitHub collects technically necessary server logs, including your IP address, date and time, requested resource and browser type. GitHub processes this data to provide and secure the service. Details: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub Privacy Statement</a>.</p>
+      <p>Legal basis: Article 6(1)(f) GDPR, the legitimate interest in providing a secure website.</p>
+      <h2>3. Contact by email</h2>
+      <p>If you email me, the information you provide, including your email address, name and message, is used only to respond to your enquiry and is not shared with third parties. It is deleted once the enquiry has been resolved and no statutory retention obligations apply.</p>
+      <p>Legal basis: Article 6(1)(b) or (f) GDPR.</p>
+      <h2>4. External links</h2>
+      <p>This website contains links to external services, such as Instagram. Their respective operators are solely responsible for their content and privacy practices.</p>
+      <h2>5. Your rights</h2>
+      <p>You have the right to access, rectification, erasure, restriction of processing, data portability and objection. You may also lodge a complaint with the competent supervisory authority: in Bremen, the State Commissioner for Data Protection and Freedom of Information of the Free Hanseatic City of Bremen.</p>
+      <p>For any enquiries, please email <a href="mailto:leon-albers@web.de">leon-albers@web.de</a>.</p>
+      <hr />
+      <p class="rechtliches-back"><a :href="homeHref">← Back to the homepage</a></p>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { withBase } from 'vitepress'
-import { onMounted, onBeforeUnmount } from 'vue'
+import { computed, watchEffect, onBeforeUnmount } from 'vue'
+import { useSiteLanguage } from '../composables/useSiteLanguage'
 
-const homeHref = withBase('/')
+const { text, isEnglish, localizedPath } = useSiteLanguage()
+const homeHref = computed(() => localizedPath('/'))
 
 const previousTitle = typeof document !== 'undefined' ? document.title : ''
 
-onMounted(() => {
+watchEffect(() => {
   if (typeof document !== 'undefined') {
-    document.title = 'Impressum & Datenschutz – Leon Albers'
+    document.title = text('Impressum & Datenschutz', 'Legal notice & privacy') + ' – Leon Albers'
   }
 })
 

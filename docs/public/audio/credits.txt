@@ -1,0 +1,11 @@
+Sheep recording
+---------------
+File: sheep.mp3
+Source: "Sheep bleating.ogg" by earthcalling; excerpted by Dcoetzee
+from "Corner of a sheep field in summer", PDSounds recording 341 (2007).
+https://commons.wikimedia.org/wiki/File:Sheep_bleating.ogg
+Released into the public domain by the author.
+Adaptation: high-pass filter, gentle fades and MP3 compression.
+
+The quiet wind layer is generated locally with Web Audio.
+Audio is only enabled after the visitor activates the sound control.

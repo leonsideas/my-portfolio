@@ -53,6 +53,11 @@ html.mobile-desktop .my-nav--home .my-nav__inner {
   padding: var(--home-inset-top) var(--home-inset-right) 0 var(--home-inset-left);
 }
 html.mobile-desktop .my-nav--home .nav-pill { padding: 0; }
+html.mobile-desktop .my-nav--home .my-nav__list {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: 'identity left right';
+}
+html.mobile-desktop .my-nav--home .my-nav__item--left { justify-self: start; }
 html.site-rotated.deich-aktiv .deich-panel {
   top: 50%;
   right: var(--home-inset-right);

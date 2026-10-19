@@ -794,7 +794,7 @@ export async function createHerd (world) {
       ? `<span class="panel-logo" role="img" aria-label="${c.titel}" style="--logo:url('${world.ui.logos}${c.label.logo}')"><img src="${world.ui.logos}${c.label.logo}" alt=""></span>`
       : `<span style="font-family:${c.label.font};letter-spacing:${c.label.spacing ?? '0.01em'}">${c.titel}</span>`
     panel.querySelector('.panel-jahr').textContent = c.jahr
-    panel.querySelector('.panel-text').textContent = c.text
+    panel.querySelector('.panel-text').textContent = world.ui.projectText?.(c.slug, c.text) ?? c.text
     panel.querySelector('.panel-link').href = `${world.ui.basis}works/${c.slug}/`
     panel.classList.add('offen')
     root.classList.add('fokus')

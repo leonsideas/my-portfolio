@@ -2,7 +2,7 @@
   <!-- Startseite: die Projekt-Herde auf dem Deich (Three.js, siehe ../deich/). Navigation und Fußzeile kommen aus dem Layout. -->
   <div ref="root" class="deich">
     <div class="deich-laden" :class="{ 'is-fertig': bereit }" aria-hidden="true">
-      <span>Deich wird geladen</span>
+      <span>{{ text('Deich wird geladen', 'Loading the dike') }}</span>
       <span class="deich-laden__balken"><span :style="{ transform: `scaleX(${fortschritt})` }" /></span>
     </div>
 
@@ -10,7 +10,7 @@
       <div class="panel-titel" />
       <div class="panel-jahr" />
       <p class="panel-text" />
-      <a class="panel-link vp-raw" href="#" @click="oeffneProjekt">Zum Projekt →</a><button class="panel-zurueck" type="button">Zurück zur Herde</button>
+      <a class="panel-link vp-raw" href="#" @click="oeffneProjekt">{{ text('Zum Projekt →', 'View project →') }}</a><button class="panel-zurueck" type="button">{{ text('Zurück zur Herde', 'Back to the flock') }}</button>
     </aside>
   </div>
 </template>
@@ -21,6 +21,11 @@ import { withBase } from 'vitepress'
 import { beginSceneProjectOpening } from '../composables/useProjectOpening'
 import { vorladen } from '../deich/dateien.js'
 import { isSiteRotated, sitePoint, screenPoint, setupSiteViewport } from '../composables/siteViewport'
+import { useSiteLanguage } from '../composables/useSiteLanguage'
+import { englishProjectSummaries } from '../data/projectSummaries'
+import { deichNight } from '../composables/deichSound'
+
+const { text, localizedPath, isEnglish } = useSiteLanguage()
 
 type Deich = {
   bereit: Promise<void>
@@ -49,7 +54,9 @@ onMounted(async () => {
     panel: panel.value,
     assets: withBase('/deich/'),
     logos: withBase('/images/project-logos/'),
-    basis: withBase('/'),
+    basis: localizedPath('/'),
+    projectText: (slug: string, fallback: string) => isEnglish.value ? englishProjectSummaries[slug] || fallback : fallback,
+    nacht: (night: boolean) => { deichNight.value = night },
     gedreht: isSiteRotated,
     zuLokal: sitePoint,
     zuBildschirm: screenPoint,
@@ -77,7 +84,7 @@ function oeffneProjekt(event: MouseEvent) {
   beginSceneProjectOpening({
     slug: info.slug,
     title: info.titel,
-    href: withBase(`/works/${encodeURIComponent(info.slug)}/`),
+    href: localizedPath(`/works/${encodeURIComponent(info.slug)}/`),
     source: root.value,
   })
 }

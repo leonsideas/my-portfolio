@@ -186,7 +186,11 @@ export function starteDeich (root, ui) {
     const t = clock.elapsedTime
     const zustand = himmel.update(jetzt(), t, camera)
     world.tageslicht = zustand.tageslicht
-    if (herd && istNacht(zustand) !== world.nacht) { world.nacht = istNacht(zustand); herd.setNacht(world.nacht) }
+    if (herd && istNacht(zustand) !== world.nacht) {
+      world.nacht = istNacht(zustand)
+      herd.setNacht(world.nacht)
+      ui.nacht?.(world.nacht)
+    }
     herd?.update(t, dt)
     controls.update()
     renderer.render(scene, camera)
@@ -225,6 +229,7 @@ export function starteDeich (root, ui) {
   let herd = null
   buildDike()
   world.nacht = istNacht(himmel.update(jetzt(), 0, camera))
+  ui.nacht?.(world.nacht)
   const bereit = (async () => {
     // Ladefortschritt für den Ladebildschirm (zählt Dateien aller Three-Loader)
     THREE.DefaultLoadingManager.onProgress = (url, fertig, gesamt) => { if (!aus) ui.fortschritt?.(fertig / gesamt) }

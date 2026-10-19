@@ -18,6 +18,14 @@ export default defineConfig({
   cleanUrls: true,
   srcExclude: ['documentation/**'],
   lang: 'de-DE',
+  locales: {
+    root: { label: 'Deutsch', lang: 'de-DE' },
+    en: {
+      label: 'English',
+      lang: 'en-GB',
+      description: 'Leon Albers works with storytelling, film, code, artificial intelligence and interactive media.',
+    },
+  },
   title: 'Leon Albers',
   titleTemplate: ':title | Leon Albers',
   description:
@@ -34,7 +42,6 @@ export default defineConfig({
     ['meta', { name: 'robots', content: 'index, follow' }],
     ['meta', { property: 'og:site_name', content: 'Leon Albers' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:locale', content: 'de_DE' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
   ],
 
@@ -42,6 +49,8 @@ export default defineConfig({
     if (pageData.isNotFound) return
 
     const canonical = pageUrl(pageData.relativePath)
+    const isEnglish = pageData.relativePath.startsWith('en/')
+    const otherPath = isEnglish ? pageData.relativePath.slice(3) : `en/${pageData.relativePath}`
     const imagePath = pageData.frontmatter.image || defaultImage
     const image = imagePath.startsWith('http') ? imagePath : `${siteUrl}${imagePath}`
     const socialTitle = title || pageData.title || 'Leon Albers'
@@ -49,6 +58,9 @@ export default defineConfig({
 
     const head: HeadConfig[] = [
       ['link', { rel: 'canonical', href: canonical }],
+      ['link', { rel: 'alternate', hreflang: isEnglish ? 'en' : 'de', href: canonical }],
+      ['link', { rel: 'alternate', hreflang: isEnglish ? 'de' : 'en', href: pageUrl(otherPath) }],
+      ['meta', { property: 'og:locale', content: isEnglish ? 'en_GB' : 'de_DE' }],
       ['meta', { property: 'og:title', content: socialTitle }],
       ['meta', { property: 'og:url', content: canonical }],
       ['meta', { property: 'og:image', content: image }],

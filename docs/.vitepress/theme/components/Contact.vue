@@ -1,5 +1,5 @@
 <template>
-  <section class="contact-screen" aria-label="Kontakt">
+  <section class="contact-screen" :aria-label="text('Kontakt', 'Contact')">
     <svg class="contact-color-filter" aria-hidden="true" focusable="false">
       <defs>
         <!-- Royal Purple (19-3642 TCX, #603f83) als Mittelton; Schatten dunkler, helle Wolle als heller Lavendelton -->
@@ -22,7 +22,7 @@
         <a
           class="contact-heading-link"
           href="mailto:leon-albers@web.de"
-          aria-label="E-Mail an leon-albers@web.de schreiben"
+          :aria-label="text('E-Mail an leon-albers@web.de schreiben', 'Email leon-albers@web.de')"
         >
           Moin
         </a>
@@ -32,15 +32,18 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from 'vue'
+import { watchEffect, onBeforeUnmount } from 'vue'
 import { withBase } from 'vitepress'
+import { useSiteLanguage } from '../composables/useSiteLanguage'
+
+const { text } = useSiteLanguage()
 
 const kontaktCutout = withBase('/images/kontakt-leon-schafe-cutout-red.webp')
 
 const previousTitle = typeof document !== 'undefined' ? document.title : ''
 
-onMounted(() => {
-  document.title = 'Kontakt'
+watchEffect(() => {
+  if (typeof document !== 'undefined') document.title = text('Kontakt', 'Contact') + ' | Leon Albers'
 })
 
 onBeforeUnmount(() => {

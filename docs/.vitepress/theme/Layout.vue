@@ -7,14 +7,12 @@ import AboutPage from './components/AboutPage.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ProjectOpeningTransition from './components/ProjectOpeningTransition.vue'
 import { computed } from 'vue'
+import { useSiteLanguage } from './composables/useSiteLanguage'
 
-const { frontmatter, site } = useData()
+const { frontmatter } = useData()
 const route = useRoute()
 
-const normalizedPath = computed(() => {
-  const base = site.value.base || '/'
-  return route.path.replace(base, '/') || '/'
-})
+const { normalizedPath } = useSiteLanguage()
 
 // ✅ NEU: About-Route umgestellt auf /Uebermich
 // ✅ Alias: /about bleibt erstmal gültig

@@ -1,12 +1,18 @@
 <template>
-  <footer class="site-footer">
-    <a :href="withBase('/rechtliches')" class="site-footer__link">Impressum</a>
+  <footer class="site-footer" :class="{ 'site-footer--home': isHome }">
+    <a :href="localizedPath('/rechtliches')" class="site-footer__link">{{ text('Impressum', 'Legal notice') }}</a>
+    <DeichSound v-if="isHome" />
     <span class="site-footer__copy">© Leon Albers {{ year }}</span>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { withBase } from 'vitepress'
+import { computed } from 'vue'
+import { useSiteLanguage } from '../composables/useSiteLanguage'
+import DeichSound from './DeichSound.vue'
+
+const { normalizedPath, localizedPath, text } = useSiteLanguage()
+const isHome = computed(() => normalizedPath.value === '/')
 
 const year = new Date().getFullYear()
 </script>
@@ -46,6 +52,19 @@ const year = new Date().getFullYear()
 .site-footer__link {
   color: inherit;
   text-decoration: none;
+}
+
+.site-footer--home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.25rem;
+}
+.site-footer--home .site-footer__link { justify-self: start; }
+.site-footer--home .site-footer__copy { justify-self: end; text-align: right; white-space: nowrap; }
+
+@media (max-width: 600px) {
+  .site-footer--home { font-size: clamp(0.55rem, calc(2.6667 * var(--site-vw)), 0.7rem); }
 }
 
 .site-footer__link:hover,

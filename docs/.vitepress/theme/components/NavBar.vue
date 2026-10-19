@@ -1,24 +1,23 @@
 <script setup lang="ts">
-  import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-  import { useData, useRoute, withBase } from 'vitepress'
+  import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+  import { useSiteLanguage } from '../composables/useSiteLanguage'
 
-  const route = useRoute()
-  const { site } = useData()
-  const phrases = [
+  const { language, isEnglish, normalizedPath, text, localizedPath, languagePath } = useSiteLanguage()
+  const phrases = computed(() => [
     'Creative Designer',
     'Storyteller',
     'Creative Coder',
-    'Ich liebe es, Geschichten zu erzählen',
-  ]
-  const identityDescription = `${phrases.join('. ')}.`
+    text('Ich liebe es, Geschichten zu erzählen', 'I love telling stories'),
+  ])
+  const identityDescription = computed(() => `${phrases.value.join('. ')}.`)
   const typedText = ref('')
   const localTime = ref('')
   const clockDateTime = ref('')
-  const clockFormatter = new Intl.DateTimeFormat('de-DE', {
+  const clockFormatter = computed(() => new Intl.DateTimeFormat(isEnglish.value ? 'en-GB' : 'de-DE', {
     timeZone: 'Europe/Berlin',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
     hourCycle: 'h23', timeZoneName: 'short',
-  })
+  }))
 
   let phraseIndex = 0
   let characterIndex = 0
@@ -28,7 +27,7 @@
 
   function updateClock() {
     const now = new Date()
-    localTime.value = clockFormatter.format(now)
+    localTime.value = clockFormatter.value.format(now)
     clockDateTime.value = now.toISOString()
   }
 
@@ -37,7 +36,7 @@
   }
 
   function typeStep() {
-    const phrase = phrases[phraseIndex]
+    const phrase = phrases.value[phraseIndex]
 
     if (!isDeleting) {
       characterIndex += 1
@@ -57,7 +56,7 @@
 
     if (characterIndex <= 0) {
       isDeleting = false
-      phraseIndex = (phraseIndex + 1) % phrases.length
+      phraseIndex = (phraseIndex + 1) % phrases.value.length
       queueTypeStep(380)
     } else {
       queueTypeStep(36)
@@ -68,7 +67,7 @@
     updateClock()
     clockTimer = window.setInterval(updateClock, 1000)
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      typedText.value = phrases[0]
+      typedText.value = phrases.value[0]
       return
     }
 
@@ -80,15 +79,15 @@
     if (clockTimer) window.clearInterval(clockTimer)
   })
 
-  const normalizedPath = computed(() => {
-    const base = site.value.base || '/'
-    let path = route.path
-
-    if (base !== '/' && path.startsWith(base)) {
-      path = `/${path.slice(base.length)}`
-    }
-
-    return path.replace(/\/+$/, '') || '/'
+  watch(language, () => {
+    updateClock()
+    if (typeTimer) window.clearTimeout(typeTimer)
+    phraseIndex = 0
+    characterIndex = 0
+    isDeleting = false
+    typedText.value = ''
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) typedText.value = phrases.value[0]
+    else queueTypeStep(200)
   })
 
   const isAboutPage = computed(() =>
@@ -109,14 +108,14 @@
 
   const leftNavItem = computed(() =>
     isAboutPage.value
-      ? { text: 'Projekte', link: '/', isAbout: false }
+      ? { text: text('Projekte', 'Projects'), link: '/', isAbout: false }
       : { text: 'CV', link: '/uebermich', isAbout: true }
   )
 
   const rightNavItem = computed(() =>
     isContactPage.value
-      ? { text: 'Projekte', link: '/' }
-      : { text: 'Kontakt', link: '/kontakt' }
+      ? { text: text('Projekte', 'Projects'), link: '/' }
+      : { text: text('Kontakt', 'Contact'), link: '/kontakt' }
   )
 </script>
 
@@ -126,7 +125,7 @@
         <ul class="my-nav__list">
           <li class="my-nav__item my-nav__item--left">
             <a
-              :href="withBase(leftNavItem.link)"
+              :href="localizedPath(leftNavItem.link)"
               class="nav-pill nav-link-font"
               :data-nav-about="leftNavItem.isAbout ? '1' : null"
             >
@@ -159,9 +158,22 @@
           </li>
 
           <li class="my-nav__item my-nav__item--right">
-            <a :href="withBase(rightNavItem.link)" class="nav-pill nav-link-font">
+            <a :href="localizedPath(rightNavItem.link)" class="nav-pill nav-link-font">
               {{ rightNavItem.text }}
             </a>
+            <div class="nav-language" :aria-label="text('Sprache', 'Language')" role="group">
+              <a
+                v-for="option in (['de', 'en'] as const)"
+                :key="option"
+                :href="languagePath(option)"
+                :lang="option"
+                :hreflang="option"
+                :aria-label="option === 'de' ? 'Deutsch' : 'English'"
+                :aria-current="language === option ? 'true' : undefined"
+                :class="{ 'is-active': language === option }"
+                class="nav-language__link"
+              >{{ option.toUpperCase() }}</a>
+            </div>
           </li>
         </ul>
       </nav>
@@ -237,7 +249,29 @@
 
   .my-nav__item--right {
     justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, calc(2 * var(--site-vw)), 30px);
   }
+
+  .nav-language { display: flex; align-items: baseline; gap: 9px; white-space: nowrap; }
+  .nav-language__link {
+    color: var(--brand-red);
+    font-size: 0.7rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+  .nav-language__link.is-active {
+    font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+    opacity: 1;
+  }
+  .nav-language__link:hover { opacity: 1; }
+  .nav-language__link:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
 
   .nav-pill {
     display: inline-flex;
@@ -339,6 +373,7 @@
       font-size: 0.8rem;
       letter-spacing: 0.12em;
     }
+    .my-nav__item--right { display: flex; }
   }
 
   @media (max-width: 767px) {
@@ -384,6 +419,8 @@
       font-size: clamp(0.42rem, calc(1.8 * var(--site-vw)), 0.56rem);
       letter-spacing: 0.015em;
     }
+    .my-nav:not(.my-nav--home) .my-nav__list { grid-template-columns: auto 1fr; grid-template-areas: 'left right' 'center center'; }
+    .my-nav:not(.my-nav--home) .nav-typewriter { font-size: 0.62rem; letter-spacing: 0.08em; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -455,6 +492,10 @@
 
   @media (max-width: 600px) {
     .my-nav--home .my-nav__list { gap: 14px; }
+    .my-nav--home .my-nav__list { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'identity right' 'identity left'; row-gap: 8px; }
+    .my-nav--home .my-nav__item--left { justify-self: end; }
+    .my-nav--home .my-nav__item--right { gap: 18px; }
+    .my-nav--home .nav-identity__statement { max-width: calc(100 * var(--site-vw) - var(--home-inset-left) - var(--home-inset-right)); overflow: hidden; }
   }
 
   /* Überschriften global weiß setzen (trotz scoped) */

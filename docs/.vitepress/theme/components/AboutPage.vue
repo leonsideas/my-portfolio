@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { watchEffect } from 'vue'
+import { useSiteLanguage } from '../composables/useSiteLanguage'
 
-onMounted(() => {
-  document.title = 'Über mich & CV | Leon Albers'
+const { text } = useSiteLanguage()
+watchEffect(() => {
+  if (typeof document !== 'undefined') document.title = text('Über mich & CV', 'About & CV') + ' | Leon Albers'
 })
 </script>
 
@@ -19,31 +21,31 @@ export default {
         <header>
           <div class="about-copy">
             <p>
-              Ich bin Leon Albers und studiere Digitale Medien an der HfK Bremen.
-              Als Creative Designer entwickle ich Ideen und Geschichten und suche
-              für jede die passende Form – zum Beispiel als Film, interaktive Arbeit
-              oder mit Code und KI.
+              {{ text(
+                'Ich bin Leon Albers und studiere Digitale Medien an der HfK Bremen. Ich liebe es, Geschichten zu erzählen und Ideen eine Form zu geben. Als Creative Designer suche ich dafür immer wieder neue Wege – mit Film, interaktiven Arbeiten, Code oder KI.',
+                'I’m Leon Albers, a creative designer studying Digital Media at the University of the Arts Bremen. I love telling stories and giving ideas a form. Sometimes that means making a film, sometimes an interactive piece, or trying something with code or AI. I enjoy finding the approach that feels right for each idea.'
+              ) }}
             </p>
           </div>
         </header>
 
         <section class="education" aria-labelledby="education-title">
-          <h2 id="education-title">Ausbildung</h2>
+          <h2 id="education-title">{{ text('Ausbildung', 'Education') }}</h2>
           <div class="about-entry">
-            <h3>HfK Bremen — Digitale Medien (B.A.)</h3>
-            <p>Seit 2023</p>
+            <h3>{{ text('HfK Bremen — Digitale Medien (B.A.)', 'University of the Arts Bremen — Digital Media (B.A.)') }}</h3>
+            <p>{{ text('Seit 2023', 'Since 2023') }}</p>
           </div>
           <div class="about-entry">
-            <h3>Mediengestalter — Konzeption &amp; Visualisierung</h3>
-            <p>Ausbildung, 2018–2021</p>
+            <h3>{{ text('Mediengestalter — Konzeption & Visualisierung', 'Media Design — Concept & Visualisation') }}</h3>
+            <p>{{ text('Ausbildung, 2018–2021', 'Vocational training, 2018–2021') }}</p>
           </div>
         </section>
 
         <section class="experience" aria-labelledby="experience-title">
-          <h2 id="experience-title">Berufserfahrung</h2>
+          <h2 id="experience-title">{{ text('Berufserfahrung', 'Experience') }}</h2>
           <div class="about-entry">
             <h3>manymany motion GmbH — Motion Designer</h3>
-            <p>Seit 2021</p>
+            <p>{{ text('Seit 2021', 'Since 2021') }}</p>
           </div>
         </section>
 
@@ -53,14 +55,14 @@ export default {
             <h3>
               <a href="https://www.9isdsc.csic.es/binomials/" target="_blank" rel="noopener noreferrer">BINOMIALS</a>
             </h3>
-            <p>November 2026 · Barcelona · bevorstehend</p>
-            <p>Gruppenausstellung im Rahmen des 9th International Symposium on Deep-Sea Corals.</p>
-            <p>Mein Beitrag: REEFRESH – MAYBE NEXT TIME.</p>
+            <p>{{ text('November 2026 · Barcelona · bevorstehend', 'November 2026 · Barcelona · upcoming') }}</p>
+            <p>{{ text('Gruppenausstellung im Rahmen des 9th International Symposium on Deep-Sea Corals.', 'Group exhibition as part of the 9th International Symposium on Deep-Sea Corals.') }}</p>
+            <p>{{ text('Mein Beitrag:', 'My contribution:') }} REEFRESH – MAYBE NEXT TIME.</p>
           </div>
           <div class="about-entry">
             <h3>Local Dreamer</h3>
-            <p>2019 · Nordenham · Einzelausstellung</p>
-            <p>Gezeigt wurden vor allem Gemälde auf Leinwand, Fotografien und grafisch bearbeitete Arbeiten.</p>
+            <p>{{ text('2019 · Nordenham · Einzelausstellung', '2019 · Nordenham · solo exhibition') }}</p>
+            <p>{{ text('Gezeigt wurden vor allem Gemälde auf Leinwand, Fotografien und grafisch bearbeitete Arbeiten.', 'Featuring paintings on canvas, photography and digitally altered works.') }}</p>
           </div>
         </section>
       </article>

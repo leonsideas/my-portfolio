@@ -5,6 +5,9 @@ import { compareProjectsByYear } from '../data/projectOrder'
 import { fontClassBySlug } from '../data/projectTypography'
 import { sitePoint } from '../composables/siteViewport'
 import ProjectVideo from './ProjectVideo.vue'
+import { useSiteLanguage, withoutLanguage } from '../composables/useSiteLanguage'
+
+const { isEnglish, text, localizedPath } = useSiteLanguage()
 
 type CardVideo = {
   url: string
@@ -49,10 +52,10 @@ const defaultDocumentTitle =
   typeof document !== 'undefined' ? document.title : 'Leon Albers | Portfolio'
 
 // 1) Markdown as Vue components
-const markdownModules = import.meta.glob('../../../works/**/index.md', { eager: true })
+const markdownModules = import.meta.glob(['../../../works/**/index.md', '../../../en/works/**/index.md'], { eager: true })
 
 // 2) Raw markdown text for meta (title, name, excerpt)
-const markdownFiles = import.meta.glob('../../../works/**/index.md', {
+const markdownFiles = import.meta.glob(['../../../works/**/index.md', '../../../en/works/**/index.md'], {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -144,6 +147,7 @@ function parseRawFrontmatter(raw: string): Record<string, any> {
 const cards = ref<Card[]>([])
 
 for (const path in markdownFiles) {
+  if (path.includes('/en/') !== isEnglish.value) continue
   const raw = markdownFiles[path] as string
   const lines = raw.split('\n')
 
@@ -155,9 +159,9 @@ for (const path in markdownFiles) {
   const slug = match?.[1] ?? ''
   if (!slug) continue
 
-  const route = `/works/${slug}/`
+  const route = localizedPath(`/works/${slug}/`)
 
-  const folder = path.replace(/\/index\.md$/, '/')
+  const folder = `../../../works/${slug}/`
   const imageKey = Object.keys(imageFiles).find(k => k.startsWith(folder))
   const videoKey = Object.keys(videoFiles).find(k => k.startsWith(folder))
 
@@ -379,7 +383,7 @@ function showWorkPageFromOverlay() {
   overlayTargetSlug.value = null
   currentSlug.value = target
 
-  router.go(withBase(`/works/${encodeURIComponent(target)}/`))
+  router.go(localizedPath(`/works/${encodeURIComponent(target)}/`))
 }
 
 function getParamsFromLocation() {
@@ -392,9 +396,10 @@ function getParamsFromLocation() {
   // Reguläre Projektadresse: /works/Projektname/
   if (!id) {
     const basePath = withBase('/')
-    const pathname = window.location.pathname.startsWith(basePath)
+    const rawPathname = window.location.pathname.startsWith(basePath)
       ? `/${window.location.pathname.slice(basePath.length)}`
       : window.location.pathname
+    const pathname = withoutLanguage(rawPathname)
     const workPathMatch = pathname.match(/^\/works\/([^/]+)\/?$/)
     const legacyPathMatch = pathname.match(/^\/([^/]+)\/?$/)
     const pathMatch = workPathMatch || legacyPathMatch
@@ -416,7 +421,7 @@ function getParamsFromLocation() {
 
 function selectCard(slug: string) {
   currentSlug.value = slug
-  router.go(withBase(`/works/${encodeURIComponent(slug)}/`))
+  router.go(localizedPath(`/works/${encodeURIComponent(slug)}/`))
 }
 
 function playProjectIntro(slug: string, videoSrc?: string | null) {
@@ -598,7 +603,7 @@ function updateDocumentTitle() {
   if (typeof document === 'undefined') return
   document.title = currentCard.value
     ? `${currentCard.value.title} | Leon Albers`
-    : 'Projekte | Leon Albers'
+    : text('Projekte | Leon Albers', 'Projects | Leon Albers')
 }
 
 const contentKey = ref(0)
@@ -786,7 +791,7 @@ onMounted(() => {
       .split('?')[0]
       .split('#')[0]
     if (slug) {
-      router.go(withBase(`/works/${encodeURIComponent(slug)}/`))
+      router.go(localizedPath(`/works/${encodeURIComponent(slug)}/`))
       return
     }
   } else if (id) {
@@ -796,7 +801,7 @@ onMounted(() => {
     const queryRoute = normalizedPath.endsWith('/works')
     const legacyRootRoute = !normalizedPath.includes('/works/')
     if (queryRoute || legacyRootRoute) {
-      router.go(withBase(`/works/${encodeURIComponent(id)}/`))
+      router.go(localizedPath(`/works/${encodeURIComponent(id)}/`))
       return
     }
   } else if (cards.value[0]?.slug) {
@@ -842,10 +847,10 @@ onBeforeUnmount(() => {
                   type="button"
                   class="workpage-nav-pill"
                   @click="goToPrev"
-                  aria-label="Vorheriges Projekt"
+                  :aria-label="text('Vorheriges Projekt', 'Previous project')"
                 >
                   <span aria-hidden="true">‹</span>
-                  <span>Vorheriges Projekt</span>
+                  <span>{{ text('Vorheriges Projekt', 'Previous project') }}</span>
                 </button>
                 <span
                   v-else
@@ -856,7 +861,7 @@ onBeforeUnmount(() => {
                 <div
                   class="workpage-dots"
                   role="tablist"
-                  aria-label="Projekt-Navigation"
+                  :aria-label="text('Projekt-Navigation', 'Project navigation')"
                 >
                   <button
                     v-for="(card, idx) in cards"
@@ -864,7 +869,7 @@ onBeforeUnmount(() => {
                     type="button"
                     class="workpage-dot"
                     :class="{ 'is-active': idx === currentIndex }"
-                    :aria-label="`Zu Projekt: ${card.title}`"
+                    :aria-label="`${text('Zu Projekt', 'Go to project')}: ${card.title}`"
                     :aria-selected="idx === currentIndex"
                     role="tab"
                     @click="goToIndex(idx)"
@@ -876,9 +881,9 @@ onBeforeUnmount(() => {
                   type="button"
                   class="workpage-nav-pill"
                   @click="goToNext"
-                  aria-label="Nächstes Projekt"
+                  :aria-label="text('Nächstes Projekt', 'Next project')"
                 >
-                  <span>Nächstes Projekt</span>
+                  <span>{{ text('Nächstes Projekt', 'Next project') }}</span>
                   <span aria-hidden="true">›</span>
                 </button>
                 <span
@@ -915,7 +920,7 @@ onBeforeUnmount(() => {
                         <figure v-if="mobileLeadImage" class="workpage-media-frame">
                           <img
                             :src="mobileLeadImage"
-                            :alt="mobileLeadCaption || currentCard.title + ' – Projektansicht'"
+                            :alt="mobileLeadCaption || currentCard.title + text(' – Projektansicht', ' – Project view')"
                             loading="eager"
                             fetchpriority="high"
                           />
@@ -944,7 +949,7 @@ onBeforeUnmount(() => {
                         >
                           <img
                             :src="img"
-                            :alt="displayImageCaptions[idx + 1] || currentCard.title + ' – Bild ' + (idx + 2)"
+                            :alt="displayImageCaptions[idx + 1] || currentCard.title + text(' – Bild ', ' – Image ') + (idx + 2)"
                             loading="lazy"
                           />
                           <figcaption v-if="displayImageCaptions[idx + 1]" class="workpage-media-caption">
@@ -984,7 +989,7 @@ onBeforeUnmount(() => {
                       >
                         <img
                           :src="img"
-                          :alt="displayImageCaptions[idx] || currentCard.title + ' – Bild ' + (idx + 1)"
+                          :alt="displayImageCaptions[idx] || currentCard.title + text(' – Bild ', ' – Image ') + (idx + 1)"
                           :loading="idx === 0 ? 'eager' : 'lazy'"
                         />
                         <figcaption v-if="displayImageCaptions[idx]" class="workpage-media-caption">
@@ -1006,13 +1011,13 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-else :key="'not-found'" class="workpage-notfound">
-              Projekt nicht gefunden.
+              {{ text('Projekt nicht gefunden.', 'Project not found.') }}
             </div>
           </Transition>
 
           <footer class="workpage-footer mt-8 pt-6 text-center text-[11px] tracking-widest uppercase shrink-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <span>© {{ new Date().getFullYear() }} Leon Albers</span>
-            <a :href="withBase('/rechtliches')" class="workpage-footer-link">Impressum &amp; Datenschutz</a>
+            <a :href="localizedPath('/rechtliches')" class="workpage-footer-link">{{ text('Impressum & Datenschutz', 'Legal notice & privacy') }}</a>
           </footer>
         </div>
       </section>

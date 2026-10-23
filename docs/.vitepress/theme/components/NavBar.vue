@@ -2,7 +2,7 @@
   import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
   import { useSiteLanguage } from '../composables/useSiteLanguage'
 
-  const { language, isEnglish, normalizedPath, text, localizedPath, languagePath } = useSiteLanguage()
+  const { language, normalizedPath, text, localizedPath, languagePath } = useSiteLanguage()
   const phrases = computed(() => [
     'Creative Designer',
     'Storyteller',
@@ -11,25 +11,11 @@
   ])
   const identityDescription = computed(() => `${phrases.value.join('. ')}.`)
   const typedText = ref('')
-  const localTime = ref('')
-  const clockDateTime = ref('')
-  const clockFormatter = computed(() => new Intl.DateTimeFormat(isEnglish.value ? 'en-GB' : 'de-DE', {
-    timeZone: 'Europe/Berlin',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hourCycle: 'h23', timeZoneName: 'short',
-  }))
 
   let phraseIndex = 0
   let characterIndex = 0
   let isDeleting = false
   let typeTimer: number | undefined
-  let clockTimer: number | undefined
-
-  function updateClock() {
-    const now = new Date()
-    localTime.value = clockFormatter.value.format(now)
-    clockDateTime.value = now.toISOString()
-  }
 
   function queueTypeStep(delay: number) {
     typeTimer = window.setTimeout(typeStep, delay)
@@ -64,8 +50,6 @@
   }
 
   onMounted(() => {
-    updateClock()
-    clockTimer = window.setInterval(updateClock, 1000)
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       typedText.value = phrases.value[0]
       return
@@ -76,11 +60,9 @@
 
   onBeforeUnmount(() => {
     if (typeTimer) window.clearTimeout(typeTimer)
-    if (clockTimer) window.clearInterval(clockTimer)
   })
 
   watch(language, () => {
-    updateClock()
     if (typeTimer) window.clearTimeout(typeTimer)
     phraseIndex = 0
     characterIndex = 0
@@ -143,9 +125,6 @@
                 <span aria-hidden="true">{{ typedText }}</span>
                 <span class="nav-typewriter__caret" aria-hidden="true" />
               </span>
-              <div v-if="isHomePage" class="nav-pill nav-link-font nav-identity__clock" title="Europe/Berlin">
-                <time :datetime="clockDateTime">{{ localTime || '–' }}</time>
-              </div>
             </div>
           </li>
 
@@ -210,7 +189,7 @@
   }
   
   /* Auf allen Seiten wie auf der Startseite:
-     links Name, Selbstbeschreibung und Uhr, rechts die Buttons */
+     links Name und Selbstbeschreibung, rechts die Buttons */
   .my-nav__inner {
     display: flex;
     width: 100%;
@@ -412,23 +391,12 @@
     overflow: visible;
   }
 
-  /* Startseite: Uhr oben mittig, auf einer Linie mit CV und Kontakt */
-  .nav-identity__clock {
-    position: absolute;
-    top: calc(var(--home-inset-top) + (1.5rem - 1.5em) / 2);
-    left: 50%;
-    transform: translateX(-50%);
-    font-variant-numeric: tabular-nums;
-  }
-
   @media (max-width: 600px) {
     .my-nav__list { gap: 14px; }
     .my-nav__list { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'identity right' 'identity left'; row-gap: 8px; }
     .my-nav__item--left { justify-self: end; }
     .my-nav__item--right { gap: 18px; }
     .nav-identity__statement { max-width: calc(100 * var(--site-vw) - var(--home-inset-left) - var(--home-inset-right)); overflow: hidden; }
-    /* Schmale, nicht gedrehte Fenster: zu wenig Platz in der Mitte, Uhr bleibt unter dem Namen */
-    html:not(.mobile-desktop) .nav-identity__clock { position: static; transform: none; }
     /* Unterseiten: alle Buttons in einer Reihe rechts neben dem Namen */
     .my-nav:not(.my-nav--home) .my-nav__list { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: 'identity left right'; }
   }

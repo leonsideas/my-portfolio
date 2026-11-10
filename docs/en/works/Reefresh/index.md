@@ -2,6 +2,8 @@
 title: REEFRESH – MAYBE NEXT TIME
 description: "A participatory archive of possible futures for deep-sea corals, adaptation and life in the ocean."
 image: /images/Reefresh-cover.webp
+logo: /images/project-logos/corals-logo.svg
+website: https://reefresh.org/
 summary: "Drawings become speculative future corals and an interactive archive of their possible adaptations."
 role: "Concept, storytelling, participatory format, logo design, visual design, 3D and web development"
 format: "Participatory speculative design / interactive web archive"
@@ -12,6 +14,10 @@ tools:
   - WebGL
   - Participation
   - Storytelling
+imageCaptions:
+  - "The reefresh.org start screen with its speculative future corals."
+  - "The interactive archive: 3D corals and a timeline of their possible evolution."
+  - "Drawing station with a coral template, pencils and a collection box for the contributions."
 ---
 
 # REEFRESH – MAYBE NEXT TIME
@@ -37,9 +43,15 @@ The drawings become three-dimensional corals with their own fictional stories. A
 
 The contributions are collected in an interactive web archive. Visitors can explore the corals as 3D models and place them within a shared story about the future. The website connects the original drawings, imagined species, environmental changes and a timeline.
 
+The website is finished and live at [reefresh.org](https://reefresh.org/). You can explore the corals and their stories there yourself.
+
 ## Context and presentation
 
-The project developed through an exchange with MARUM and is intended for presentation in the context of an international deep-sea coral symposium in Barcelona. The archive grows with each new contribution.
+The project developed through an exchange with MARUM. From 2 to 5 November 2026, I took part in [BINOMIALS](https://www.9isdsc.csic.es/binomials/), a group exhibition in the Historical Building of the University of Barcelona. The exhibition was part of the 9th International Symposium on Deep-Sea Corals and brought art and deep-sea research together.
+
+<a href="/documents/reefresh/binomials-flyer-en.pdf" download="BINOMIALS-Flyer.pdf">Download the BINOMIALS flyer (PDF)</a>
+
+The archive grows with each new contribution.
 
 ## My contribution and the participants
 

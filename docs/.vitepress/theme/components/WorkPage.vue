@@ -29,6 +29,8 @@ type Card = {
   tools: string[]
   route: string
   image: string | null
+  logo: string | null
+  website: string | null
   video: string | null
   component: any
   images: string[]
@@ -248,6 +250,8 @@ for (const path in markdownFiles) {
     tools: Array.isArray(fm.tools) ? fm.tools.map(String) : [],
     route,
     image: coverImage,
+    logo: typeof fm.logo === 'string' ? fm.logo : null,
+    website: typeof fm.website === 'string' ? fm.website : null,
     video: videoKey ? (videoFiles[videoKey] as string) : null,
     component: mod?.default ? markRaw(mod.default) : null,
     images,
@@ -904,12 +908,31 @@ onBeforeUnmount(() => {
                       </div>
 
                       <h1 class="workpage-title" :class="fontClassBySlug[currentCard.slug]">
-                        {{ currentCard.title }}
+                        <span
+                          v-if="currentCard.logo"
+                          class="workpage-logo"
+                          :style="{ '--project-logo': `url('${withBase(currentCard.logo)}')` }"
+                          aria-hidden="true"
+                        >
+                          <img :src="withBase(currentCard.logo)" alt="" />
+                        </span>
+                        <span :class="{ 'workpage-title__text--hidden': currentCard.logo }">{{ currentCard.title }}</span>
                       </h1>
 
                       <p v-if="currentCard.summary" class="workpage-summary">
                         {{ currentCard.summary }}
                       </p>
+
+                      <a
+                        v-if="currentCard.website"
+                        :href="currentCard.website"
+                        class="workpage-website"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        :aria-label="`${currentCard.title}: ${text('Projektwebsite öffnen', 'Open project website')}`"
+                      >
+                        {{ currentCard.website.replace(/^https?:\/\//, '').replace(/\/$/, '') }} <span aria-hidden="true">↗</span>
+                      </a>
 
                       <div
                         v-if="hasMedia"
@@ -1179,6 +1202,52 @@ onBeforeUnmount(() => {
   font-weight: 500;
   letter-spacing: -0.02em;
 }
+
+.workpage-logo {
+  position: relative;
+  display: block;
+  width: min(100%, 36rem);
+}
+
+.workpage-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  visibility: hidden;
+}
+
+.workpage-logo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: var(--project-logo) left center / contain no-repeat;
+  mask: var(--project-logo) left center / contain no-repeat;
+}
+
+.workpage-title__text--hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.workpage-website {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  color: var(--brand-red);
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.workpage-website:hover { opacity: 0.75; }
+.workpage-website:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
 
 .workpage-summary {
   margin: 1.2rem 0 0;

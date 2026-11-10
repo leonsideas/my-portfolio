@@ -2,6 +2,8 @@
 title: REEFRESH – MAYBE NEXT TIME
 description: "Ein partizipatives Zukunftsarchiv über Tiefwasserkorallen, Anpassung und das Weiterleben im Meer."
 image: /images/Reefresh-cover.webp
+logo: /images/project-logos/corals-logo.svg
+website: https://reefresh.org/
 summary: "Aus vielen Zeichnungen entstehen spekulative Zukunftskorallen und ein interaktives Archiv ihrer möglichen Anpassungen."
 role: "Konzeption, Storytelling, partizipatives Format, Logoentwicklung, visuelle Gestaltung, 3D und Webentwicklung"
 format: "Partizipatives Speculative-Design-Projekt / interaktives Webarchiv"
@@ -12,6 +14,10 @@ tools:
   - WebGL
   - Partizipation
   - Storytelling
+imageCaptions:
+  - "Startansicht von reefresh.org mit den spekulativen Zukunftskorallen."
+  - "Das interaktive Archiv: 3D-Korallen und ein Zeitstrahl ihrer möglichen Entwicklung."
+  - "Zeichenstation mit Korallenvorlage, Stiften und einer Sammelbox für die Entwürfe."
 ---
 
 # REEFRESH – MAYBE NEXT TIME
@@ -38,9 +44,15 @@ Aus den Zeichnungen werden dreidimensionale Korallen und eigene fiktive Geschich
 
 Die Beiträge werden in einem interaktiven Webarchiv gesammelt. Dort lassen sich die Korallen als 3D-Modelle entdecken und in einer gemeinsamen Zukunftsgeschichte einordnen. Die Website verbindet die ursprünglichen Zeichnungen, erfundene Arten, Umweltveränderungen und eine zeitliche Entwicklung miteinander.
 
+Die Website ist fertig und unter [reefresh.org](https://reefresh.org/) online. Dort kannst du die Korallen und ihre Geschichten selbst erkunden.
+
 ## Kontext und Präsentation
 
-Das Projekt entstand im Austausch mit dem MARUM und ist für die Präsentation im Umfeld eines internationalen Korallenkongresses in Barcelona gedacht. Das Archiv wächst mit jedem neuen Beitrag weiter.
+Das Projekt entstand im Austausch mit dem MARUM. Mit REEFRESH war ich vom 2. bis 5. November 2026 in der Gruppenausstellung [BINOMIALS](https://www.9isdsc.csic.es/binomials/) im historischen Gebäude der Universität Barcelona vertreten. Die Ausstellung war Teil des 9th International Symposium on Deep-Sea Corals und brachte Kunst und Tiefseeforschung zusammen.
+
+<a href="/documents/reefresh/binomials-flyer-en.pdf" download="BINOMIALS-Flyer.pdf">BINOMIALS-Flyer herunterladen (PDF)</a>
+
+Das Archiv wächst mit jedem neuen Beitrag weiter.
 
 ## Mein Anteil und die Beiträge
 

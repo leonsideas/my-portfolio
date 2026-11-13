@@ -13,10 +13,6 @@
         </filter>
       </defs>
     </svg>
-    <div class="contact-cutout" aria-hidden="true">
-      <img :src="kontaktCutout" alt="" />
-    </div>
-
     <div class="contact-content">
       <h1 class="contact-heading">
         <a
@@ -27,6 +23,9 @@
           Moin
         </a>
       </h1>
+      <div class="contact-cutout" aria-hidden="true">
+        <img :src="kontaktCutout" alt="" width="1672" height="941" />
+      </div>
     </div>
   </section>
 </template>
@@ -53,6 +52,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .contact-screen {
+  --contact-image-width: min(calc(72 * var(--site-vw)), 960px, calc((100 * var(--site-vh) - 300px) * 2.38857));
   position: fixed;
   inset: 0;
   margin: 0;
@@ -79,29 +79,33 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: clamp(178px, calc(28 * var(--site-vh)), 250px) clamp(20px, calc(6 * var(--site-vw)), 48px) calc(32 * var(--site-vh));
+  justify-content: center;
+  gap: clamp(4px, calc(1 * var(--site-vh)), 12px);
+  padding: clamp(100px, calc(14 * var(--site-vh)), 128px) clamp(20px, calc(6 * var(--site-vw)), 48px) max(76px, calc(env(safe-area-inset-bottom) + 64px));
   text-align: center;
 }
 
 .contact-cutout {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: min(calc(72 * var(--site-vw)), 960px);
-  z-index: 1;
+  flex: 0 0 auto;
+  width: var(--contact-image-width);
+  max-width: 100%;
+  /* Der Ausschnitt entfernt nur den transparenten Raum über der Herde. */
+  aspect-ratio: 1672 / 700;
+  overflow: hidden;
   pointer-events: none;
-  transform: translateX(-50%);
 }
 
 .contact-cutout img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
   filter: url(#contact-royal-purple);
 }
 
 .contact-heading {
+  flex: 0 0 auto;
   margin: 0;
   font-family: var(--font-heading, "Playfair Display"), Georgia, serif;
   font-weight: 600;
@@ -127,12 +131,8 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 767px) {
-  .contact-content {
-    padding-top: clamp(158px, calc(24 * var(--site-vh)), 210px);
-  }
-
-  .contact-cutout {
-    width: calc(92 * var(--site-vw));
+  .contact-screen {
+    --contact-image-width: min(calc(92 * var(--site-vw)), calc((100 * var(--site-vh) - 300px) * 2.38857));
   }
 }
 </style>

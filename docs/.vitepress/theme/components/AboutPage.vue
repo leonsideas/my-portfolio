@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { watchEffect } from 'vue'
+import { withBase } from 'vitepress'
 import { useSiteLanguage } from '../composables/useSiteLanguage'
 
 const { text } = useSiteLanguage()
+const portfolioDownload = withBase('/documents/leon-albers-portfolio.pdf')
 watchEffect(() => {
   if (typeof document !== 'undefined') document.title = text('Über mich & CV', 'About & CV') + ' | Leon Albers'
 })
@@ -26,6 +28,12 @@ export default {
                 'I’m Leon Albers, a creative designer studying Digital Media at the University of the Arts Bremen. I love telling stories and giving ideas a form. Sometimes that means making a film, sometimes an interactive piece, or trying something with code or AI. I enjoy finding the approach that feels right for each idea.'
               ) }}
             </p>
+            <div class="portfolio-download">
+              <a :href="portfolioDownload" download="Leon-Albers-Portfolio.pdf">
+                {{ text('Portfolio herunterladen', 'Download portfolio') }} <span aria-hidden="true">↓</span>
+              </a>
+              <p>{{ text('Vier ausgewählte Projekte · PDF · Deutsch', 'Four selected projects · PDF · German') }}</p>
+            </div>
           </div>
         </header>
 
@@ -55,9 +63,9 @@ export default {
             <h3>
               <a href="https://www.9isdsc.csic.es/binomials/" target="_blank" rel="noopener noreferrer">BINOMIALS</a>
             </h3>
-            <p>{{ text('November 2026 · Barcelona · bevorstehend', 'November 2026 · Barcelona · upcoming') }}</p>
+            <p>{{ text('2.–5. November 2026 · Barcelona', '2–5 November 2026 · Barcelona') }}</p>
             <p>{{ text('Gruppenausstellung im Rahmen des 9th International Symposium on Deep-Sea Corals.', 'Group exhibition as part of the 9th International Symposium on Deep-Sea Corals.') }}</p>
-            <p>{{ text('Mein Beitrag:', 'My contribution:') }} REEFRESH – MAYBE NEXT TIME.</p>
+            <p>{{ text('Mein Beitrag war:', 'I exhibited:') }} REEFRESH – MAYBE NEXT TIME.</p>
           </div>
           <div class="about-entry">
             <h3>Local Dreamer</h3>
@@ -112,6 +120,31 @@ export default {
 
 .about-copy p {
   margin: 0;
+}
+
+.portfolio-download {
+  margin-top: 0.4rem;
+}
+
+.portfolio-download a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: inherit;
+  font-size: 0.86rem;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.portfolio-download a:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 5px;
+}
+
+.portfolio-download p {
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+  opacity: 0.75;
 }
 
 .education,
